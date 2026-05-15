@@ -9,6 +9,7 @@ services:
       - /app/node_modules
     environment:
       - VITE_API_URL=${VITE_API_URL}
+      - VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
     depends_on:
       - backend
     
