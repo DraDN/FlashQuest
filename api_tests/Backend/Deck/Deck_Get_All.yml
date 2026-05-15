@@ -1,0 +1,19 @@
+info:
+  name: Deck_Get_All
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: 0.0.0.0:3000/api/decks?user_id=100.0
+  params:
+    - name: user_id
+      value: "100.0"
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

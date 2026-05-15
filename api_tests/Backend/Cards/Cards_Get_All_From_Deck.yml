@@ -1,0 +1,15 @@
+info:
+  name: Cards_Get_All_From_Deck
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: 0.0.0.0:3000/api/decks/1/cards
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

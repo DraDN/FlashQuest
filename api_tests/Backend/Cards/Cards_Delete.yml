@@ -1,0 +1,15 @@
+info:
+  name: Cards_Delete
+  type: http
+  seq: 1
+
+http:
+  method: DELETE
+  url: 0.0.0.0:3000/api/cards/2
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

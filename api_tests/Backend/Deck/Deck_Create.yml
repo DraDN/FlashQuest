@@ -1,0 +1,23 @@
+info:
+  name: Deck_Create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: 0.0.0.0:3000/api/decks
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 100,
+        "name": "Test"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+​
