@@ -12,10 +12,10 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     allowedHosts: [
-      'api.docker'
+      'flashquest.com'
     ],
-    watch: {
-      usePolling: true,
+    hmr: {
+      clientPort: 80,
     },
     strictPort: true,
   }

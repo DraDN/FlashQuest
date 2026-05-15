@@ -5,6 +5,7 @@ backend/database_files
 
 data/*.sqlite
 data/*.sqlite-journal
+data/*.db
 
 .env
 .clerk_keys
