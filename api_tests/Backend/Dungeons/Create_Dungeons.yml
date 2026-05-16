@@ -1,17 +1,18 @@
 info:
-  name: Deck_Create
+  name: Create_Dungeons
   type: http
   seq: 1
 
 http:
   method: POST
-  url: 0.0.0.0:3000/api/decks
+  url: 0.0.0.0:3000/api/dungeons
   body:
     type: json
     data: |-
       {
-        "user_id": 100,
-        "name": "Test"
+        "user_id": 100.0,
+        "name": "Test Dungeon",
+        "deck_ids": [ 1 ]
       }
   auth: inherit
 

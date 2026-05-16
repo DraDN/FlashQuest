@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-        "user_id": 100,
-        "name": "Test"
+        "user_id": 100.0,
+        "name": "Test Deck"
       }
   auth: inherit
 
@@ -20,4 +20,3 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-​

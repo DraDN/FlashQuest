@@ -1,0 +1,16 @@
+info:
+  name: Get_Dungeons
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: 0.0.0.0:3000/api/dungeons/100.0
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+​

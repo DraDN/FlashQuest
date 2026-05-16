@@ -56,3 +56,27 @@ app.delete('/api/cards/:id', (req, res) => {
     db.prepare('DELETE FROM cards WHERE id = ?').run(id);
     res.json( { success: true } );
 });
+
+// === DUNGEONS API ===
+
+app.get('/api/dungeons/:user_id', (req, res) => {
+    const { user_id } = req.params;
+    const dungeons = db.prepare('SELECT * FROM dungeons WHERE user_id = ?').all(user_id);
+    res.json(dungeons);
+});
+
+app.post('/api/dungeons', (req, res) => {
+    const { user_id, name, deck_ids } = req.body;
+    const result = db.prepare('INSERT INTO dungeons (user_id, name) VALUES (?, ?)').run(user_id, name);
+    deck_ids.forEach(deck_id => {
+        db.prepare('INSERT INTO dungeon_decks (dungeon_id, deck_id) VALUES (?, ?)').run(result.lastInsertRowid, deck_id);
+    });
+    const dungeon = db.prepare('SELECT * FROM dungeons WHERE id = ?').get(result.lastInsertRowid);
+    res.json(dungeon);
+});
+
+app.delete('/api/dungeons/:id', (req, res) => {
+    const { id } = req.params;
+    db.prepare('DELETE FROM dungeons WHERE id = ?').run(id);
+    res.json( { success: true } );
+});

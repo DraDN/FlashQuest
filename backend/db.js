@@ -11,7 +11,7 @@ db.exec(`
         user_id TEXT NOT NULL,
         name TEXT NOT NULL,
         xp INTEGER DEFAULT 0,
-        level INTEGER DEFAULT 1,
+        level INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     
@@ -20,6 +20,20 @@ db.exec(`
         deck_id INTEGER NOT NULL,
         question TEXT NOT NULL,
         answer TEXT NOT NULL,
+        FOREIGN KEY (deck_id) REFERENCES decks (id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS dungeons (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS dungeon_decks (
+        dungeon_id INTEGER NOT NULL,
+        deck_id INTEGER NOT NULL,
+        FOREIGN KEY (dungeon_id) REFERENCES dungeons (id) ON DELETE CASCADE,
         FOREIGN KEY (deck_id) REFERENCES decks (id) ON DELETE CASCADE
     );
 
