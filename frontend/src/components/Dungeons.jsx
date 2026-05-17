@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 
-import CreateDungeonModal from './CreateDungeonModal';
+import DungeonModal from './DungeonModal';
 import DungeonCard from './DungeonCard';
 
-const API = import.meta.env.VITE_API_URL;
+import { getDungeons, createDungeon, editDungeon, deleteDungeon } from '../api';
 
 function Dungeons() {
     const { user } = useUser();
     const [ dungeons, setDungeons ] = useState([]);
-    // const [ isCreateModalOpen, setCreateModalVisibility ] = useState(false);
     const [ modalConfig, setModalConfig ] = useState({ isOpen:false, mode: "create", id: null, initial_name: "" });
 
     const openCreateModal = () => {
@@ -21,47 +20,30 @@ function Dungeons() {
     }
 
     useEffect(() => {
-        fetch(`${API}/api/dungeons?user_id=${user.id}`)
-        .then(res => res.json())
+        getDungeons(user.id)
         .then(setDungeons);
     }, [user?.id]);
 
-    const createDungeon = async (name, deck_ids) => {
-        const res = await fetch(`${API}/api/dungeons`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ user_id: user.id, name: name, deck_ids: deck_ids })
-        })
-        const dungeon = await res.json();
-        setDungeons([...dungeons, dungeon]);
+    const handleDungeonCreation = async (name, deck_ids) => {
+        const new_dungeon = await createDungeon(user.id, name, deck_ids);
+        setDungeons([...dungeons, new_dungeon]);
     }
 
-    const editDungeon = async (id, name, deck_ids) => {
-        const res = await fetch(`${API}/api/dungeons/${id}/edit`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ name: name, deck_ids: deck_ids })
-        })
-        const dungeon = await res.json();
-        setDungeons(dungeons.map(d => d.id === id ? dungeon : d));
+    const handelDungeonEdit = async (id, name, deck_ids) => {
+        const edited_dungeon = await editDungeon(id, name, deck_ids);
+        setDungeons(dungeons.map(d => d.id === id ? edited_dungeon : d));
     }
 
     const handleDungeonSave = async (id, name, deck_ids) => {
         if (modalConfig.mode === "create") {
-            await createDungeon(name, deck_ids);
+            await handleDungeonCreation(name, deck_ids);
         } else if (modalConfig.mode === "edit") {
-            await editDungeon(id, name, deck_ids);
+            await handelDungeonEdit(id, name, deck_ids);
         }
     }
 
-    const deleteDungeon = async (id) => {
-        await fetch(`${API}/api/dungeons/${id}`, {
-            method: 'DELETE'
-        })
+    const handleDungeonDeletion = async (id) => {
+        deleteDungeon(id);
         setDungeons(dungeons.filter(d => d.id !== id));
     }
 
@@ -71,7 +53,7 @@ function Dungeons() {
                 {/* <button className="bg-blue-500 p-5 rounded-xl hover:bg-red-500 transition-colors" onClick={() => onNavigate('home')}>go back</button> */}
                 <button className='bg-green-900 px-4 py-3 rounded-xl hover:bg-amber-700 transition-colors absolute bottom-6 right-1/2 translate-x-1/2' onClick={() => openCreateModal()}> + New dungeon </button>
                 {modalConfig.isOpen && (
-                    <CreateDungeonModal 
+                    <DungeonModal 
                         mode={modalConfig.mode}
                         id={modalConfig.id}
                         initial_name={modalConfig.initial_name}
@@ -85,9 +67,7 @@ function Dungeons() {
                     ) : (
                         dungeons.map((dungeon) => (
                             <div key={dungeon.id}>
-                                {/* <h1>{dungeon.name}</h1> */}
-                                {/* <button className='bg-red-600' onClick={() => deleteDungeon(dungeon.id)}>Delete</button> */}
-                                <DungeonCard dungeon={dungeon} onDelete={deleteDungeon} onEdit={openEditModal} />
+                                <DungeonCard dungeon={dungeon} onDelete={handleDungeonDeletion} onEdit={openEditModal} />
                             </div>
                         )
                     ))

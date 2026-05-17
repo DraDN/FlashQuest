@@ -1,24 +1,21 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 
-const API = import.meta.env.VITE_API_URL;
+import { getDecks, getDungeonDecks } from '../api';
 
-export default function CreateDungeonModal({ onClose, onSave, mode, id, initial_name }) {
+export default function DungeonModal({ onClose, onSave, mode, id, initial_name }) {
     const [dungeonName, setDungeonName] = useState(mode === 'edit' ? initial_name : '');
     const [decks, setDecks] = useState([]);
     const [selectedDecksID, setSelectedDecksID] = useState([]);
     const { user } = useUser();
 
     useEffect(() => {
-        fetch(`${API}/api/decks?user_id=${user.id}`)
-        .then(res => res.json())
-        .then(setDecks);
+        getDecks(user.id).then(setDecks);
     }, [user?.id]);
 
     useEffect(() => {
         if (mode === 'edit') {
-            fetch(`${API}/api/dungeons/${id}/decks`)
-            .then(res => res.json())
+            getDungeonDecks(id)
             .then(decks => {
                 setSelectedDecksID(decks.map(d => d.id));
             });

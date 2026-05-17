@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 
-const API = import.meta.env.VITE_API_URL;
+import { getDungeonDecks } from "../api";
 
 export default function DungeonCard({ dungeon, onDelete, onEdit }) {
     const [ decks, setDecks ] = useState([]);
 
     useEffect(() => {
-        fetch(`${API}/api/dungeons/${dungeon.id}/decks`)
-        .then(res => res.json())
+        getDungeonDecks(dungeon.id)
         .then(setDecks);
     }, [dungeon]);
 
