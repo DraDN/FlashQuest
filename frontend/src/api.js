@@ -28,6 +28,34 @@ export const deleteDeck = async (id) =>
         method: 'DELETE'
     }).then(res => res.json());
 
+// === CARDS API ===
+
+export const getCards = async (deck_id) => 
+    fetch(`${API}/api/decks/${deck_id}/cards`).then(res => res.json());
+
+export const createCard = async (deck_id, question, answer) => 
+    fetch(`${API}/api/cards`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ deck_id, question, answer })
+    }).then(res => res.json());
+
+export const editCard = async (card_id, question, answer) =>
+    fetch(`${API}/api/cards/${card_id}/edit`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ question, answer })
+    }).then(res => res.json());
+
+export const deleteCard = async (id) =>
+    fetch(`${API}/api/cards/${id}`, {
+        method: 'DELETE'
+    }).then(res => res.json());
+
 // === DUNGEONS API ===
 
 export const getDungeons = async (user_id) => 

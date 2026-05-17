@@ -49,8 +49,7 @@ export default function Dungeons({ onDungeonSelect }) {
 
     return (
         <>
-            <div className="bg-gray-950 text-white flex flex-col w-full">
-                {/* <button className="bg-blue-500 p-5 rounded-xl hover:bg-red-500 transition-colors" onClick={() => onNavigate('home')}>go back</button> */}
+            <div className="bg-gray-950 text-white grid md:grid-cols-2 w-full">
                 <button className='bg-green-900 px-4 py-3 rounded-xl hover:bg-amber-700 transition-colors absolute bottom-6 right-1/2 translate-x-1/2' onClick={() => openCreateModal()}> + New dungeon </button>
                 {modalConfig.isOpen && (
                     <DungeonModal 

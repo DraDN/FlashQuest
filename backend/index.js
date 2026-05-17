@@ -59,6 +59,14 @@ app.post('/api/cards', (req, res) => {
     res.json(card);
 });
 
+app.post('/api/cards/:id/edit', (req, res) => {
+    const { id } = req.params;
+    const { question, answer } = req.body;
+    db.prepare('UPDATE cards SET question = ?, answer = ? WHERE id = ?').run(question, answer, id);
+    const card = db.prepare('SELECT * FROM cards WHERE id = ?').get(id);
+    res.json(card);
+});
+
 app.delete('/api/cards/:id', (req, res) => {
     const { id } = req.params;
     db.prepare('DELETE FROM cards WHERE id = ?').run(id);
