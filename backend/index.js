@@ -30,6 +30,14 @@ app.post('/api/decks', (req, res) => {
     res.json(deck);
 });
 
+app.post('/api/decks/:id/rename', (req, res) => {
+    const { id } = req.params;
+    const { name } = req.body;
+    db.prepare('UPDATE decks SET name = ? WHERE id = ?').run(name, id);
+    const deck = db.prepare('SELECT * FROM decks WHERE id = ?').get(id);
+    res.json(deck)
+});
+
 app.delete('/api/decks/:id', (req, res) => {
     const { id } = req.params;
     db.prepare('DELETE FROM decks WHERE id = ?').run(id);
@@ -78,6 +86,18 @@ app.post('/api/dungeons', (req, res) => {
         db.prepare('INSERT INTO dungeon_decks (dungeon_id, deck_id) VALUES (?, ?)').run(result.lastInsertRowid, deck_id);
     });
     const dungeon = db.prepare('SELECT * FROM dungeons WHERE id = ?').get(result.lastInsertRowid);
+    res.json(dungeon);
+});
+
+app.post('/api/dungeons/:id/edit', (req, res) => {
+    const { id } = req.params;
+    const { name, deck_ids } = req.body;
+    db.prepare('UPDATE dungeons SET name = ? WHERE id = ?').run(name, id);
+    db.prepare('DELETE FROM dungeon_decks WHERE dungeon_id = ?').run(id);
+    deck_ids.forEach(deck_id => {
+        db.prepare('INSERT INTO dungeon_decks (dungeon_id, deck_id) VALUES (?, ?)').run(id, deck_id);
+    })
+    const dungeon = db.prepare('SELECT * FROM dungeons WHERE id = ?').get(id);
     res.json(dungeon);
 });
 
