@@ -17,7 +17,7 @@ function AccountSummary() {
                 });
                 setAccountLevel(sum);
             });
-    }, [user?.id]);
+    });
 
     return (
         <>

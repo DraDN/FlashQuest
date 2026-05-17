@@ -1,14 +1,11 @@
 
-function Dungeon({ dungeon, onNavigate }) {
-
+export default function DeckEditor({ deck, onNavigate }) {
     return (
         <>
             <div>
-                <h1>Dungeon {dungeon.name}</h1>
+                <h1>Deck Editor - {deck.name}</h1>
                 <button onClick={() => onNavigate('home')}>go back</button>
             </div>
         </>
     )
 }
-
-export default Dungeon;

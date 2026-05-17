@@ -6,7 +6,7 @@ import DungeonCard from './DungeonCard';
 
 import { getDungeons, createDungeon, editDungeon, deleteDungeon } from '../api';
 
-function Dungeons() {
+export default function Dungeons({ onDungeonSelect }) {
     const { user } = useUser();
     const [ dungeons, setDungeons ] = useState([]);
     const [ modalConfig, setModalConfig ] = useState({ isOpen:false, mode: "create", id: null, initial_name: "" });
@@ -67,7 +67,7 @@ function Dungeons() {
                     ) : (
                         dungeons.map((dungeon) => (
                             <div key={dungeon.id}>
-                                <DungeonCard dungeon={dungeon} onDelete={handleDungeonDeletion} onEdit={openEditModal} />
+                                <DungeonCard dungeon={dungeon} onDelete={handleDungeonDeletion} onEdit={openEditModal} onPlay={onDungeonSelect} />
                             </div>
                         )
                     ))
@@ -76,5 +76,3 @@ function Dungeons() {
         </>
     );
 }
-
-export default Dungeons;

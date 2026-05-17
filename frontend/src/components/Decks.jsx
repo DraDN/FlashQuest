@@ -59,7 +59,7 @@ export default function Decks({ onDeckSelect }) {
                                 <h1>{deck.name}</h1>
                                 <button className='bg-red-600' onClick={() => handleDeckDeletion(deck.id)}>Delete</button>
                                 <button className='bg-blue-600' onClick={() => openRenameModal(deck.id, deck.name)}>Rename</button>
-                                <button className='bg-indigo-400' onClick={() => onDeckSelect(deck.id)}>Select</button>
+                                <button className='bg-indigo-400' onClick={() => onDeckSelect(deck)}>Select</button>
                             </div>
                         )
                     ))
