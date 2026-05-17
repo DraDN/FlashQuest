@@ -59,10 +59,16 @@ app.delete('/api/cards/:id', (req, res) => {
 
 // === DUNGEONS API ===
 
-app.get('/api/dungeons/:user_id', (req, res) => {
-    const { user_id } = req.params;
+app.get('/api/dungeons', (req, res) => {
+    const { user_id } = req.query;
     const dungeons = db.prepare('SELECT * FROM dungeons WHERE user_id = ?').all(user_id);
     res.json(dungeons);
+});
+
+app.get('/api/dungeons/:id/decks', (req, res) => {
+    const { id } = req.params;
+    const decks = db.prepare('SELECT * FROM decks WHERE id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)').all(id);
+    res.json(decks);
 });
 
 app.post('/api/dungeons', (req, res) => {

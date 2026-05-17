@@ -1,6 +1,7 @@
 info:
-  name: Delete_Dungeon
+  name: Dungeon_Delete
   type: http
+  seq: 1
 
 http:
   method: DELETE

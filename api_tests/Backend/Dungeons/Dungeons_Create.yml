@@ -1,7 +1,7 @@
 info:
-  name: Create_Dungeons
+  name: Dungeons_Create
   type: http
-  seq: 1
+  seq: 4
 
 http:
   method: POST
@@ -14,11 +14,9 @@ http:
         "name": "Test Dungeon",
         "deck_ids": [ 1 ]
       }
-  auth: inherit
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-​
