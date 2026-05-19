@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // import { useUser } from "@clerk/clerk-react";
 
 import AccountSummary from "../components/AccountSummary";
@@ -8,7 +8,11 @@ import Sidemenu from "../components/Sidemenu";
 
 
 export default function Homepage({ onNavigate }) {
-    const [ subpage, setSubpage ] = useState('decks');
+    const [ subpage, setSubpage ] = useState(sessionStorage.getItem('subpage') || 'decks');
+
+    useEffect(() => {
+        sessionStorage.setItem('subpage', subpage);
+    }, [subpage]);
 
     return (
     <>
@@ -17,7 +21,7 @@ export default function Homepage({ onNavigate }) {
                 <AccountSummary />
             </div>
             <div className="flex md:flex-row flex-col grow">
-                <div className="border-gray-700 border-5 min-w-1/4">
+                <div className="border-gray-700 border-5 min-w-1/4 w-1/4">
                     <Sidemenu subpage={subpage} setSubpage={setSubpage} />
                 </div>
                 <div className="border-gray-700 text-white border-5 grow relative">
