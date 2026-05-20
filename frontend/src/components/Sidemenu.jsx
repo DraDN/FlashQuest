@@ -1,18 +1,15 @@
-import { useUser } from "@clerk/clerk-react";
-
-function Sidemenu({ subpage, setSubpage }) {
-    const { user } = useUser();
-    console.log(subpage);
-
+export default function Sidemenu({ subpage, setSubpage }) {
     return (
         <>
-            <div className="text-white font-extralight p-12 flex flex-col gap-10">
-                <p className="text-3xl">Welcome, <i>{user.firstName}</i></p>
-                <button className={`${subpage === 'decks' ? "bg-red-500" : "bg-blue-500"} p-5 rounded-xl hover:bg-green-500 transition-colors`} onClick={() => setSubpage('decks')}>Decks</button>
-                <button className={`${subpage === 'dungeons' ? "bg-red-500" : "bg-blue-500"} p-5 rounded-xl hover:bg-green-500 transition-colors`} onClick={() => setSubpage('dungeons')}>Dungeons</button>
+            <div className="text-white p-12 flex flex-col space-y-12 text-center">
+                <div>
+                    <h1 className="text-3xl font-extralight">- My stuff -</h1>
+                </div>
+                <div className="flex flex-col space-y-2 text-xl">
+                    <button className={`${subpage === 'decks' ? "text-dungeon-red-500" : "text-dungeon-purple"} p-4 font-extrabold hover:text-dungeon-yellow transition-colors`} onClick={() => setSubpage('decks')}>- Decks -</button>
+                    <button className={`${subpage === 'dungeons' ? "text-dungeon-red-500" : "text-dungeon-purple"} p-4 font-extrabold hover:text-dungeon-yellow transition-colors`} onClick={() => setSubpage('dungeons')}>- Dungeons -</button>
+                </div>
             </div>
         </>
     )
 }
-
-export default Sidemenu;

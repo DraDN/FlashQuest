@@ -64,6 +64,9 @@ export const getDungeons = async (user_id) =>
 export const getDungeonDecks = async (dungeon_id) => 
     fetch(`${API}/api/dungeons/${dungeon_id}/decks`).then(res => res.json());
 
+export const getDungeonCards = async (dungeon_id) => 
+    fetch(`${API}/api/dungeons/${dungeon_id}/cards`).then(res => res.json());
+
 export const createDungeon = async (user_id, name, deck_ids) => 
     fetch(`${API}/api/dungeons`, {
         method: 'POST',

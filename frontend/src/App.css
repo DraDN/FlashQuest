@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+@theme {
+  --color-dungeon-dark-900: #0a0a0f;
+  --color-dungeon-dark-500: #000b1c;
+  --color-dungeon-purple: #4b2a4e;
+  --color-dungeon-red-900: #832223;
+  --color-dungeon-red-500: #c66567;
+  --color-dungeon-orange: #e48b70;
+  --color-dungeon-yellow: #f3c8a8;
+  --color-dungeon-green: #567b68;
+}

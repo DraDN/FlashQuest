@@ -87,6 +87,12 @@ app.get('/api/dungeons/:id/decks', (req, res) => {
     res.json(decks);
 });
 
+app.get('/api/dungeons/:id/cards', (req, res) => {
+    const { id } = req.params;
+    const cards = db.prepare('SELECT * FROM cards WHERE deck_id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)').all(id);
+    res.json(cards);
+});
+
 app.post('/api/dungeons', (req, res) => {
     const { user_id, name, deck_ids } = req.body;
     const result = db.prepare('INSERT INTO dungeons (user_id, name) VALUES (?, ?)').run(user_id, name);

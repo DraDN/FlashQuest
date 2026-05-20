@@ -44,13 +44,16 @@ export default function DeckEditor({ deck, onNavigate }) {
 
     return (
         <>
-            <div className="w-full min-h-screen flex flex-col bg-gray-950 text-white">
+            <div className="w-full min-h-screen flex flex-col bg-gray-950 text-dungeon-gold">
                 <div className="flex flex-row justify-between p-5 bg-gray-500">
                     <h1 className="font-bold">Deck Editor - {deck.name}</h1>
                     <button onClick={() => onNavigate('home')}>go back</button>
                 </div>
-                <h1 className="text-3xl font-bold p-5 bg-gray-600">Cards:</h1>
-                <div className="grow relative flex flex-col">
+                <div className="inline-flex w-full bg-gray-600 items-center justify-between">
+                    <h1 className="text-3xl font-bold p-5">Cards:</h1>
+                    <button className='bg-green-900 px-4 py-3 rounded-xl hover:bg-amber-700 transition-colors text-2xl m-4' onClick={openCreateModal}> + New card </button>
+                </div>
+                <div className="grow relative flex flex-col pb-26">
                     {!cards || cards.length === 0 ? (
                         <div className="grow flex flex-col items-center justify-center gap-6">
                             <h1 className="text-7xl font-bold">Deck is empty</h1>
@@ -75,7 +78,6 @@ export default function DeckEditor({ deck, onNavigate }) {
                             }
                         </div>
                     )}
-                    <button className='bg-green-900 px-4 py-3 rounded-xl hover:bg-amber-700 transition-colors absolute bottom-16 right-1/2 translate-x-1/2 text-2xl' onClick={openCreateModal}> + New card </button>
                 </div>
 
                 {modalConfig.isOpen && (

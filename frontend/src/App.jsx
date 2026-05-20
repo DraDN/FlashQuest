@@ -26,7 +26,7 @@ function App() {
       <Header />
     
       <SignedIn>
-        <div className="min-h-screen flex">
+        <div className="flex">
           { page === 'home' && <Homepage onNavigate={(page, page_related_object) => {
             setPage(page);
             setPageRelatedObject(page_related_object);

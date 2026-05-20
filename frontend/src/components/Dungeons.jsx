@@ -49,28 +49,30 @@ export default function Dungeons({ onDungeonSelect }) {
 
     return (
         <>
-            <div className="bg-gray-950 text-white grid md:grid-cols-2 w-full">
-                <button className='bg-green-900 px-4 py-3 rounded-xl hover:bg-amber-700 transition-colors absolute bottom-6 right-1/2 translate-x-1/2' onClick={() => openCreateModal()}> + New dungeon </button>
-                {modalConfig.isOpen && (
-                    <DungeonModal 
-                        mode={modalConfig.mode}
-                        id={modalConfig.id}
-                        initial_name={modalConfig.initial_name}
-                        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
-                        onSave={handleDungeonSave} />
-                )}
-                {!dungeons || dungeons.length === 0 ? (
-                    <div className="text-7xl font-bold flex items-center justify-center">
-                        <h1>No dungeons found</h1>
-                    </div>
-                    ) : (
-                        dungeons.map((dungeon) => (
-                            <div key={dungeon.id}>
-                                <DungeonCard dungeon={dungeon} onDelete={handleDungeonDeletion} onEdit={openEditModal} onPlay={onDungeonSelect} />
-                            </div>
-                        )
-                    ))
-                }
+            <div className='text-white flex flex-col flex-1 w-full'>
+                <button className='bg-green-900 px-4 py-3 rounded-xl hover:bg-amber-700 transition-colors m-4' onClick={() => openCreateModal()}> + New dungeon </button>
+                <div className="grid md:grid-cols-2 overflow-y-auto">
+                    {modalConfig.isOpen && (
+                        <DungeonModal 
+                            mode={modalConfig.mode}
+                            id={modalConfig.id}
+                            initial_name={modalConfig.initial_name}
+                            onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+                            onSave={handleDungeonSave} />
+                    )}
+                    {!dungeons || dungeons.length === 0 ? (
+                        <div className="text-7xl font-bold flex items-center justify-center">
+                            <h1>No dungeons found</h1>
+                        </div>
+                        ) : (
+                            dungeons.map((dungeon) => (
+                                <div key={dungeon.id}>
+                                    <DungeonCard dungeon={dungeon} onDelete={handleDungeonDeletion} onEdit={openEditModal} onPlay={onDungeonSelect} />
+                                </div>
+                            )
+                        ))
+                    }
+                </div>
             </div>
         </>
     );

@@ -3,7 +3,7 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@cl
 function Header() {
     return (
         <>
-            <header className="items-end bg-purple-900 text-white">
+            <header className="items-end bg-dungeon-dark-500 text-white">
                 <div className="flex items-center justify-end px-6 py-3">
                 <SignedOut>
                     <div className="flex gap-4">
