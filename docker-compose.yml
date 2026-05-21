@@ -8,7 +8,6 @@ services:
       - ./frontend:/app # syncs the lxc code files (the ones i edit) with the files inside the container (for hot reload)
       - /app/node_modules
     environment:
-      - VITE_API_URL=${VITE_API_URL}
       - VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
     depends_on:
       - backend
