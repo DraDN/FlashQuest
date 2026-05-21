@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { useUser, UserAvatar } from "@clerk/clerk-react";
 
-const API = import.meta.env.VITE_API_URL;
-
 function AccountSummary() {
     const { user } = useUser();
     const [ account_level, setAccountLevel ] = useState(0);
 
     useEffect(() => {
-        fetch(`${API}/api/decks?user_id=${user.id}`)
+        fetch(`/api/decks?user_id=${user.id}`)
             .then(res => res.json())
             .then(data => {
                 let sum = 0;
