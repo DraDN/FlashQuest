@@ -66,7 +66,7 @@ export default function Decks({ onDeckSelect }) {
                                         </div>
                                         <h2 className='font-medium text-sm'>xp</h2>
                                     </div>
-                                    <div className='*:p-2 *:rounded-xl *:hover:bg-dungeon-yellow *:transition-colors flex flex-row gap-2'>
+                                    <div className='*:p-2 *:rounded-xl *:hover:bg-dungeon-yellow *:transition-colors flex md:flex-row flex-col gap-2'>
                                         <button className='bg-dungeon-red-900' onClick={() => handleDeckDeletion(deck.id)}>Delete</button>
                                         <button className='bg-dungeon-purple' onClick={() => openRenameModal(deck.id, deck.name)}>Rename</button>
                                         <button className='bg-dungeon-green' onClick={() => onDeckSelect(deck)}>Select</button>

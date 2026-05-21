@@ -15,7 +15,7 @@ export default function Homepage({ onNavigate }) {
 
     return (
     <>
-        <div className="w-full bg-dungeon-dark-900 flex flex-col flex-1 h-auto sm:max-h-[90vh]">
+        <div className="w-full bg-dungeon-dark-900 flex flex-col flex-1 h-auto sm:max-h-screen">
             <div className="border-dungeon-yellow border-5">
                 <AccountSummary />
             </div>
