@@ -6,20 +6,18 @@ import Header from './components/Header'
 import Homepage from './pages/Home';
 import Dungeon from './pages/Dungeon';
 import DeckEditor from './pages/DeckEditor';
+import Results from './pages/Results';
 
 function App() {
-  const [page, setPage] = useState(sessionStorage.getItem('page') || 'home');
-  const [page_related_object, setPageRelatedObject] = useState(() => {
-    if (sessionStorage.getItem('page_related_object')) {
-      return JSON.parse(sessionStorage.getItem('page_related_object'));
-    }
-    return null;
+  const [page, setPage] = useState({
+    name: sessionStorage.getItem('page_name') || 'home',
+    related_object: sessionStorage.getItem('page_related_object') ? JSON.parse(sessionStorage.getItem('page_related_object')) : null,
   });
 
   useEffect(() => {
-    sessionStorage.setItem('page', page);
-    sessionStorage.setItem('page_related_object', JSON.stringify(page_related_object));
-  }, [page, page_related_object]);
+    sessionStorage.setItem('page_name', page.name);
+    sessionStorage.setItem('page_related_object', page.related_object ? JSON.stringify(page.related_object) : null);
+  }, [page]);
 
   return (
     <>
@@ -27,12 +25,10 @@ function App() {
     
       <SignedIn>
         <div className="flex">
-          { page === 'home' && <Homepage onNavigate={(page, page_related_object) => {
-            setPage(page);
-            setPageRelatedObject(page_related_object);
-          }} /> }
-          { page === 'dungeon' && <Dungeon dungeon={page_related_object} onNavigate={setPage} /> }
-          { page === 'deck-editor' && <DeckEditor deck={page_related_object} onNavigate={setPage} /> }
+          { page.name === 'home' && <Homepage onNavigate={setPage} /> }
+          { page.name === 'dungeon' && <Dungeon dungeon={page.related_object} onNavigate={setPage} /> }
+          { page.name === 'deck-editor' && <DeckEditor deck={page.related_object} onNavigate={setPage} /> }
+          { page.name === 'results' && <Results results={page.related_object} onNavigate={setPage} /> }
         </div>
       </SignedIn>
 

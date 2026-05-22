@@ -6,9 +6,12 @@ import { PlayerCards, DraggableCard } from "../components/PlayerCards";
 import Monsters from "../components/Monsters";
 
 import AttackModal from "../components/AttackModal";
+import RoundEndModal from "../components/RoundEndModal";
+import EarlyFleeModal from "../components/EarlyFleeModal";
 
 const MAX_NO_MONSTERS = 2;
 const MAX_HAND_SIZE = 5;
+const EARLY_FLEE_FEE = 0.6;
 
 const shuffle_array = (array) => {
     const copy = [...array];
@@ -87,7 +90,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const [ selected_monster, setSelectedMonster ] = useState(null);
 
     const [ isAttackModalOpen, setIsAttackModalOpen ] = useState(false);
+    const [ isRoundEndModalOpen, setIsRoundEndModalOpen ] = useState(false);
+    const [ isEarlyFleeModalOpen, setIsEarlyFleeModalOpen ] = useState(false);
+
     const [ player_health, setPlayerHealth ] = useState(100);
+    const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
     
     const generate_monsters = () => {
         const new_monsters = [];
@@ -154,7 +161,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const nextRoom = () => {
         setRound(round + 1);
         setMonsters(generate_monsters());
-        // refill_hand();
         console.log("next room!");
     }
 
@@ -178,25 +184,22 @@ export default function Dungeon({ dungeon, onNavigate }) {
         });
 
         getDungeonDecks(dungeon.id)
-        .then(setDecks);
+        .then((decks) => decks.map(d => {
+            return {
+                ...d,
+                level_gained: 0,
+                xp_gained: 0
+            }
+        })).then(setDecks);
     }, [dungeon, round]);
 
     const reward_deck_xp = (deck_id, xp) => {
         setDecks((prevDecks) =>
             prevDecks.map((d) => {
                 if (d.id === deck_id) {
-                    const new_xp = d.xp + xp;
-                    const xp_needed_for_next_level = d.level * 100;
+                    const new_xp_gained = d.xp_gained + xp;
 
-                    if (new_xp >= xp_needed_for_next_level) {
-                        return {
-                            ...d,
-                            level: d.level + 1,
-                            xp: new_xp - xp_needed_for_next_level,
-                        };
-                    }
-
-                    return { ...d, xp: new_xp };
+                    return { ...d, xp_gained: new_xp_gained };
                 }
 
                 return d;
@@ -204,8 +207,29 @@ export default function Dungeon({ dungeon, onNavigate }) {
         );
     }
 
-    const save_deck_xp = async (decks) => {
-        await levelDecks(decks);
+    const save_deck_xp = async (decks, percentage) => {
+        let new_levels = [];
+        decks.forEach(deck => {
+            let level_gained = 0;
+
+            let xp_needed_for_next_level = (deck.level + level_gained) * 100;
+            let total_xp = deck.xp + (deck.xp_gained * percentage);
+            while (total_xp >= xp_needed_for_next_level) {
+                level_gained++;
+                xp_needed_for_next_level = (deck.level + level_gained) * 100;
+            }
+
+            new_levels.push(level_gained);
+        });
+
+        const updated_deck_values = decks.map((d, index) => ({
+           ...d,
+           level_gained: new_levels[index],
+           xp: d.xp + (d.xp_gained * percentage),
+           level: (d.level + new_levels[index]),
+        }))
+        await levelDecks(updated_deck_values);
+        return updated_deck_values;
     }
 
     const mouse_sensor = useSensor(MouseSensor, {
@@ -229,7 +253,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
         const { over } = event;
 
         if (over) {
-            // setSelectedCard(card_state[active.id]);
             setSelectedMonster(monsters[over.id]);
             setIsAttackModalOpen(true);
         } else {
@@ -239,21 +262,28 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     const handleSubmitAttack = (answer) => {
-        console.log(answer);
+        let new_answer_stats = {...answer_stats};
+
         if (answer && (selected_card.answer.toLowerCase() === answer.toLowerCase() || answer.toLowerCase() === "test")) {
             const hurt_monsters = monsters.map(mon => mon.id === selected_monster.id ? { ...mon, health: mon.health - 10 } : mon);
             const updated_monsters = hurt_monsters.filter(mon => mon.health > 0);
-
-            if (updated_monsters.length === 0) {
-                // onNavigate('home');
-                nextRoom();
-                return;
-            }
 
             setMonsters(updated_monsters);
             play_card(selected_card);
 
             reward_deck_xp(selected_card.deck_id, selected_monster.xp_reward);
+
+            new_answer_stats.correct += 1;
+
+            if (updated_monsters.length === 0) {
+                // onNavigate('home');
+                // nextRoom();
+                // setIsRoundEndModalOpen(true);
+                setTimeout(() => {
+                    setIsRoundEndModalOpen(true);
+                }, 1250);
+                return;
+            }
         } else {
             setPlayerHealth(player_health - selected_monster.attack);
 
@@ -261,10 +291,13 @@ export default function Dungeon({ dungeon, onNavigate }) {
                 onNavigate('home');
                 return;
             }
+
+            new_answer_stats.wrong += 1;
         }
 
         setSelectedCard(null);
         setSelectedMonster(null);
+        setAnswerStats(new_answer_stats);
     }
 
     const handleCloseAttackModal = () => {
@@ -273,10 +306,19 @@ export default function Dungeon({ dungeon, onNavigate }) {
         setIsAttackModalOpen(false);
     }
 
+    const handleExit = async (xp_percentage) => {
+        const new_decks = await save_deck_xp(decks, xp_percentage);
+        const results = {
+            decks: new_decks,
+            answer_stats: answer_stats
+        }
+        onNavigate({name: 'results', related_object: results});
+    }
+
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="w-full flex flex-col bg-dungeon-dark-900 min-h-screen relative">
-                <button className="text-white absolute top-4 left-4" onClick={async () => {onNavigate('home'); await save_deck_xp(decks);}}>{`<- back`}</button>
+                <button className="text-white absolute top-4 left-4" onClick={() => {setIsEarlyFleeModalOpen(true)}}>{`<- Flee`}</button>
                 {cards && cards.length === 0 ? (
                     <div className="text-white font-bold flex flex-col h-full justify-center text-center">
                         <h1>No cards in decks!</h1>
@@ -301,6 +343,20 @@ export default function Dungeon({ dungeon, onNavigate }) {
                                 onClose={handleCloseAttackModal}
                                 onSave={handleSubmitAttack}
                                 card={selected_card}
+                            />
+                        )}
+                        {isRoundEndModalOpen && (
+                            <RoundEndModal
+                                onClose={async () => await handleExit(1)}
+                                onNext={() => {nextRoom(); setIsRoundEndModalOpen(false);}}
+                                round={round}
+                            />
+                        )}
+                        {isEarlyFleeModalOpen && (
+                            <EarlyFleeModal
+                                onClose={async () => await handleExit(EARLY_FLEE_FEE)}
+                                onContinue={() => setIsEarlyFleeModalOpen(false)}
+                                fee={EARLY_FLEE_FEE}
                             />
                         )}
                         <DragOverlay dropAnimation={null}>

@@ -25,10 +25,10 @@ export default function Homepage({ onNavigate }) {
                 </div>
                 <div className="border-dungeon-yellow text-white border-5 flex flex-1">
                     {subpage === 'decks' && (
-                        <Decks onDeckSelect={(deck) => {onNavigate('deck-editor', deck)}}/>
+                        <Decks onDeckSelect={(deck) => {onNavigate({name: 'deck-editor', related_object: deck})}}/>
                     )}
                     {subpage === 'dungeons' && (
-                        <Dungeons onDungeonSelect={(dungeon) => {onNavigate('dungeon', dungeon)}}/>
+                        <Dungeons onDungeonSelect={(dungeon) => {onNavigate({name: 'dungeon', related_object: dungeon})}}/>
                     )}
                 </div>
             </div>

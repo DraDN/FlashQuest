@@ -47,7 +47,7 @@ export default function DeckEditor({ deck, onNavigate }) {
             <div className="w-full min-h-screen flex flex-col bg-gray-950 text-dungeon-gold">
                 <div className="flex flex-row justify-between p-5 bg-gray-500">
                     <h1 className="font-bold">Deck Editor - {deck.name}</h1>
-                    <button onClick={() => onNavigate('home')}>go back</button>
+                    <button onClick={() => onNavigate({name: 'home'})}>go back</button>
                 </div>
                 <div className="inline-flex w-full bg-gray-600 items-center justify-between">
                     <h1 className="text-3xl font-bold p-5">Cards:</h1>

@@ -1,0 +1,39 @@
+export default function Results({ onNavigate, results }) {
+    console.log(results);
+    return (
+        <>
+            <div className="w-full min-h-screen max-h-screen flex flex-col items-center justify-center bg-dungeon-dark-900 p-4 *:m-4">
+                <h1 className="text-4xl font-bold text-center text-dungeon-orange">Congratulations!</h1>
+                <div className="flex md:flex-row flex-col md:space-x-4 space-y-4 items-center">
+                    <div className="flex flex-col text-white bg-dungeon-dark-500 border border-dungeon-yellow rounded-lg p-4">
+                        <h1 className="text-xl text-dungeon-yellow">Stats</h1>
+                        <div className="*:text-2xl *:font-semibold space-y-1">
+                            <p>Correct: {results.answer_stats.correct}</p>
+                            <p>Incorrect: {results.answer_stats.incorrect}</p>
+                            <p>Total: {results.answer_stats.correct + results.answer_stats.incorrect}</p>
+                        </div>
+                    </div>
+                    <div className="flex flex-col text-white bg-dungeon-dark-500 border border-dungeon-yellow rounded-lg p-4">
+                        <h1 className="text-xl text-dungeon-yellow">XP earned</h1>
+                        <div className="flex flex-col text-2xl space-y-1 max-h-1/4 overflow-y-auto">
+                            {results.decks.map((deck) => (
+                                <span key={deck.id}>
+                                    {deck.name} <span className="font-semibold text-dungeon-yellow">+{deck.xp_gained}XP</span>
+                                    {deck.level_gained > 0 && (
+                                        <span className="font-bold text-dungeon-orange"> +{deck.level_gained} levels!</span>
+                                    )}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <button
+                    className="px-4 py-2 rounded-lg font-semibold text-xl transition-colors bg-dungeon-green hover:bg-dungeon-yellow hover:text-dungeon-dark-900"
+                    onClick={() => {onNavigate({name: 'home'})}}
+                    >
+                    Alright!
+                </button>
+            </div>
+        </>
+    )
+}
