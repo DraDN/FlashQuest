@@ -38,6 +38,14 @@ app.post('/api/decks/:id/rename', (req, res) => {
     res.json(deck)
 });
 
+app.post('/api/decks/sync-xp', (req, res) => {
+    const { decks } = req.body;
+    decks.forEach(({ id, xp, level }) => {
+        db.prepare('UPDATE decks SET xp = ?, level = ? WHERE id = ?').run(xp, level, id);
+    });
+    res.json({ success: true });
+})
+
 app.delete('/api/decks/:id', (req, res) => {
     const { id } = req.params;
     db.prepare('DELETE FROM decks WHERE id = ?').run(id);

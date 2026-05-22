@@ -64,7 +64,7 @@ export default function Decks({ onDeckSelect }) {
                                                 <div className="h-full bg-linear-to-r from-dungeon-purple to-dungeon-yellow rounded-full transition-all duration-500 ease-out" style={{ width: `${(0.35) * 100}%` }}></div>
                                             </div>
                                         </div>
-                                        <h2 className='font-medium text-sm'>xp</h2>
+                                        <h2 className='font-medium text-sm'>{deck.xp} xp</h2>
                                     </div>
                                     <div className='*:p-2 *:rounded-xl *:hover:bg-dungeon-yellow *:transition-colors flex md:flex-row flex-col gap-2'>
                                         <button className='bg-dungeon-red-900' onClick={() => handleDeckDeletion(deck.id)}>Delete</button>
