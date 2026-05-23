@@ -10,8 +10,6 @@ export default function AttackModal({ onClose, onSave, card }) {
         setAnswer('');
         onClose();
     }
-
-    console.log(card.question);
     
     return (
         <>

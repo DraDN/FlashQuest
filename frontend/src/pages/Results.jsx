@@ -1,5 +1,4 @@
 export default function Results({ onNavigate, results }) {
-    console.log(results);
     return (
         <>
             <div className="w-full min-h-screen max-h-screen flex flex-col items-center justify-center bg-dungeon-dark-900 p-4 *:m-4">

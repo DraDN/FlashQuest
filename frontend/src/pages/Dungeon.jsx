@@ -176,7 +176,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const nextRoom = () => {
         setRound(round + 1);
         setMonsters(generate_monsters());
-        console.log("next room!");
     }
 
     useEffect(() => {
@@ -252,8 +251,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
         new_levels.forEach(level => {
             account_level_up += level;
         });
-
-        console.log(account_level_up);
 
         if (account_level_up > 0) {
             await levelUpAccount(user.id, account_level_up);
