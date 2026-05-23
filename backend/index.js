@@ -42,7 +42,7 @@ app.post('/api/level-account', (req, res) => {
 app.post('/api/level-up-account', (req, res) => {
     const { user_id, added_levels } = req.body;
     const exist = db.prepare('SELECT level FROM user_levels WHERE user_id = ?').get(user_id);
-    if (exist.rows.length === 0) {
+    if (!exist) {
         db.prepare('INSERT INTO user_levels (user_id, level) VALUES (?, ?)').run(user_id, added_levels);
     } else {
         db.prepare('UPDATE user_levels SET level = level + ? WHERE user_id = ?').run(added_levels, user_id);

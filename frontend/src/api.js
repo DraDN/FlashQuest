@@ -13,7 +13,7 @@ export const setAccountLevel = async (user_id, level) =>
     }).then(res => res.json());
 
 export const levelUpAccount = async (user_id, added_levels) =>
-    fetch(`/api/level-account`, {
+    fetch(`/api/level-up-account`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

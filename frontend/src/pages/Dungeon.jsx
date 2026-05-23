@@ -32,11 +32,11 @@ const MONSTER_TEMPLATES = [
 ]
 
 const TIER_TEMPLATES = [
-    { id: "Weak", base_health: 10, base_attack: 5, base_xp: 2 },
-    { id: "Normal", base_health: 20, base_attack: 10, base_xp: 4 },
-    { id: "Hard", base_health: 30, base_attack: 10, base_xp: 6 },
+    { id: "Weak", base_health: 10, base_attack: 5, base_xp: 20 },
+    { id: "Normal", base_health: 20, base_attack: 10, base_xp: 40 },
+    { id: "Hard", base_health: 30, base_attack: 10, base_xp: 60 },
     { id: "Elite", base_health: 40, base_attack: 15, base_xp: 8 },
-    { id: "Boss", base_health: 50, base_attack: 20, base_xp: 10 },
+    { id: "Boss", base_health: 100, base_attack: 20, base_xp: 10 },
 ]
 
 const MONSTER_ASSETS = MONSTER_TEMPLATES.map(monster => ({
@@ -226,9 +226,12 @@ export default function Dungeon({ dungeon, onNavigate }) {
             new_levels.push(level_gained);
         });
 
-        const account_level_up = decks.reduce((acc, deck) => {
-            return acc + deck.level_gained;
-        }, 0);
+        let account_level_up = 0;
+        new_levels.forEach(level => {
+            account_level_up += level;
+        });
+
+        console.log(account_level_up);
 
         if (account_level_up > 0) {
             await levelUpAccount(user.id, account_level_up);
