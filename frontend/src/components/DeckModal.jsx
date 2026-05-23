@@ -20,10 +20,10 @@ export default function DeckModal({ onClose, onSave, mode, id, initial_value }) 
         <>
             <Modal children={
                 <div>
-                    <h1 className="text-xl font-bold text-white mb-4">{mode === 'create' ? 'Create Deck' : 'Rename Deck'}</h1>
+                    <h1 className="text-2xl font-bold text-white mb-4">{mode === 'create' ? 'Create Deck' : 'Rename Deck'}</h1>
 
                     <form onSubmit={handleSave} className="space-y-4">
-                        <label className="block text-sm font-medium text-zinc-400 mb-2"> Deck Name </label>
+                        <label className="block text-md font-medium text-zinc-400 mb-2"> Deck Name </label>
                         <input
                             type="text"
                             value={deckName}
@@ -40,17 +40,17 @@ export default function DeckModal({ onClose, onSave, mode, id, initial_value }) 
                             {deckName.length}/{MAX_CHARACTERS}
                         </div>
                         
-                        <div className="flex justify-end gap-3 pt-2">
+                        <div className="flex justify-end gap-3 pt-2 *:px-4 *:py-2 *:rounded-lg *:font-semibold *:text-sm *:transition-colors">
                             <button 
                                 type="button"
-                                className="px-4 py-2 rounded-lg bg-zing-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-sm transition-colors"
+                                className="bg-zing-800 hover:bg-zinc-700 text-zinc-300"
                                 onClick={() => { setDeckName(''); onClose(); }}>
                                 
                                 Cancel
                             </button>
                             <button 
                                 type="submit"
-                                className="px-4 py-2 rounded-lg bg-dungeon-green hover:bg-dungeon-yellow text-white hover:text-dungeon-dark-900 font-semibold text-sm transition-colors shadow-lg shadow-purple-900/20">
+                                className="bg-dungeon-green-700 hover:bg-dungeon-yellow text-white hover:text-dungeon-dark-900">
                                 Save
                             </button>
                         </div>

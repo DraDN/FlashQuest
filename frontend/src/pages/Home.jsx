@@ -16,14 +16,14 @@ export default function Homepage({ onNavigate }) {
     return (
     <>
         <div className="w-full bg-dungeon-dark-900 flex flex-col flex-1 sm:h-screen sm:max-h-screen">
-            <div className="border-dungeon-yellow border-5">
+            <div className="border border-dungeon-yellow m-2">
                 <AccountSummary />
             </div>
             <div className="flex md:flex-row flex-col grow overflow-hidden">
-                <div className="border-dungeon-yellow border-5 min-w-1/4 mb:max-w-1/4 mb:w-1/4">
+                <div className="border border-dungeon-yellow m-2 min-w-1/4 mb:max-w-1/4 mb:w-1/4">
                     <Sidemenu subpage={subpage} setSubpage={setSubpage} />
                 </div>
-                <div className="border-dungeon-yellow text-white border-5 flex flex-1">
+                <div className="border border-dungeon-yellow m-2 text-white flex flex-1">
                     {subpage === 'decks' && (
                         <Decks onDeckSelect={(deck) => {onNavigate({name: 'deck-editor', related_object: deck})}}/>
                     )}

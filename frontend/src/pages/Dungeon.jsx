@@ -41,7 +41,7 @@ const TIER_TEMPLATES = [
 
 const MONSTER_ASSETS = MONSTER_TEMPLATES.map(monster => ({
     name: monster.name,
-    image: `/assets/monsters/${monster.id}.png`
+    image: `/monsters/${monster.id}.png`
 }))
 
 const get_room_progression_index = (round) => {
@@ -53,8 +53,6 @@ const get_monster = (round) => {
     const floor_mult = Math.pow(1.3, floor_index);
     const room_pregression_index = get_room_progression_index(round);
 
-    // let tier = "Normal";
-    // let base_health = Math.random() * 14 + 10;
     let tier_id = "Normal";
     if (room_pregression_index >= 4 && room_pregression_index <= 6) tier_id = "Hard";
     else if (room_pregression_index >= 7 && room_pregression_index <= 8) tier_id = "Elite";
@@ -78,7 +76,8 @@ const get_monster = (round) => {
         health: max_health,
         max_health: max_health,
         attack: attack,
-        xp_reward: xp
+        xp_reward: xp,
+        is_hit: false
     }
 }
 
@@ -135,8 +134,19 @@ export default function Dungeon({ dungeon, onNavigate }) {
                 }
 
                 const top_card = current_draw_pile.shift();
-                new_hand.push(top_card);
+                new_hand.push({...top_card, isFresh: true });
             }
+
+            setTimeout(() => {
+                setCardState((previousState) => {
+                    const unfresh_hand = new_hand.map(c => ({...c, isFresh: false }));
+
+                    return {
+                        ...previousState,
+                        hand: unfresh_hand,
+                    }
+                })
+            }, 1000);
 
             return {
                 draw_pile: current_draw_pile,
@@ -177,7 +187,19 @@ export default function Dungeon({ dungeon, onNavigate }) {
             setCardState(() => {
                 const initial_draw_pile = shuffle_array(new_cards);
 
-                const starting_hand = initial_draw_pile.slice(0, MAX_HAND_SIZE);
+                let starting_hand = initial_draw_pile.slice(0, MAX_HAND_SIZE);
+                starting_hand = starting_hand.map(c => ({...c, isFresh: true }));
+
+                setTimeout(() => {
+                    setCardState((previousState) => {
+                        const unfresh_hand = previousState.hand.map(c => ({...c, isFresh: false }));
+
+                        return {
+                            ...previousState,
+                            hand: unfresh_hand,
+                        }
+                    })
+                }, 1000);
 
                 return {
                     draw_pile: initial_draw_pile.slice(MAX_HAND_SIZE),
@@ -240,7 +262,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
         const updated_deck_values = decks.map((d, index) => ({
            ...d,
            level_gained: new_levels[index],
-           xp: d.xp + parseInt(d.xp_gained * percentage),
+           xp: d.xp + d.xp_gained * percentage,
            level: (d.level + new_levels[index]),
         }))
         await levelDecks(updated_deck_values);
@@ -280,25 +302,28 @@ export default function Dungeon({ dungeon, onNavigate }) {
         let new_answer_stats = {...answer_stats};
 
         if (answer && (selected_card.answer.toLowerCase() === answer.toLowerCase() || answer.toLowerCase() === "test")) {
-            const hurt_monsters = monsters.map(mon => mon.id === selected_monster.id ? { ...mon, health: mon.health - 10 } : mon);
-            const updated_monsters = hurt_monsters.filter(mon => mon.health > 0);
+            const hurt_monsters = monsters.map(mon => mon.id === selected_monster.id ? { ...mon, health: mon.health - 10, is_hit: true } : mon);
 
-            setMonsters(updated_monsters);
+            setMonsters(hurt_monsters);
+
+            setTimeout(() => {
+                setMonsters(prevMonsters => {
+                    const unhurt_monsters = prevMonsters.map(mon => ({...mon, is_hit: false }));
+                    const updated_monsters = unhurt_monsters.filter(mon => mon.health > 0);
+                    if (updated_monsters.length === 0) {
+                        setTimeout(() => {
+                            setIsRoundEndModalOpen(true);
+                        }, 1000);
+                    }
+                    return updated_monsters;
+                });
+            }, 800);
+
             play_card(selected_card);
 
             reward_deck_xp(selected_card.deck_id, selected_monster.xp_reward);
 
             new_answer_stats.correct += 1;
-
-            if (updated_monsters.length === 0) {
-                // onNavigate('home');
-                // nextRoom();
-                // setIsRoundEndModalOpen(true);
-                setTimeout(() => {
-                    setIsRoundEndModalOpen(true);
-                }, 500);
-                return;
-            }
         } else {
             setPlayerHealth(player_health - selected_monster.attack);
 
@@ -333,7 +358,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="w-full flex flex-col bg-dungeon-dark-900 min-h-screen relative">
-                <button className="text-white absolute top-4 left-4" onClick={() => {setIsEarlyFleeModalOpen(true)}}>{`<- Flee`}</button>
+                <button className="text-dungeon-red-900 border border-dungeon-red-900 hover:text-dungeon-dark-900 hover:bg-dungeon-red-900 px-2 py-1 rounded-lg absolute top-4 left-4" onClick={() => {setIsEarlyFleeModalOpen(true)}}>{`Flee`}</button>
                 {cards && cards.length === 0 ? (
                     <div className="text-white font-bold flex flex-col h-full justify-center text-center">
                         <h1>No cards in decks!</h1>
@@ -343,15 +368,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                     <div className="flex flex-col w-full h-full">
                         <Monsters monsters={monsters} />
                         
-                        <div className="space-y-1.5 relative">
-                            <div className="w-full">
-                                <div className="flex flex-row p-4 bg-linear-to-r from-red-700 to-red-200 transition-all duration-500 ease-out"
-                                    style={{ width: `${player_health}%`}}>
-                                </div>
-                                <p className="text-white absolute right-1/2 translate-x-1/2 top-1/2 -translate-y-1/2">Health: {player_health}</p>
-                            </div>
-                        </div>
-                        <PlayerCards hand={card_state.hand}/>
+                        <PlayerCards hand={card_state.hand} player_health={player_health}/>
 
                         {isAttackModalOpen && (
                             <AttackModal

@@ -44,38 +44,36 @@ export default function DeckEditor({ deck, onNavigate }) {
 
     return (
         <>
-            <div className="w-full min-h-screen flex flex-col bg-gray-950 text-dungeon-gold">
-                <div className="flex flex-row justify-between p-5 bg-gray-500">
-                    <h1 className="font-bold">Deck Editor - {deck.name}</h1>
-                    <button onClick={() => onNavigate({name: 'home'})}>go back</button>
+            <div className="w-full min-h-screen flex flex-col text-white">
+                <div className="inline-flex w-full bg-dungeon-dark-900 items-center justify-between">
+                    <h1 className="text-3xl font-pixel-header font-bold p-5">Cards of <span className="text-dungeon-orange-glow">{deck.name}</span>: </h1>
+
+                    <button className="px-4 py-2 m-4 border border-dungeon-red-900 rounded-xl text-dungeon-red-900 font-bold hover:bg-dungeon-red-900 hover:text-dungeon-dark-900 transition-colors" onClick={() => onNavigate({name: 'home'})}>- Back -</button>
                 </div>
-                <div className="inline-flex w-full bg-gray-600 items-center justify-between">
-                    <h1 className="text-3xl font-bold p-5">Cards:</h1>
-                    <button className='bg-green-900 px-4 py-3 rounded-xl hover:bg-amber-700 transition-colors text-2xl m-4' onClick={openCreateModal}> + New card </button>
-                </div>
-                <div className="grow relative flex flex-col pb-26">
+                <div className="grow relative flex flex-col">
                     {!cards || cards.length === 0 ? (
-                        <div className="grow flex flex-col items-center justify-center gap-6">
+                        <div className="grow flex flex-col items-center justify-center gap-6 bg-dungeon-dark-900">
                             <h1 className="text-7xl font-bold">Deck is empty</h1>
                             <h2 className="text-lg font-medium">Please add some cards</h2>
+                            <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-3xl font-pixel-header' onClick={() => openCreateModal()}>- New card -</button>
                         </div>
                     ) : (
-                        <div className="flex flex-col bg-gray-900">
-                            <div className="grid grid-cols-3 place-items-center *:p-5">
+                        <div className="flex flex-col grow bg-dungeon-dark-900">
+                            <div className="grid grid-cols-3 place-items-center font-pixel-header text-4xl *:p-5">
                                 <p>Question</p>
                                 <p>Answer</p>
+                                <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-3xl font-pixel-header' onClick={() => openCreateModal()}>- New card -</button>
                             </div>
                             {cards.map((card) => (
-                                <div key={card.id} className="grid grid-cols-3 *:border-10 *:border-gray-700 *:p-5">
-                                    <p>{card.question}</p>
-                                    <p>{card.answer}</p>
-                                    <div className="flex flex-row gap-4">
-                                        <button className="bg-red-600 grow" onClick={() => handleCardDeletion(card.id)}>Delete</button>
-                                        <button className="bg-orange-500 grow" onClick={() => openEditModal(card.id, card.question, card.answer)}>Edit</button>
-                                    </div>
+                                <div key={card.id} className="grid grid-cols-3 text-xl items-center m-4 *:p-2 *:m-2 mb-2 border border-dungeon-yellow divide-x-2 divide-dungeon-yellow">
+                                        <p>{card.question}</p>
+                                        <p>{card.answer}</p>
+                                        <div className='*:p-2 *:rounded-xl *:hover:bg-dungeon-yellow *:transition-colors flex justify-center md:flex-row flex-col gap-2'>
+                                            <button className="bg-dungeon-red-900 grow" onClick={() => handleCardDeletion(card.id)}>Delete</button>
+                                            <button className="bg-dungeon-purple grow" onClick={() => openEditModal(card.id, card.question, card.answer)}>Edit</button>
+                                        </div>
                                 </div>
-                            ))
-                            }
+                            ))}
                         </div>
                     )}
                 </div>

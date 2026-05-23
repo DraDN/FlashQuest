@@ -17,11 +17,14 @@ export default function AttackModal({ onClose, onSave, card }) {
         <>
             <Modal children={
                 <div>
-                    <h1 className="text-xl font-bold text-white mb-2">Attack!</h1>
-                    <h2 className="text-white font-bold mb-4">Question: {card.question}</h2>
+                    <h1 className="text-center text-2xl font-bold text-dungeon-orange-glow mb-2">Attack!</h1>
+                    <div className="flex flex-col text-xl text-center text-white gap-1 mb-4">
+                        <h2 className="">Question: </h2>
+                        <span className="font-bold">{card.question}</span>
+                    </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <label className="block text-sm font-medium text-zinc-400 mb-2"> Answer to attack the monster! </label>
+                        <label className="block text-md font-medium text-zinc-400 mb-2"> Answer to attack the monster! </label>
                         <input
                             type="text"
                             onChange={(e) => setAnswer(e.target.value)}
@@ -29,17 +32,18 @@ export default function AttackModal({ onClose, onSave, card }) {
                             required
                         />
                         
-                        <div className="flex justify-end gap-3 pt-2">
+                        <div className="flex justify-end gap-3 pt-2 *:px-4 *:py-2 *:rounded-lg *:font-semibold *:text-sm *:transition-colors">
                             <button 
                                 type="button"
-                                className="px-4 py-2 rounded-lg bg-zing-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-sm transition-colors"
+                                className="bg-zing-800 hover:bg-zinc-700 text-zinc-300"
                                 onClick={() => { setAnswer(''); onClose(); }}>
+                                
                                 Cancel
                             </button>
                             <button 
                                 type="submit"
-                                className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm transition-colors shadow-lg shadow-purple-900/20">
-                                Save
+                                className="bg-dungeon-green-700 hover:bg-dungeon-yellow text-white hover:text-dungeon-dark-900">
+                                Answer
                             </button>
                         </div>
                     </form>

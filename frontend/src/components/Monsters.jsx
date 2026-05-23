@@ -3,7 +3,7 @@ import { useDroppable } from "@dnd-kit/core";
 export default function Monsters({ monsters }) {
     return (
         <>
-            <div className="flex flex-row grow gap-4 p-4 items-center justify-center flex-wrap bg-red-100">
+            <div className="flex flex-row grow gap-4 p-4 h-2/3 items-center justify-center flex-wrap dungeon-bg">
                 {monsters.map((mon, index) => (
                     <MonsterCard key={mon.id} monster={mon} index={index} />
                 ))}
@@ -19,10 +19,11 @@ function MonsterCard({ monster, index }) {
 
     return (
         <div ref={setNodeRef}
-            className="p-4 w-40 md:h-1/2 h-1/3 text-center space-y-2">
-            <div className={`h-full ${isOver ? "bg-dungeon-red-900" : "bg-white"} p-4 text-center rounded-xl`}>
+            className="p-4 text-center space-y-2 shrink-0 text-white bg-dungeon-dark-900/85 rounded-b-2xl rounded-t-full">
+            <div className={`w-35 h-40 ${isOver ? "bg-dungeon-red-900" : ""} ${(monster.is_hit && monster.is_hit == true) ? (`${monster.health <= 0 ? "animate-float-up pointer-events-none" : "animate-shake"} border-2 border-dungeon-red-900/50`) : "border-white"} text-center rounded-b-xl rounded-t-full`}>
+                <img src={`${monster.asset.image}`} className="w-full h-full object-contain" />
             </div>
-            <p>Health: {monster.health} / {monster.max_health}</p>
+            <p className="text-dungeon-red-500">Health: {monster.health} / {monster.max_health}</p>
             <p>{monster.tier} {monster.asset.name}</p>
         </div>
     );

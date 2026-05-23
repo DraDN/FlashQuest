@@ -1,5 +1,103 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: pixelFontNormal;
+  src: url('/Munro.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: pixelFontHeader;
+  src: url('/Alkhemikal.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: pixelFontTitle;
+  src: url('/GothicPixels.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.fancy-border {
+  image-rendering: pixelated;
+  border-image: url('/border-5.png') 18;
+  border-image-repeat: repeat;
+  border-width: 18px;
+  border-style: solid;
+}
+
+.dungeon-bg {
+  background-image: url('/dungeon_bg.png');
+  background-size: cover;
+  background-position: center;
+}
+
+@layer utilities {
+  .animate-shake {
+    animation: shake 0.2s ease-in-out;
+  }
+
+  .animate-flash-red {
+    animation: flashRed 0.3s ease-out;
+  }
+
+  .animate-float-up {
+    animation: floatUp 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  }
+
+  .animate-card-draw {
+    animation: cardDraw 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-in-out;
+  }
+
+  .custom-scroll {
+    scrollbar-color: var(--color-dungeon-purple) var(--color-dungeon-dark-500);
+    scrollbar-width: thin;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cardDraw {
+  0% {
+    opacity: 0;
+    transform: translate(var(--slide-from-x, 100px), var(--slide-from-y, 300px)) scale(0.4) rotate(-15deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+@keyframes flashRed {
+  0% { background-color: rgba(233, 63, 89, 0.4); transform: translateY(4px); }
+  100% { background-color: rgba(0,0,0,0); transform: translateY(0); }
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(0.8); opacity: 1; }
+  20% { transform: translateY(-20px) scale(1.2); }
+  100% { transform: translateY(-60px) scale(1); opacity: 0; }
+}
+
 @theme {
   --color-dungeon-dark-900: #0a0a0f;
   --color-dungeon-dark-500: #000b1c;
@@ -7,6 +105,15 @@
   --color-dungeon-red-900: #832223;
   --color-dungeon-red-500: #c66567;
   --color-dungeon-orange: #e48b70;
+  --color-dungeon-orange-glow: #ffa057;
   --color-dungeon-yellow: #f3c8a8;
+  --color-dungeon-yellow-glow: #f8d877;
+  --color-dungeon-green-200: #66ac7d;
   --color-dungeon-green: #567b68;
+  --color-dungeon-green-700: #4a7833;
+  --color-dungeon-green-900: #485322;
+
+  --font-pixel-normal: 'pixelFontNormal', sans-serif;
+  --font-pixel-header: 'pixelFontHeader', sans-serif;
+  --font-pixel-title: 'pixelFontTitle', sans-serif;
 }

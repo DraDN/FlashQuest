@@ -49,19 +49,20 @@ export default function Decks({ onDeckSelect }) {
     return (
         <>
             <div className="text-white flex flex-col flex-1 w-full">
-                <button className='text-dungeon-green px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-extrabold text-2xl' onClick={() => openCreateModal()}>- New deck -</button>
-                <div className='overflow-y-auto'>
+                <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-4xl font-pixel-header' onClick={() => openCreateModal()}>- New deck -</button>
                     {!decks || decks.length === 0 ? (
-                        <div className="text-7xl font-bold flex items-center justify-center">
-                            <h1>No decks found</h1>
+                        <div className="flex grow flex-col gap-6 items-center justify-center">
+                            <h1 className='text-7xl font-bold'>No decks found</h1>
+                            <h2 className='text-lg font-medium'>Click the button above to create a new deck</h2>
                         </div>
                         ) : (
-                            decks.map((deck) => (
+                        <div className='overflow-y-auto custom-scroll'>
+                            {decks.map((deck) => (
                                 <DeckCard key={deck.id} deck={deck} onSelect={onDeckSelect} onRename={openRenameModal} onDelete={handleDeckDeletion} />
-                            )
-                        ))
+                            ))}
+                        </div>
+                        )
                     }
-                </div>
 
                 {modalConfig.isOpen && (
                     <DeckModal

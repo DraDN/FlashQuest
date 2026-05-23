@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 
 import { getDecks, getDungeonDecks } from '../api';
+import Modal from "./Modal";
 
 const MAX_CHARACTERS = 50;
 
@@ -46,14 +47,14 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
     };
 
     return (
-        <>
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+        <Modal children={(
+            <>
                 {decks && ( 
-                <div className="w-full max-w-md max-h-[90vh] flex flex-col relative p-6 bg-zinc-900">
-                    <h1 className="text-xl font-bold text-white mb-4">{mode === 'create' ? 'Create New Dungeon' : 'Edit Dungeon'}</h1>
+                <div>
+                    <h1 className="text-2xl font-bold text-white mb-4">{mode === 'create' ? 'Create New Dungeon' : 'Edit Dungeon'}</h1>
 
                     <form onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 space-y-4">
-                        <label className="block text-sm font-medium text-zinc-400 mb-2"> Dungeon Name </label>
+                        <label className="block text-md font-medium text-zinc-400 mb-2"> Dungeon Name </label>
                         <input
                             type="text"
                             value={dungeonName}
@@ -71,7 +72,7 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
                         </div>
 
                         <div className="flex-1 overflow-y-auto space-y-2">
-                            <label className="lock text-sm font-medium text-zinc-400 mb-2"> Select decks to pull flashcards from: </label>
+                            <label className="lock text-md font-medium text-zinc-400 mb-2"> Select decks to pull flashcards from: </label>
                             {decks.length === 0 ? (
                                 <p className="text-sm text-zinc-400">No decks found.</p>
                             ) : (decks.map((d) => (
@@ -83,16 +84,17 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
                             )}
                         </div>
                         
-                        <div className="flex justify-end gap-3 pt-2">
+                         <div className="flex justify-end gap-3 pt-2 *:px-4 *:py-2 *:rounded-lg *:font-semibold *:text-sm *:transition-colors">
                             <button 
                                 type="button"
-                                className="px-4 py-2 rounded-lg bg-zing-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-sm transition-colors"
+                                className="bg-zing-800 hover:bg-zinc-700 text-zinc-300"
                                 onClick={() => { setDungeonName(''); setSelectedDecksID([]); onClose(); }}>
+                                
                                 Cancel
                             </button>
                             <button 
                                 type="submit"
-                                className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm transition-colors shadow-lg shadow-purple-900/20">
+                                className="bg-dungeon-green-700 hover:bg-dungeon-yellow text-white hover:text-dungeon-dark-900">
                                 Save
                             </button>
                         </div>
@@ -105,7 +107,7 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
                         <h3 className="text-xl font-bold text-white mb-4">Please create a deck first</h3>
                     </div>
                 )}
-            </div>
-        </>
-    );
+            </>
+            )} />
+    )
 }
