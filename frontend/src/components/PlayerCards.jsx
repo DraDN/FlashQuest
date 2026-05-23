@@ -4,9 +4,10 @@ export function PlayerCards({ hand }) {
     return (
         <>
             <div className="flex flex-row flex-wrap min-h-1/3 gap-4 p-4 md:items-center justify-center bg-red-400 overflow-clip">
-                {hand.map((c, index) => (
-                    <DraggableCard key={c.id} card={c} index={index} />
-                ))}
+                {hand.map((c, index) => {
+                    console.log(c)
+                    return <DraggableCard key={c.id} card={c} index={index} />
+                })}
             </div>
         </>
     )

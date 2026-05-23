@@ -4,6 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import { getDecks, createDeck, renameDeck, deleteDeck } from '../api';
 
 import DeckModal from './DeckModal';
+import DeckCard from './DeckCard';
 
 export default function Decks({ onDeckSelect }) {
     const { user } = useUser();
@@ -56,22 +57,7 @@ export default function Decks({ onDeckSelect }) {
                         </div>
                         ) : (
                             decks.map((deck) => (
-                                <div key={deck.id} className="bg-dungeon-dark-500 border border-dungeon-yellow text-2xl font-bold flex items-center justify-between m-5 gap-4 p-4">
-                                    <div className='flex flex-row gap-2 items-center'>
-                                        <h1>{deck.name}</h1>
-                                        <div className='space-y-1.5'>
-                                            <div className="w-full h-2.5 overflow-hidden bg-red-500">
-                                                <div className="h-full bg-linear-to-r from-dungeon-purple to-dungeon-yellow rounded-full transition-all duration-500 ease-out" style={{ width: `${(0.35) * 100}%` }}></div>
-                                            </div>
-                                        </div>
-                                        <h2 className='font-medium text-sm'>{deck.xp} xp</h2>
-                                    </div>
-                                    <div className='*:p-2 *:rounded-xl *:hover:bg-dungeon-yellow *:transition-colors flex md:flex-row flex-col gap-2'>
-                                        <button className='bg-dungeon-red-900' onClick={() => handleDeckDeletion(deck.id)}>Delete</button>
-                                        <button className='bg-dungeon-purple' onClick={() => openRenameModal(deck.id, deck.name)}>Rename</button>
-                                        <button className='bg-dungeon-green' onClick={() => onDeckSelect(deck)}>Select</button>
-                                    </div>
-                                </div>
+                                <DeckCard key={deck.id} deck={deck} onSelect={onDeckSelect} onRename={openRenameModal} onDelete={handleDeckDeletion} />
                             )
                         ))
                     }

@@ -37,15 +37,9 @@ db.exec(`
         FOREIGN KEY (deck_id) REFERENCES decks (id) ON DELETE CASCADE
     );
 
-    CREATE TABLE IF NOT EXISTS dungeon_runs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT NOT NULL,
-        deck_id INTEGER NOT NULL,
-        xp_earned INTEGER DEFAULT 0,
-        correct INTEGER DEFAULT 0,
-        total INTEGER DEFAULT 0,
-        completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (deck_id) REFERENCES decks (id) ON DELETE SET NULL
+    CREATE TABLE IF NOT EXISTS user_levels (
+        user_id TEXT NOT NULL PRIMARY KEY,
+        level INTEGER NOT NULL
     )
 `);
 

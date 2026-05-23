@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
+import { useUser } from "@clerk/clerk-react";
 
-import { getDungeonCards, getDungeonDecks, levelDecks } from "../api";
+import { getDungeonCards, getDungeonDecks, levelDecks, levelUpAccount } from "../api";
 import { PlayerCards, DraggableCard } from "../components/PlayerCards";
 import Monsters from "../components/Monsters";
 
@@ -82,6 +83,8 @@ const get_monster = (round) => {
 }
 
 export default function Dungeon({ dungeon, onNavigate }) {
+    const { user } = useUser();
+
     const [ cards, setCards ] = useState([]);
     const [ decks, setDecks ] = useState([]);
     const [ round, setRound ] = useState(1);
@@ -123,7 +126,9 @@ export default function Dungeon({ dungeon, onNavigate }) {
             let current_discard_pile = [...previousState.discard_pile];
             let new_hand = [...previousState.hand]
 
-            while (new_hand.length < MAX_HAND_SIZE) {
+            const limit = Math.min(cards.length, MAX_HAND_SIZE);
+
+            while (new_hand.length < limit) {
                 if (current_draw_pile.length === 0) {
                     current_draw_pile = shuffle_array(current_discard_pile);
                     current_discard_pile = [];
@@ -168,7 +173,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
         getDungeonCards(dungeon.id)
         .then(new_cards => {
             setCards(new_cards);
-            // setMonsters(generate_monsters(round));
 
             setCardState(() => {
                 const initial_draw_pile = shuffle_array(new_cards);
@@ -221,6 +225,14 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
             new_levels.push(level_gained);
         });
+
+        const account_level_up = decks.reduce((acc, deck) => {
+            return acc + deck.level_gained;
+        }, 0);
+
+        if (account_level_up > 0) {
+            await levelUpAccount(user.id, account_level_up);
+        }
 
         const updated_deck_values = decks.map((d, index) => ({
            ...d,
@@ -281,7 +293,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                 // setIsRoundEndModalOpen(true);
                 setTimeout(() => {
                     setIsRoundEndModalOpen(true);
-                }, 1250);
+                }, 500);
                 return;
             }
         } else {

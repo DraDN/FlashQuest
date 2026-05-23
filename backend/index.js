@@ -15,6 +15,41 @@ app.listen(3000, '0.0.0.0', () => {
     console.log('Backend running on port 3000');
 });
 
+// === ACCOUNT LEVEL ===
+
+app.get('/api/level-account', (req, res) => {
+    const { user_id } = req.query;
+    const level = db.prepare('SELECT level FROM user_levels WHERE user_id = ?').get(user_id);
+    if (!level) {
+        db.prepare('INSERT INTO user_levels (user_id, level) VALUES (?, ?)').run(user_id, 0);
+        res.json( { level: 0 } );
+    } else {
+        res.json(level);
+    }
+})
+
+app.post('/api/level-account', (req, res) => {
+    const { user_id, level } = req.body;
+    const exist = db.prepare('SELECT level FROM user_levels WHERE user_id = ?').get(user_id);
+    if (!exist) {
+        db.prepare('INSERT INTO user_levels (user_id, level) VALUES (?, ?)').run(user_id, level);
+    } else {
+        db.prepare('UPDATE user_levels SET level = ? WHERE user_id = ?').run(level, user_id);
+    }
+    res.json( { success: true } );
+});
+
+app.post('/api/level-up-account', (req, res) => {
+    const { user_id, added_levels } = req.body;
+    const exist = db.prepare('SELECT level FROM user_levels WHERE user_id = ?').get(user_id);
+    if (exist.rows.length === 0) {
+        db.prepare('INSERT INTO user_levels (user_id, level) VALUES (?, ?)').run(user_id, added_levels);
+    } else {
+        db.prepare('UPDATE user_levels SET level = level + ? WHERE user_id = ?').run(added_levels, user_id);
+    }
+    res.json( { success: true } );
+});
+
 // === DECKS API ===
 
 app.get('/api/decks', (req, res) => {

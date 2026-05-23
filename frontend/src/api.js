@@ -1,3 +1,26 @@
+// === ACCOUNT LEVEL ===
+
+export const getAccountLevel = async (user_id) => 
+    fetch(`/api/level-account?user_id=${user_id}`).then(res => res.json());
+
+export const setAccountLevel = async (user_id, level) =>
+    fetch(`/api/level-account`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id, level })
+    }).then(res => res.json());
+
+export const levelUpAccount = async (user_id, added_levels) =>
+    fetch(`/api/level-account`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id, added_levels })
+    }).then(res => res.json());
+
 // === DECKS API ===
 
 export const getDecks = async (user_id) => 
