@@ -8,8 +8,10 @@ export default function DeckCard({ deck, onSelect, onRename, onDelete }) {
                 </div>
                 <div className='flex flex-row gap-2 items-center'>
                     <div className='relative space-y-1.5 grow bg-dungeon-dark-900 border border-dungeon-yellow rounded-xl'>
-                        <div className="w-full h-full flex grow">
-                            <div className="flex flex-row p-4 bg-linear-to-r from-dungeon-purple to-dungeon-yellow rounded-xl transition-all duration-500 ease-out" style={{ width: `${(deck.xp / ((deck.level + 1) * 100)) * 100}%` }}></div>
+                        <div className="w-full h-4.5 flex grow">
+                            {deck.xp > 0 && (
+                                <div className="flex flex-row bg-linear-to-r from-dungeon-purple to-dungeon-yellow rounded-xl transition-all duration-500 ease-out" style={{ width: `${(deck.xp / ((deck.level + 1) * 100)) * 100}%` }}></div>
+                            )}
                         </div>
                     </div>
                     <h2 className='font-medium text-sm text-dungeon-yellow'>XP {deck.xp}</h2>
