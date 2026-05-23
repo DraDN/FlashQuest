@@ -240,7 +240,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
         const updated_deck_values = decks.map((d, index) => ({
            ...d,
            level_gained: new_levels[index],
-           xp: d.xp + (d.xp_gained * percentage),
+           xp: d.xp + parseInt(d.xp_gained * percentage),
            level: (d.level + new_levels[index]),
         }))
         await levelDecks(updated_deck_values);
