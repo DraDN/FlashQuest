@@ -15,14 +15,24 @@ app.listen(3000, '0.0.0.0', () => {
     console.log('Backend running on port 3000');
 });
 
-// === ACCOUNT LEVEL ===
+// === ACCOUNT API ===
+
+app.get('/api/check-status', (req, res) => {
+    const { user_id } = req.query;
+    const exists = db.prepare('SELECT level FROM user_levels WHERE user_id = ?').get(user_id);
+    if (!exists) {
+        db.prepare('INSERT INTO user_levels (user_id, level) VALUES (?, ?)').run(user_id, 0);
+        res.json( { status: 'new' } );
+    } else {
+        res.json( { status: 'exists' } );
+    }
+})
 
 app.get('/api/level-account', (req, res) => {
     const { user_id } = req.query;
     const level = db.prepare('SELECT level FROM user_levels WHERE user_id = ?').get(user_id);
     if (!level) {
-        db.prepare('INSERT INTO user_levels (user_id, level) VALUES (?, ?)').run(user_id, 0);
-        res.json( { level: 0 } );
+        res.json( { level: -1 } );
     } else {
         res.json(level);
     }
@@ -32,11 +42,11 @@ app.post('/api/level-account', (req, res) => {
     const { user_id, level } = req.body;
     const exist = db.prepare('SELECT level FROM user_levels WHERE user_id = ?').get(user_id);
     if (!exist) {
-        db.prepare('INSERT INTO user_levels (user_id, level) VALUES (?, ?)').run(user_id, level);
+        res.json( { success: false } );
     } else {
         db.prepare('UPDATE user_levels SET level = ? WHERE user_id = ?').run(level, user_id);
+        res.json( { success: true } );
     }
-    res.json( { success: true } );
 });
 
 app.post('/api/level-up-account', (req, res) => {
@@ -44,10 +54,11 @@ app.post('/api/level-up-account', (req, res) => {
     const exist = db.prepare('SELECT level FROM user_levels WHERE user_id = ?').get(user_id);
     if (!exist) {
         db.prepare('INSERT INTO user_levels (user_id, level) VALUES (?, ?)').run(user_id, added_levels);
+        res.json( { success: false } );
     } else {
         db.prepare('UPDATE user_levels SET level = level + ? WHERE user_id = ?').run(added_levels, user_id);
+        res.json( { success: true } );
     }
-    res.json( { success: true } );
 });
 
 // === DECKS API ===
@@ -68,22 +79,35 @@ app.post('/api/decks', (req, res) => {
 app.post('/api/decks/:id/rename', (req, res) => {
     const { id } = req.params;
     const { name } = req.body;
-    db.prepare('UPDATE decks SET name = ? WHERE id = ?').run(name, id);
-    const deck = db.prepare('SELECT * FROM decks WHERE id = ?').get(id);
-    res.json(deck)
+    const result = db.prepare('UPDATE decks SET name = ? WHERE id = ?').run(name, id);
+    if (result.rowCount === 0) {
+        res.json( { success: false } );
+    } else {
+        const deck = db.prepare('SELECT * FROM decks WHERE id = ?').get(id);
+        res.json(deck)
+    }
 });
 
 app.post('/api/decks/sync-xp', (req, res) => {
     const { decks } = req.body;
+    let good;
     decks.forEach(({ id, xp, level }) => {
-        db.prepare('UPDATE decks SET xp = ?, level = ? WHERE id = ?').run(xp, level, id);
+        const result = db.prepare('UPDATE decks SET xp = ?, level = ? WHERE id = ?').run(xp, level, id);
+        if (result.rowCount > 0) good++;
     });
-    res.json({ success: true });
+
+    if (good === decks.length) {
+        res.json({ success: true, partial: false });
+    } else if (good === 0) {
+        res.json({ success: false, partial: false });
+    } else {
+        res.json({ success: false, partial: true });
+    }
 })
 
 app.delete('/api/decks/:id', (req, res) => {
     const { id } = req.params;
-    db.prepare('DELETE FROM decks WHERE id = ?').run(id);
+    const result = db.prepare('DELETE FROM decks WHERE id = ?').run(id);
     res.json( { success: true } );
 });
 
@@ -105,9 +129,13 @@ app.post('/api/cards', (req, res) => {
 app.post('/api/cards/:id/edit', (req, res) => {
     const { id } = req.params;
     const { question, answer } = req.body;
-    db.prepare('UPDATE cards SET question = ?, answer = ? WHERE id = ?').run(question, answer, id);
-    const card = db.prepare('SELECT * FROM cards WHERE id = ?').get(id);
-    res.json(card);
+    const result = db.prepare('UPDATE cards SET question = ?, answer = ? WHERE id = ?').run(question, answer, id);
+    if (result.rowCount === 0) {
+        res.json( { success: false } );
+    } else {
+        const card = db.prepare('SELECT * FROM cards WHERE id = ?').get(id);
+        res.json(card);
+    }
 });
 
 app.delete('/api/cards/:id', (req, res) => {
@@ -149,13 +177,17 @@ app.post('/api/dungeons', (req, res) => {
 app.post('/api/dungeons/:id/edit', (req, res) => {
     const { id } = req.params;
     const { name, deck_ids } = req.body;
-    db.prepare('UPDATE dungeons SET name = ? WHERE id = ?').run(name, id);
-    db.prepare('DELETE FROM dungeon_decks WHERE dungeon_id = ?').run(id);
-    deck_ids.forEach(deck_id => {
-        db.prepare('INSERT INTO dungeon_decks (dungeon_id, deck_id) VALUES (?, ?)').run(id, deck_id);
-    })
-    const dungeon = db.prepare('SELECT * FROM dungeons WHERE id = ?').get(id);
-    res.json(dungeon);
+    const result = db.prepare('UPDATE dungeons SET name = ? WHERE id = ?').run(name, id);
+    if (result.rowCount === 0) {
+        res.json( { success: false } );
+    } else {
+        db.prepare('DELETE FROM dungeon_decks WHERE dungeon_id = ?').run(id);
+        deck_ids.forEach(deck_id => {
+            db.prepare('INSERT INTO dungeon_decks (dungeon_id, deck_id) VALUES (?, ?)').run(id, deck_id);
+        })
+        const dungeon = db.prepare('SELECT * FROM dungeons WHERE id = ?').get(id);
+        res.json(dungeon);
+    }
 });
 
 app.delete('/api/dungeons/:id', (req, res) => {

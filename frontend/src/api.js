@@ -1,5 +1,8 @@
 // === ACCOUNT LEVEL ===
 
+export const checkAccountStatus = async (user_id) => 
+    fetch(`/api/check-status?user_id=${user_id}`).then(res => res.json());
+
 export const getAccountLevel = async (user_id) => 
     fetch(`/api/level-account?user_id=${user_id}`).then(res => res.json());
 
