@@ -32,11 +32,11 @@ const MONSTER_TEMPLATES = [
 ]
 
 const TIER_TEMPLATES = [
-    { id: "Weak", base_health: 10, base_attack: 5, base_xp: 20 },
-    { id: "Normal", base_health: 20, base_attack: 10, base_xp: 40 },
-    { id: "Hard", base_health: 30, base_attack: 10, base_xp: 60 },
-    { id: "Elite", base_health: 40, base_attack: 15, base_xp: 8 },
-    { id: "Boss", base_health: 100, base_attack: 20, base_xp: 10 },
+    { id: "Weak", base_health: 10, base_attack: 5, base_xp: 5 },
+    { id: "Normal", base_health: 20, base_attack: 10, base_xp: 10 },
+    { id: "Hard", base_health: 30, base_attack: 10, base_xp: 15 },
+    { id: "Elite", base_health: 40, base_attack: 15, base_xp: 25 },
+    { id: "Boss", base_health: 100, base_attack: 20, base_xp: 50 },
 ]
 
 const MONSTER_ASSETS = MONSTER_TEMPLATES.map(monster => ({
