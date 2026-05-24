@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
 import { useUser } from "@clerk/clerk-react";
 
-import { getDungeonCards, getDungeonDecks, levelDecks, levelUpAccount } from "../api";
+import { getDungeonCards, getDungeonDecks, levelDecks, levelUpAccount, getAccountLevel } from "../api";
 import { PlayerCards, DraggableCard } from "../components/PlayerCards";
 import Monsters from "../components/Monsters";
 
@@ -13,6 +13,9 @@ import EarlyFleeModal from "../components/EarlyFleeModal";
 const MAX_NO_MONSTERS = 2;
 const MAX_HAND_SIZE = 5;
 const EARLY_FLEE_FEE = 0.6;
+const BASE_PLAYER_ATTACK = 10;
+const PLAYER_ATTACK_SCALE_FACTOR = 1.12;
+const MONSTER_ATTACK_SCALE_FACTOR = 1.3;
 
 const shuffle_array = (array) => {
     const copy = [...array];
@@ -50,7 +53,7 @@ const get_room_progression_index = (round) => {
 
 const get_monster = (round) => {
     const floor_index = Math.floor((round - 1) / 10);
-    const floor_mult = Math.pow(1.3, floor_index);
+    const floor_mult = Math.pow(MONSTER_ATTACK_SCALE_FACTOR, floor_index);
     const room_pregression_index = get_room_progression_index(round);
 
     let tier_id = "Normal";
@@ -96,6 +99,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const [ isEarlyFleeModalOpen, setIsEarlyFleeModalOpen ] = useState(false);
 
     const [ player_health, setPlayerHealth ] = useState(100);
+    const [ player_attack, setPlayerAttack ] = useState(BASE_PLAYER_ATTACK);
     const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
     
     const generate_monsters = () => {
@@ -218,6 +222,12 @@ export default function Dungeon({ dungeon, onNavigate }) {
         })).then(setDecks);
     }, [dungeon, round]);
 
+    useEffect(() => {
+        getAccountLevel(user.id).then((level) => {
+            setPlayerAttack(Math.round(BASE_PLAYER_ATTACK * Math.pow(PLAYER_ATTACK_SCALE_FACTOR, level)));
+        });
+    }, [user?.id]);
+
     const reward_deck_xp = (deck_id, xp) => {
         setDecks((prevDecks) =>
             prevDecks.map((d) => {
@@ -299,7 +309,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
         let new_answer_stats = {...answer_stats};
 
         if (answer && (selected_card.answer.toLowerCase() === answer.toLowerCase() || answer.toLowerCase() === "test")) {
-            const hurt_monsters = monsters.map(mon => mon.id === selected_monster.id ? { ...mon, health: mon.health - 10, is_hit: true } : mon);
+            const hurt_monsters = monsters.map(mon => mon.id === selected_monster.id ? { ...mon, health: mon.health - player_attack, is_hit: true } : mon);
 
             setMonsters(hurt_monsters);
 
