@@ -150,7 +150,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                         hand: unfresh_hand,
                     }
                 })
-            }, 1000);
+            }, 400);
 
             return {
                 draw_pile: current_draw_pile,
@@ -202,7 +202,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                             hand: unfresh_hand,
                         }
                     })
-                }, 1000);
+                }, 400);
 
                 return {
                     draw_pile: initial_draw_pile.slice(MAX_HAND_SIZE),
@@ -224,7 +224,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
     useEffect(() => {
         getAccountLevel(user.id).then((level) => {
-            setPlayerAttack(Math.round(BASE_PLAYER_ATTACK * Math.pow(PLAYER_ATTACK_SCALE_FACTOR, level)));
+            setPlayerAttack(Math.round(BASE_PLAYER_ATTACK * Math.pow(PLAYER_ATTACK_SCALE_FACTOR, level.level)));
         });
     }, [user?.id]);
 
