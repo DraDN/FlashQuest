@@ -8,6 +8,8 @@ data/*.sqlite-journal
 data/*.db
 
 .env
+.env.dev
+.env.prod
 .clerk_keys
 
 .dockerignore
