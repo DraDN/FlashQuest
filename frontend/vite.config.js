@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
       allowedHosts: env.VITE_HOSTS.split(',').map((host) => host.trim()),
       hmr: {
         host: env.VITE_HMR_HOST,
-        clientPort: env.VITE_HMR_PROTOCOL === 'wss' ? 443 : 5173,
+        clientPort: env.VITE_HMR_PROTOCOL === 'wss' ? 443 : 80,
         protocol: env.VITE_HMR_PROTOCOL
       },
       strictPort: true,
