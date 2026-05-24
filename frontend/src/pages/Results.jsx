@@ -8,8 +8,8 @@ export default function Results({ onNavigate, results }) {
                     <div className="flex flex-col text-white bg-dungeon-dark-500 border border-dungeon-yellow rounded-lg p-4">
                         <h1 className="text-2xl font-pixel-header text-dungeon-yellow">Stats</h1>
                         <div className="*:text-2xl *:font-semibold space-y-1">
-                            <p className="text-dungeon-red-500">Correct: {results.answer_stats.correct}</p>
-                            <p className="text-dungeon-green-200">Incorrect: {results.answer_stats.incorrect}</p>
+                            <p className="text-dungeon-green-200">Correct: {results.answer_stats.correct}</p>
+                            <p className="text-dungeon-red-500">Incorrect: {results.answer_stats.incorrect}</p>
                             <p>Total: {results.answer_stats.correct + results.answer_stats.incorrect}</p>
                         </div>
                     </div>
