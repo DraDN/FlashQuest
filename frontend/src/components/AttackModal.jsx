@@ -26,7 +26,7 @@ export default function AttackModal({ onClose, onSave, card }) {
                         <input
                             type="text"
                             onChange={(e) => setAnswer(e.target.value)}
-                            className="w-full bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outerline-none focus:border-purple-600 transition-colors"
+                            className="w-full bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors"
                             required
                         />
                         

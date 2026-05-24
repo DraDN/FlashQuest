@@ -60,7 +60,7 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
                             value={dungeonName}
                             maxLength={MAX_CHARACTERS}
                             onChange={(e) => setDungeonName(e.target.value)}
-                            className="w-full bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outerline-none focus:border-purple-600 transition-colors"
+                            className="w-full bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors"
                             required
                         />
                         <div className={`text-xs text-right mt-1 font-mono ${
