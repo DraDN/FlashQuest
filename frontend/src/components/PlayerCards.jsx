@@ -52,10 +52,12 @@ export function DraggableCard({ card, index }) {
 function HealthBar({ player_health }) {
     return (
         <div className="space-y-1.5 relative">
-            <div className="w-full">
-                <div className={`flex flex-row p-4 bg-dungeon-red-900 transition-all ${player_health < 100 && "rounded-r-xl"} duration-500 ease-out`}
-                    style={{ width: `${player_health}%`}}>
-                </div>
+            <div className="w-full h-8">
+                {player_health > 0 && (
+                    <div className={`flex flex-row h-full bg-dungeon-red-900 transition-all ${player_health < 100 && "rounded-r-xl"} duration-500 ease-out`}
+                        style={{ width: `${player_health}%`}}>
+                    </div>
+                )}
                 <p className="text-white absolute right-1/2 translate-x-1/2 top-1/2 -translate-y-1/2 italic">Health: {player_health}</p>
             </div>
         </div>

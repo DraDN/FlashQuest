@@ -9,6 +9,7 @@ import Monsters from "../components/Monsters";
 import AttackModal from "../components/AttackModal";
 import RoundEndModal from "../components/RoundEndModal";
 import EarlyFleeModal from "../components/EarlyFleeModal";
+import DeathModal from "../components/DeathModal";
 
 const MAX_NO_MONSTERS = 2;
 const MAX_HAND_SIZE = 5;
@@ -97,6 +98,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const [ isAttackModalOpen, setIsAttackModalOpen ] = useState(false);
     const [ isRoundEndModalOpen, setIsRoundEndModalOpen ] = useState(false);
     const [ isEarlyFleeModalOpen, setIsEarlyFleeModalOpen ] = useState(false);
+    const [ isDeathModalOpen, setIsDeathModalOpen ] = useState(false);
 
     const [ player_health, setPlayerHealth ] = useState(100);
     const [ player_attack, setPlayerAttack ] = useState(BASE_PLAYER_ATTACK);
@@ -334,10 +336,10 @@ export default function Dungeon({ dungeon, onNavigate }) {
         } else {
             setPlayerHealth(player_health - selected_monster.attack);
 
-            if (player_health <= 0) {
-                onNavigate('home');
-                return;
-            }
+            // if (player_health <= 0) {
+            //     setIsDeathModalOpen(true);
+            //     return;
+            // }
 
             new_answer_stats.wrong += 1;
         }
@@ -347,6 +349,14 @@ export default function Dungeon({ dungeon, onNavigate }) {
         setAnswerStats(new_answer_stats);
     }
 
+    useEffect(() => {
+        setTimeout(() => {
+            if (player_health <= 0) {
+                setIsDeathModalOpen(true);
+            }
+        }, 1000);
+    }, [player_health]);
+
     const handleCloseAttackModal = () => {
         setSelectedCard(null);
         setSelectedMonster(null);
@@ -354,6 +364,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     const handleExit = async (xp_percentage) => {
+        if (xp_percentage === 0) {
+            onNavigate({name: 'home'});
+            return;
+        }
+
         const new_decks = await save_deck_xp(decks, xp_percentage);
         const results = {
             decks: new_decks,
@@ -396,6 +411,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
                                 onClose={async () => await handleExit(EARLY_FLEE_FEE)}
                                 onContinue={() => setIsEarlyFleeModalOpen(false)}
                                 fee={EARLY_FLEE_FEE}
+                            />
+                        )}
+                        {isDeathModalOpen && (
+                            <DeathModal
+                                onExit={async () => await handleExit(0)}
                             />
                         )}
                         <DragOverlay dropAnimation={null}>
