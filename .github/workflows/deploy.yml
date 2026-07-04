@@ -38,7 +38,7 @@ jobs:
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} bash << 'EOF'
             set -e  # stop on any error
 
-            cd /app
+            cd ~/app
 
             echo "--- Pulling latest code ---"
             git pull origin main
