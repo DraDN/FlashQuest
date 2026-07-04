@@ -203,7 +203,7 @@ Distributed under the <b>MIT License</b>. See `LICENSE.txt` for more information
 [issues-shield]: https://img.shields.io/github/issues/DraDN/FlashQuest.svg?style=for-the-badge
 [issues-url]: https://github.com/DraDN/FlashQuest/issues
 [license-shield]: https://img.shields.io/github/license/DraDN/FlashQuest.svg?style=for-the-badge
-[license-url]: https://github.com/DraDN/FlashQuest/blob/main/LICENSE.txt
+[license-url]: https://github.com/DraDN/FlashQuest/blob/main/LICENSE
 [product-screenshot]: images/screenshot_flashquest_use.png
 
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
