@@ -1,5 +1,5 @@
 # FROM node:20-alpine
-FROM node:20-slim
+FROM node:24-slim
 
 WORKDIR /app
 
