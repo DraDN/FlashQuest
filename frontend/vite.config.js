@@ -24,12 +24,13 @@ export default defineConfig(({ mode }) => {
       hmr: {
         host: env.VITE_HMR_HOST,
         clientPort: env.VITE_HMR_PROTOCOL === 'wss' ? 443 : 80,
-        protocol: env.VITE_HMR_PROTOCOL
+        protocol: env.VITE_HMR_PROTOCOL,
+        port: 5173
       },
       strictPort: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:3000',
+          target: 'http://backend:3000',
           changeOrigin: true,
         },
       },

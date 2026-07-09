@@ -371,7 +371,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
         const new_decks = await save_deck_xp(decks, xp_percentage);
         const results = {
-            decks: new_decks,
+            decks: new_decks, // NEW_DECKS THATS HERE DOESN'T HAVE UPDATED XP (IN CASE OF FEE ETC)
             answer_stats: answer_stats
         }
         onNavigate({name: 'results', related_object: results});

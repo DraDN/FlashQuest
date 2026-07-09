@@ -54,13 +54,17 @@ export const levelDecks = async (decks) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ decks })
-    }).then(res => res.json());
+    }).then(res => {
+        if (!res.ok) {
+            res.json().then(err => { throw err; });
+        }
+    });
 }
 
 export const deleteDeck = async (id) =>
     fetch(`/api/decks/${id}`, {
         method: 'DELETE'
-    }).then(res => res.json());
+    });
 
 // === CARDS API ===
 
@@ -88,7 +92,7 @@ export const editCard = async (card_id, question, answer) =>
 export const deleteCard = async (id) =>
     fetch(`/api/cards/${id}`, {
         method: 'DELETE'
-    }).then(res => res.json());
+    });
 
 // === DUNGEONS API ===
 
@@ -122,4 +126,4 @@ export const editDungeon = async (id, name, deck_ids) =>
 export const deleteDungeon = async (id) =>
     fetch(`/api/dungeons/${id}`, {
         method: 'DELETE'
-    }).then(res => res.json());
+    });
