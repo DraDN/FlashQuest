@@ -4,9 +4,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.prod
       args:
-        - VITE_HOSTS=${VITE_HOSTS}
-        - VITE_HMR_HOST=${VITE_HMR_HOST}
-        - VITE_HMR_PROTOCOL=${VITE_HMR_PROTOCOL}
         - VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
     ports:
       - "80:80"
