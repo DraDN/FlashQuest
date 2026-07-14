@@ -10,27 +10,25 @@ const deleteDeckStmt = db.prepare('DELETE FROM decks WHERE id = ?');
 
 const getDecksOfDungeonStmt = db.prepare('SELECT * FROM decks WHERE id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)');
 
-const checkDeckExists = (id) => (checkDeckExistsStmt.get(id) != undefined);
-
 module.exports = {
-	DECK_MAX_CHARACTERS: 100,
+	checkDeckExists(id) {
+		return (checkDeckExistsStmt.get(id) != undefined);
+	},
 
 	getUserDecks(user_id) {
 		return getUserDecksStmt.all(user_id);
 	},
 
-	addDeck(user_id, name) {
-		const result = insertDeckStmt.run(user_id, name);
-		return getDeckByIDStmt.get(result.lastInsertRowid);
+	getDeck(id) {
+		return getDeckByIDStmt.get(id);
 	},
 
-	renameDeck(id, new_name) {
-		const result = updateDeckNameStmt.run(id, name);
-		if (result.changes === 0) {
-			throw new Error('NOT_FOUND');
-		}
+	insertDeck(user_id, name) {
+		return insertDeckStmt.run(user_id, name);
+	},
 
-		return getDeckByIDStmt.get(id);
+	updateDeckName(id, new_name) {
+		return updateDeckNameStmt.run(new_name, id);
 	},
 
 	setDeckLevelXP(id, new_xp, new_level) {
@@ -40,7 +38,7 @@ module.exports = {
 	setDecksLevelXP: db.transaction((decks_level_infos) => {
 		for (const deck_level_info of decks_level_infos) {
 			if (updateDeckLevelStmt.run(deck_level_info.xp, deck_level_info.level, deck_level_info.id).changes === 0) {
-				throw new Error(`Deck ID ${deck_level_info.id} not found`);
+				throw new Error(`NOT_FOUND:${deck_level_info.id}`);
 			}
 		}
 	}),

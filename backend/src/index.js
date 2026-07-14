@@ -6,10 +6,10 @@ const db = require('./db');
 
 const { body, validationResult } = require('express-validator');
 
-const accountRepo = require('./repositories/accountRepository')
-const decksRepo = require('./repositories/decksRepository');
-const cardsRepo = require('./repositories/cardsRepository');
-const dungeonsRepo = require('./repositories/dungeonsRepository');
+const accountService = require('./services/accountService');
+const decksService = require('./services/decksService');
+const cardsService = require('./services/cardsService');
+const dungeonsService = require('./services/dungeonsService');
 
 app.use(cors());
 app.use(express.json());
@@ -24,11 +24,11 @@ app.listen(3000, '0.0.0.0', () => {
 
 // === ACCOUNT API ===
 
-app.get('/api/check-status', (req, res) => {
+app.get('/api/check-status', async (req, res) => {
     const { user_id } = req.query;
 
     try {
-        const is_new = accountRepo.checkAccountStatus(user_id);
+        const is_new = await accountSerivce.ensureAccountIsInitialized(user_id);
 
         return res.status(200).json({ new: is_new });
     } catch (error) {
@@ -40,11 +40,11 @@ app.get('/api/check-status', (req, res) => {
     }
 })
 
-app.get('/api/level-account', (req, res) => {
+app.get('/api/level-account', async (req, res) => {
     const { user_id } = req.query;
 
     try {
-        const level = accountRepo.getUserLevel(user_id);
+        const level = await accountService.getAccountLevel(user_id);
 
         return res.status(200).json(level);
     } catch (error) {
@@ -52,7 +52,7 @@ app.get('/api/level-account', (req, res) => {
             return res.status(404).json({ errors: 'User ID not found' });
         }
 
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: `Internal server error: ${error.message}` });
     }
 })
 
@@ -61,7 +61,7 @@ app.post('/api/level-account', [
         .notEmpty().withMessage('\'level\' is required')
         .isInt({ min: 0 }).withMessage('\'level\' must be a positive integer')
         .toInt()
-], (req, res) => {
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -70,7 +70,7 @@ app.post('/api/level-account', [
     const { user_id, level } = req.body;
 
     try {
-        const updated_level = accountRepo.setUserLevel(user_id, level);
+        const updated_level = await accountSerivce.setAccountLevel(user_id, level);
 
         return res.status(200).json(updated_level);
     } catch (error) {
@@ -87,7 +87,7 @@ app.post('/api/level-up-account', [
         .notEmpty().withMessage('\'added_levels\' is required')
         .isInt({ min: 0 }).withMessage('\'added_levels\' must a positive integer')
         .toInt()
-], (req, res) => {
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -96,7 +96,7 @@ app.post('/api/level-up-account', [
     const { user_id, added_levels } = req.body;
 
     try {
-        const new_level = accountRepo.addUserLevels(user_id, added_levels);
+        const new_level = await accountSerivce.addAccountLevels(user_id, added_levels);
 
         return res.status(200).json(new_level);
     } catch (error) {
@@ -110,9 +110,9 @@ app.post('/api/level-up-account', [
 
 // === DECKS API ===
 
-app.get('/api/decks', (req, res) => {
+app.get('/api/decks', async (req, res) => {
     const { user_id } = req.query;
-    const decks = decksRepo.getUserDecks(user_id);
+    const decks = await decksService.getUserDecks(user_id);
     return res.status(200).json(decks);
 });
 
@@ -120,8 +120,8 @@ app.post('/api/decks', [
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
-        .isLength({ max: decksRepo.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long')
-], (req, res) => {
+        .isLength({ max: decksService.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long')
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -130,7 +130,7 @@ app.post('/api/decks', [
     const { user_id, name } = req.body;
 
     try {
-        const deck = decksRepo.addDeck(user_id, name);
+        const deck = await decksService.addDeck(user_id, name);
 
         return res.status(200).json(deck);
     } catch (error) {
@@ -142,8 +142,8 @@ app.post('/api/decks/:id/rename', [
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
-        .isLength({ max: decksRepo.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long')
-], (req, res) => {
+        .isLength({ max: decksService.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long')
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -153,7 +153,7 @@ app.post('/api/decks/:id/rename', [
     const { name } = req.body;
 
     try {
-        const renamed_deck = decksRepo.renameDeck(id, name);
+        const renamed_deck = await decksService.renameDeck(id, name);
 
         return res.status(200).json(renamed_deck);
     } catch (error) {
@@ -167,22 +167,22 @@ app.post('/api/decks/:id/rename', [
 
 // TODO limit possible deck number
 // TOOO FIX if this fails, account level still gets updated!!!
-app.post('/api/decks/sync-xp', (req, res) => {
+app.post('/api/decks/sync-xp', async (req, res) => {
     const { decks } = req.body;
 
     try {
-        decksRepo.setDecksLevelXP(decks || []);
+        await decksService.setDecksLevelXP(decks || []);
         return res.status(204).send();
     } catch (error) {
         return res.status(400).json({ errors: error.message });
     }
 })
 
-app.delete('/api/decks/:id', (req, res) => {
+app.delete('/api/decks/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const result = decksRepo.deleteDeck(id);
+        await decksService.deleteDeck(id);
         return res.status(204).send();
     } catch (error) {
         return res.status(500).json({ errors: 'Internal server error' });
@@ -191,28 +191,32 @@ app.delete('/api/decks/:id', (req, res) => {
 
 // === CARDS API ===
 
-app.get('/api/decks/:id/cards', (req, res) => {
+app.get('/api/decks/:id/cards', async (req, res) => {
     const { id } = req.params;
 
-    const found = decksRepo.checkDeckExists(id);
-    if (!found) {
-        return res.status(404).json({ errors: 'Deck ID not found'});
-    }
+    try {
+        const cards = await decksService.getDeckCards(id);
 
-    const cards = cardsRepo.getCardsOfDeck(id);
-    return res.status(200).json(cards);
+        return res.status(200).json(cards);
+    } catch (error) {
+        if (error.message === 'NOT_FOUND') {
+            return res.status(404).json({ error: 'Deck ID not found' });
+        }
+
+        return res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 app.post('/api/cards', [
     body('question')
         .trim()
         .notEmpty().withMessage('\'question\' is required')
-        .isLength({ max: cardsRepo.CARD_MAX_CHARACTERS }).withMessage('\'question\' too long'),
+        .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('\'question\' too long'),
     body('answer')
         .trim()
         .notEmpty().withMessage('\'answer\' is required')
-        .isLength({ max: cardsRepo.CARD_MAX_CHARACTERS }).withMessage('\'answer\' too long')
-], (req, res) => {
+        .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('\'answer\' too long')
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -220,27 +224,30 @@ app.post('/api/cards', [
 
     const { deck_id, question, answer } = req.body;
 
-    const found = decksRepo.checkDeckExists(id);
-    if (!found) {
-        return res.status(404).json({ errors: 'Deck ID not found' });
+    try {
+        const card = await cardsService.addCard(deck_id, question, answer);
+
+        return res.status(200).json(card);
+    } catch (error) {
+        if (error.message === 'NOT_FOUND') {
+            res.status(404).json({ error: 'Deck ID not found' });
+        }
+
+        return res.status(500).json({ error: `Internal server error - ${error.message}` });
     }
 
-    const result = cardsRepo.addCard(deck_id, question, answer);
-    const card = cardsRepo.getCardByID(resutl.lastInsertRowid);
-
-    return res.status(200).json(card);
 });
 
 app.post('/api/cards/:id/edit', [
     body('question')
         .trim()
         .notEmpty().withMessage('\'question\' is required')
-        .isLength({ max: cardsRepo.CARD_MAX_CHARACTERS }).withMessage('\'question\' too long'),
+        .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('\'question\' too long'),
     body('answer')
         .trim()
         .notEmpty().withMessage('\'answer\' is required')
-        .isLength({ max: cardsRepo.CARD_MAX_CHARACTERS }).withMessage('\'answer\' too long')
-], (req, res) => {
+        .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('\'answer\' too long')
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -249,58 +256,73 @@ app.post('/api/cards/:id/edit', [
     const { id } = req.params;
     const { question, answer } = req.body;
 
-    const result = cardsRepo.editCard(id, question, answer);
-    if (result.changes === 0) {
-        return res.status(404).json({ errors: 'Card ID not found' });
-    }
+    try {
+        const card = await cardsService.editCard(id, question, answer);
 
-    const card = cardsRepo.getCardByID(id);
-    return res.status(200).json(card);
+        return res.status(200).json(card);
+    } catch (error) {
+        if (error.message === 'NOT_FOUND') {
+            res.status(404).json({ error: 'Card ID not found' });
+        }
+
+        return res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
-app.delete('/api/cards/:id', (req, res) => {
+app.delete('/api/cards/:id', async (req, res) => {
     const { id } = req.params;
 
-    const result = cardsRepo.deleteCard(id);
-    if (result.changes === 0) {
-        return res.status(404).json({ errors: 'Card ID not found' });
-    }
+    try {
+        await cardsService.deleteCard(id);
 
-    return res.status(204).send();
+        return res.status(204).send();
+    } catch (errors) {
+        if (error.message === 'NOT_FOUND') {
+            res.status(404).json({ error: 'Card ID not found' });
+        }
+
+        return res.status(500).json({ error: 'Internal server error' });
+    } 
 });
 
 // === DUNGEONS API ===
 
-app.get('/api/dungeons', (req, res) => {
+app.get('/api/dungeons', async (req, res) => {
     const { user_id } = req.query;
-    const dungeons = dungeonsRepo.getUserDungeons(user_id);
+    const dungeons = await dungeonsService.getUserDungeons(user_id);
     return res.status(200).json(dungeons);
 });
 
-app.get('/api/dungeons/:id/decks', (req, res) => {
+app.get('/api/dungeons/:id/decks', async (req, res) => {
     const { id } = req.params;
 
-    const found = dungeonsRepo.checkDungeonExists(id);
-    if (!found) {
-        return res.status(404).json({ errors: 'Dungeon ID not found' });
+    try {
+        const decks = await dungeonsService.getDungeonDecks(id);
+
+        return res.status(200).json(decks);
+    } catch (error) {
+        if (error.message === 'NOT_FOUND') {
+            return res.status(404).json({ errors: 'Dungeon ID not found' });
+        }
+
+        return res.status(500).json({ error: 'Internal server error' });
     }
-
-    const decks = decksRepo.getDecksOfDungeon(id);
-
-    return res.status(200).json(decks);
 });
 
-app.get('/api/dungeons/:id/cards', (req, res) => {
+app.get('/api/dungeons/:id/cards', async (req, res) => {
     const { id } = req.params;
 
-    const found = dungeonsRepo.checkDungeonExists(id);
-    if (!found) {
-        return res.status(404).json({ errors: 'Dungeon ID not found' });
+    try {
+        const cards = await dungeonsService.getDungeonCards(id);
+
+        return res.status(200).json(cards);
+    } catch (error) {
+        if (error.message === 'NOT_FOUND') {
+            return res.status(404).json({ errors: 'Dungeon ID not found' });
+        }
+
+        return res.status(500).json({ error: 'Internal server error' });
     }
-
-    const cards = cardsRepo.getCardsOfDungeon(id);
-
-    return res.status(200).json(cards);
 });
 
 // TODO add deck number limiting
@@ -308,8 +330,8 @@ app.post('/api/dungeons', [
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
-        .isLength({ max: dungeonsRepo.DUNGEON_MAX_CHARACTERS }).withMessage('\'name\' is too long')
-], (req, res) => {
+        .isLength({ max: dungeonsService.DUNGEON_MAX_CHARACTERS }).withMessage('\'name\' is too long')
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -318,10 +340,11 @@ app.post('/api/dungeons', [
     const { user_id, name, deck_ids } = req.body;
 
     try {
-        const dungeon = dungeonsRepo.addDungeon(user_id, name, deck_ids);
+        const dungeon = await dungeonsService.addDungeon(user_id, name, deck_ids);
+
         return res.status(200).json(dungeon);
     } catch (error) {
-        return res.status(400).json({ errors: error.message });
+        return res.status(400).json({ errors: error.message }); // TOOD FIX ERRORS
     }
 });
 
@@ -329,8 +352,8 @@ app.post('/api/dungeons/:id/edit', [
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
-        .isLength({ max: dungeonsRepo.DUNGEON_MAX_CHARACTERS }).withMessage('\'name\' is too long')
-], (req, res) => {
+        .isLength({ max: dungeonsService.DUNGEON_MAX_CHARACTERS }).withMessage('\'name\' is too long')
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -340,7 +363,7 @@ app.post('/api/dungeons/:id/edit', [
     const { name, deck_ids } = req.body;
 
     try {
-        const updatedDungeon = dungeonsRepo.editDungeon(id, name, deck_ids);
+        const updatedDungeon = await dungeonsService.editDungeon(id, name, deck_ids);
         return res.status(200).json(updatedDungeon);
     } catch (error) {
         if (error.message === 'DUNGEON_NOT_FOUND') {
@@ -351,13 +374,18 @@ app.post('/api/dungeons/:id/edit', [
     }
 });
 
-app.delete('/api/dungeons/:id', (req, res) => {
+app.delete('/api/dungeons/:id', async (req, res) => {
     const { id } = req.params;
 
-    const result = db.prepare('DELETE FROM dungeons WHERE id = ?').run(id);
-    if (result.changes === 0) {
-        return res.status(404).json({ errors: 'Dungeon ID not found' });
-    }
+    try {
+        await dungeonsService.deleteDungeon(id);
 
-    return res.status(204).send();
+        return res.status(204).send();
+    } catch (error) {
+        if (error.message === 'NOT_FOUND') {
+            return res.status(404).json({ errors: 'Dungeon ID not found' });
+        }
+
+        return res.status(500).json({ error: 'Internal server error' });
+    }
 });

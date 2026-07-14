@@ -9,9 +9,7 @@ const getCardsOfDeckStmt = db.prepare('SELECT * FROM cards WHERE deck_id = ?');
 const getCardsOfDungeonStmt = db.prepare('SELECT * FROM cards WHERE deck_id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)');
 
 module.exports = {
-	CARD_MAX_CHARACTERS: 100,
-
-	getCardByID(id) {
+	getCard(id) {
 		return getCardByIDStmt.get(id);
 	},
 
@@ -19,11 +17,11 @@ module.exports = {
 		return getCardsOfDeckStmt.all(deck_id);
 	},
 
-	addCard(deck_id, question, answer) {
+	insertCard(deck_id, question, answer) {
 		return insertCardIntoDeckStmt.run(deck_id, question, answer);
 	},
 
-	editCard(id, question, answer) {
+	updateCard(id, question, answer) {
 		return updateCardStmt.run(question, answer, id);
 	},
 
