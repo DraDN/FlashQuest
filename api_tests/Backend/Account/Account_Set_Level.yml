@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: 0.0.0.0:3000/api/level-account
+  url: 0.0.0.0:3000/api/account/level
   body:
     type: json
     data: |-
