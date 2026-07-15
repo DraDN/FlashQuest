@@ -1,15 +1,15 @@
 info:
-  name: Cards_Get_All_From_Deck
+  name: Dungeons_Get_All
   type: http
   seq: 1
 
 http:
   method: GET
-  url: 0.0.0.0:3000/api/decks/:id/cards
+  url: 0.0.0.0:3000/api/dungeons?user_id=100.0
   params:
-    - name: id
-      value: "2"
-      type: path
+    - name: user_id
+      value: "100.0"
+      type: query
   auth: inherit
 
 settings:

@@ -59,7 +59,7 @@ module.exports = {
 		}
 	},
 
-	async editDungeon(user_id, new_name, new_deck_ids) {
+	async editDungeon(id, new_name, new_deck_ids) {
 		const edit_transaction = db.transaction((dungeonId, newDungeonName, newDeckIds) => {
 			for (const deckId of newDeckIds) {
 				if (!decksRepo.checkDeckExists(deckId)) {
@@ -72,7 +72,7 @@ module.exports = {
 				throw new Error('DUNGEON_NOT_FOUND');
 			}
 
-			dungeonsRepo.deleteDungeon(dungeonId);
+			dungeonsRepo.updateDungeonName(dungeonId, newDungeonName);
 			for (const deckId of newDeckIds) {
 				dungeonsRepo.linkDeckToDungeon(dungeonId, deckId);
 			}
@@ -81,7 +81,7 @@ module.exports = {
 		});
 
 		try {
-			return edit_transaction(user_id, new_name, new_deck_ids);
+			return edit_transaction(id, new_name, new_deck_ids);
 		} catch (error) {
 			if (error.message.startsWith('DECK_NOT_FOUND:')) {
                 const missingId = error.message.split(':')[1];

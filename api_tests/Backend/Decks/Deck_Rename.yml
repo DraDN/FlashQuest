@@ -1,18 +1,20 @@
 info:
-  name: Cards_Create
+  name: Deck_Rename
   type: http
   seq: 1
 
 http:
   method: POST
-  url: 0.0.0.0:3000/api/cards
+  url: 0.0.0.0:3000/api/decks/:id/rename
+  params:
+    - name: id
+      value: "2"
+      type: path
   body:
     type: json
     data: |-
       {
-        "deck_id": 2,
-        "question": "Test question",
-        "answer": "Test answer"
+        "name": "Test Deck Renamed"
       }
   auth: inherit
 

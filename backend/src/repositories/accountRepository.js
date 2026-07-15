@@ -21,7 +21,7 @@ module.exports = {
 	},
 
 	setUserLevel(user_id, level) {
-		return setUserLevelStmt.run(user_id, level);
+		return setUserLevelStmt.run(level, user_id);
 	},
 
 	addUserLevels(user_id, added_levels) {

@@ -5,7 +5,11 @@ info:
 
 http:
   method: GET
-  url: 0.0.0.0:3000/api/dungeons/17/decks
+  url: 0.0.0.0:3000/api/dungeons/:id/decks
+  params:
+    - name: id
+      value: "1"
+      type: path
   auth: inherit
 
 settings:

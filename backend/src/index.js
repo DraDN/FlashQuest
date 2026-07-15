@@ -28,7 +28,7 @@ app.get('/api/check-status', async (req, res) => {
     const { user_id } = req.query;
 
     try {
-        const is_new = await accountSerivce.ensureAccountIsInitialized(user_id);
+        const is_new = await accountService.ensureAccountIsInitialized(user_id);
 
         return res.status(200).json({ new: is_new });
     } catch (error) {
@@ -36,7 +36,7 @@ app.get('/api/check-status', async (req, res) => {
             return res.status(500).json({ error: 'Couldn\'t insert user into level records' });
         }
 
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: `Internal server error - ${error.message}` });
     }
 })
 
@@ -70,12 +70,14 @@ app.post('/api/level-account', [
     const { user_id, level } = req.body;
 
     try {
-        const updated_level = await accountSerivce.setAccountLevel(user_id, level);
+        const updated_level = await accountService.setAccountLevel(user_id, level);
 
         return res.status(200).json(updated_level);
     } catch (error) {
         if (error.message === 'NOT_FOUND') {
             return res.status(404).json({ errors: 'User ID not found' });
+        } else if (error.message === 'FAIL') {
+            return res.status(500).json({ error: 'Couldn\'t update user level' });
         }
 
         return res.status(500).json({ error: 'Internal server error' });
@@ -96,7 +98,7 @@ app.post('/api/level-up-account', [
     const { user_id, added_levels } = req.body;
 
     try {
-        const new_level = await accountSerivce.addAccountLevels(user_id, added_levels);
+        const new_level = await accountService.addAccountLevels(user_id, added_levels);
 
         return res.status(200).json(new_level);
     } catch (error) {
@@ -366,7 +368,7 @@ app.post('/api/dungeons/:id/edit', [
         const updatedDungeon = await dungeonsService.editDungeon(id, name, deck_ids);
         return res.status(200).json(updatedDungeon);
     } catch (error) {
-        if (error.message === 'DUNGEON_NOT_FOUND') {
+        if (error.message === 'NOT_FOUND') {
             return res.status(404).json({ errors: 'Dungeon ID not found' });
         }
 

@@ -1,18 +1,17 @@
 info:
-  name: Cards_Create
+  name: Account_Level_Up
   type: http
   seq: 1
 
 http:
   method: POST
-  url: 0.0.0.0:3000/api/cards
+  url: 0.0.0.0:3000/api/level-up-account
   body:
     type: json
     data: |-
       {
-        "deck_id": 2,
-        "question": "Test question",
-        "answer": "Test answer"
+        "user_id": "100.0",
+        "added_levels": 1
       }
   auth: inherit
 

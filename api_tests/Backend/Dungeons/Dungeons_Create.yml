@@ -12,7 +12,7 @@ http:
       {
         "user_id": 100.0,
         "name": "Test Dungeon",
-        "deck_ids": [ 1 ]
+        "deck_ids": [ 2 ]
       }
 
 settings:

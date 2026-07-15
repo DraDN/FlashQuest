@@ -31,6 +31,8 @@ module.exports = {
 			if (!found) {
 				throw new Error('NOT_FOUND');
 			}
+
+			throw new Error('FAIL');
 		}
 
 		return accountRepo.getUserLevel(user_id);
