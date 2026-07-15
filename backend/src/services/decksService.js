@@ -1,3 +1,5 @@
+const { AppError, NotFoundError } = require('../utils/errors');
+
 const decksRepo = require('../repositories/decksRepository');
 const cardsRepo = require('../repositories/cardsRepository');
 
@@ -16,7 +18,7 @@ module.exports = {
 	async renameDeck(id, new_name) {
 		const update_result = decksRepo.updateDeckName(id, new_name)
 		if (update_result.changes === 0) {
-			throw new Error('NOT_FOUND');
+			throw new NotFoundError('Deck ID not found');
 		}
 
 		return decksRepo.getDeck(id);
@@ -26,10 +28,6 @@ module.exports = {
 		try {
 			return decksRepo.setDecksLevelXP(decks_level_info);
 		} catch (error) {
-			if (error.message.startsWith('NOT_FOUND:')) {
-                const missingId = error.message.split(':')[1];
-                throw new Error(`Deck progress update failed. Deck ID ${missingId} does not exist.`);
-            }
 			throw error;
 		}
 	},
@@ -37,14 +35,14 @@ module.exports = {
 	async deleteDeck(id) {
 		const delete_result = decksRepo.deleteDeck(id);
 		if (delete_result.changes === 0) {
-			throw new Error('NOT_FOUND');
+			throw new NotFoundError('Deck ID not found');
 		}
 	},
 
 	async getDeckCards(id) {
 		const found = decksRepo.checkDeckExists(id);
 		if (!found) {
-			throw new Error('NOT_FOUND');
+			throw new NotFoundError('Deck ID not found');
 		}
 
 		return cardsRepo.getCardsOfDeck(id);

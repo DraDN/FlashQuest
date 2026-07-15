@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const validationHandler = require('../middleware/validationHandler');
 
 const dungeonsService = require('../services/dungeonsService');
 
@@ -11,7 +12,7 @@ router.get('/', async (req, res) => {
     return res.status(200).json(dungeons);
 });
 
-router.get('/:id/decks', async (req, res) => {
+router.get('/:id/decks', async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -19,15 +20,11 @@ router.get('/:id/decks', async (req, res) => {
 
         return res.status(200).json(decks);
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            return res.status(404).json({ errors: 'Dungeon ID not found' });
-        }
-
-        return res.status(500).json({ error: 'Internal server error' });
+        next(errors);
     }
 });
 
-router.get('/:id/cards', async (req, res) => {
+router.get('/:id/cards', async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -35,11 +32,7 @@ router.get('/:id/cards', async (req, res) => {
 
         return res.status(200).json(cards);
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            return res.status(404).json({ errors: 'Dungeon ID not found' });
-        }
-
-        return res.status(500).json({ error: 'Internal server error' });
+        next(errors);
     }
 });
 
@@ -49,12 +42,7 @@ router.post('/', [
         .trim()
         .notEmpty().withMessage('\'name\' is required')
         .isLength({ max: dungeonsService.DUNGEON_MAX_CHARACTERS }).withMessage('\'name\' is too long')
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+], validationHandler, async (req, res, next) => {
     const { user_id, name, deck_ids } = req.body;
 
     try {
@@ -62,7 +50,7 @@ router.post('/', [
 
         return res.status(200).json(dungeon);
     } catch (error) {
-        return res.status(400).json({ errors: error.message }); // TOOD FIX ERRORS
+        next(error);
     }
 });
 
@@ -71,12 +59,7 @@ router.post('/:id/edit', [
         .trim()
         .notEmpty().withMessage('\'name\' is required')
         .isLength({ max: dungeonsService.DUNGEON_MAX_CHARACTERS }).withMessage('\'name\' is too long')
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+], validationHandler, async (req, res, next) => {
     const { id } = req.params;
     const { name, deck_ids } = req.body;
 
@@ -84,15 +67,11 @@ router.post('/:id/edit', [
         const updatedDungeon = await dungeonsService.editDungeon(id, name, deck_ids);
         return res.status(200).json(updatedDungeon);
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            return res.status(404).json({ errors: 'Dungeon ID not found' });
-        }
-
-        return res.status(400).json({ errors: error.message });
+        next(error);
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -100,11 +79,7 @@ router.delete('/:id', async (req, res) => {
 
         return res.status(204).send();
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            return res.status(404).json({ errors: 'Dungeon ID not found' });
-        }
-
-        return res.status(500).json({ error: 'Internal server error' });
+        next(error);
     }
 });
 

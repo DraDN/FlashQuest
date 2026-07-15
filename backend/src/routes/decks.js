@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const validationHandler = require('../middleware/validationHandler');
 
 const decksService = require('../services/decksService');
 
@@ -16,12 +17,7 @@ router.post('/', [
         .trim()
         .notEmpty().withMessage('\'name\' is required')
         .isLength({ max: decksService.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long')
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+], validationHandler, async (req, res, next) => {
     const { user_id, name } = req.body;
 
     try {
@@ -29,7 +25,7 @@ router.post('/', [
 
         return res.status(200).json(deck);
     } catch (error) {
-        return res.status(500).json({ errors: 'Internal server error' });
+        next(error);
     }
 });
 
@@ -38,12 +34,7 @@ router.post('/:id/rename', [
         .trim()
         .notEmpty().withMessage('\'name\' is required')
         .isLength({ max: decksService.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long')
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+], validationHandler, async (req, res, next) => {
     const { id } = req.params;
     const { name } = req.body;
 
@@ -52,39 +43,35 @@ router.post('/:id/rename', [
 
         return res.status(200).json(renamed_deck);
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            return res.status(400).json({ errors: 'Deck ID not found' });
-        }
-
-        return res.status(500).json({ errors: 'Internal server error' });
+        next(error);
     }
 });
 
 // TODO limit possible deck number
 // TOOO FIX if this fails, account level still gets updated!!!
-router.post('/sync-xp', async (req, res) => {
+router.post('/sync-xp', async (req, res, next) => {
     const { decks } = req.body;
 
     try {
         await decksService.setDecksLevelXP(decks || []);
         return res.status(204).send();
     } catch (error) {
-        return res.status(400).json({ errors: error.message });
+        next(error);
     }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req, res, next) => {
     const { id } = req.params;
 
     try {
         await decksService.deleteDeck(id);
         return res.status(204).send();
     } catch (error) {
-        return res.status(500).json({ errors: 'Internal server error' });
+        next(error);
     }
 });
 
-router.get('/:id/cards', async (req, res) => {
+router.get('/:id/cards', async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -92,11 +79,7 @@ router.get('/:id/cards', async (req, res) => {
 
         return res.status(200).json(cards);
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            return res.status(404).json({ error: 'Deck ID not found' });
-        }
-
-        return res.status(500).json({ error: 'Internal server error' });
+        next(error);
     }
 });
 

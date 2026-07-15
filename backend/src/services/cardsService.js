@@ -1,3 +1,5 @@
+const { AppError, NotFoundError } = require('../utils/errors');
+
 const cardsRepo = require('../repositories/cardsRepository');
 const decksRepo = require('../repositories/decksRepository');
 
@@ -7,7 +9,7 @@ module.exports = {
 	addCard(deck_id, question, answer) {
 		const found = decksRepo.checkDeckExists(deck_id);
 		if (!found) {
-			throw new Error('NOT_FOUND');
+			throw new NotFoundError('Deck ID not found');
 		}
 
 		const add_result = cardsRepo.insertCard(deck_id, question, answer);
@@ -17,7 +19,7 @@ module.exports = {
 	editCard(id, question, answer) {
 		const edit_result = cardsRepo.updateCard(id, question, answer);
 		if (edit_result.changes === 0) {
-			throw new Error('NOT_FOUND');
+			throw new NotFoundError('Card ID not found');
 		}
 
 		return cardsRepo.getCard(id);
@@ -26,7 +28,7 @@ module.exports = {
 	deleteCard(id) {
 		const delete_result = cardsRepo.deleteCard(id);
 		if (delete_result.changes === 0) {
-			throw new Error('NOT_FOUND');
+			throw new NotFoundError('Card ID not found');
 		}
 	}
 };

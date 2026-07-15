@@ -1,3 +1,5 @@
+const { AppError, NotFoundError } = require('../utils/errors');
+
 const accountRepo = require('../repositories/accountRepository');
 
 module.exports = {
@@ -6,7 +8,7 @@ module.exports = {
 		if (!found) {
 			const result = accountRepo.insertUserLevel(user_id);
 			if (result.changes === 0) {
-				throw new Error('FAIL');
+				throw new AppError(500, 'Failed to initialize account');
 			}
 
 			return true;
@@ -18,7 +20,7 @@ module.exports = {
 	async getAccountLevel(user_id) {
 		const level = accountRepo.getUserLevel(user_id);
 		if (!level) {
-			throw new Error('NOT_FOUND');
+			throw new NotFoundError('Account level not found');
 		}
 
 		return level;
@@ -29,10 +31,10 @@ module.exports = {
 		if (result.changes === 0) {
 			const found = accountRepo.checkUserLevelExists(user_id);
 			if (!found) {
-				throw new Error('NOT_FOUND');
+				throw new NotFoundError('User ID not found');
 			}
 
-			throw new Error('FAIL');
+			throw new AppError(500, 'Failed to set account level');
 		}
 
 		return accountRepo.getUserLevel(user_id);
@@ -43,7 +45,7 @@ module.exports = {
 		if (result.changes === 0) {
 			const found = accountRepo.checkUserLevelExists(user_id);
 			if (!found) {
-				throw new Error('NOT_FOUND');
+				throw new NotFoundError('User ID not found');
 			}
 		}
 

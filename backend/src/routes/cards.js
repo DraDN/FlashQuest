@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const validationHandler = require('../middleware/validationHandler');
 
 const cardsService = require('../services/cardsService');
 
@@ -14,12 +15,7 @@ router.post('/', [
         .trim()
         .notEmpty().withMessage('\'answer\' is required')
         .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('\'answer\' too long')
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+], validationHandler, async (req, res, next) => {
     const { deck_id, question, answer } = req.body;
 
     try {
@@ -27,13 +23,8 @@ router.post('/', [
 
         return res.status(200).json(card);
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            res.status(404).json({ error: 'Deck ID not found' });
-        }
-
-        return res.status(500).json({ error: `Internal server error - ${error.message}` });
+        next(error);
     }
-
 });
 
 router.post('/:id/edit', [
@@ -45,12 +36,7 @@ router.post('/:id/edit', [
         .trim()
         .notEmpty().withMessage('\'answer\' is required')
         .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('\'answer\' too long')
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+], validationHandler, async (req, res, next) => {
     const { id } = req.params;
     const { question, answer } = req.body;
 
@@ -59,15 +45,11 @@ router.post('/:id/edit', [
 
         return res.status(200).json(card);
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            res.status(404).json({ error: 'Card ID not found' });
-        }
-
-        return res.status(500).json({ error: 'Internal server error' });
+        next(error);
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -75,11 +57,7 @@ router.delete('/:id', async (req, res) => {
 
         return res.status(204).send();
     } catch (errors) {
-        if (error.message === 'NOT_FOUND') {
-            res.status(404).json({ error: 'Card ID not found' });
-        }
-
-        return res.status(500).json({ error: 'Internal server error' });
+        next(errors);
     } 
 });
 

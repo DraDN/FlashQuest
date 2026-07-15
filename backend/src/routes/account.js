@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const validationHandler = require('../middleware/validationHandler');
 
 const accountService = require('../services/accountService');
 
-router.get('/check-status', async (req, res) => {
+router.get('/check-status', async (req, res, next) => {
     const { user_id } = req.query;
 
     try {
@@ -13,15 +14,11 @@ router.get('/check-status', async (req, res) => {
 
         return res.status(200).json({ new: is_new });
     } catch (error) {
-        if (error.message === 'FAIL') {
-            return res.status(500).json({ error: 'Couldn\'t insert user into level records' });
-        }
-
-        return res.status(500).json({ error: 'Internal server error' });
+        next(error);
     }  
 });
 
-router.get('/level', async (req, res) => {
+router.get('/level', async (req, res, next) => {
     const { user_id } = req.query;
 
     try {
@@ -29,11 +26,7 @@ router.get('/level', async (req, res) => {
 
         return res.status(200).json(level);
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            return res.status(404).json({ errors: 'User ID not found' });
-        }
-
-        return res.status(500).json({ error: `Internal server error: ${error.message}` });
+        next(error);
     }
 });
 
@@ -42,12 +35,7 @@ router.post('/level-up', [
         .notEmpty().withMessage('\'level\' is required')
         .isInt({ min: 0 }).withMessage('\'level\' must be a positive integer')
         .toInt()
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+], validationHandler, async (req, res, next) => {
     const { user_id, level } = req.body;
 
     try {
@@ -55,11 +43,7 @@ router.post('/level-up', [
 
         return res.status(200).json(updated_level);
     } catch (error) {
-        if (error.message === 'NOT_FOUND') {
-            return res.status(404).json({ errors: 'User ID not found' });
-        }
-
-        return res.status(500).json({ error: 'Internal server error' });
+        next(error);
     }
 });
 
