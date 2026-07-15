@@ -32,12 +32,12 @@ module.exports = {
 	},
 
 	setDeckLevelXP(id, new_xp, new_level) {
-		return updateDeckLevelStmt.run(new_xp, new_level, id);
+		return updateDeckLevelStmt.run(Math.round(new_xp), new_level, id);
 	},
 
 	setDecksLevelXP: db.transaction((decks_level_infos) => {
 		for (const deck_level_info of decks_level_infos) {
-			if (updateDeckLevelStmt.run(deck_level_info.xp, deck_level_info.level, deck_level_info.id).changes === 0) {
+			if (updateDeckLevelStmt.run(deck_level_info.xp, Math.round(deck_level_info.level), deck_level_info.id).changes === 0) {
 				throw new Error(`NOT_FOUND:${deck_level_info.id}`);
 			}
 		}
