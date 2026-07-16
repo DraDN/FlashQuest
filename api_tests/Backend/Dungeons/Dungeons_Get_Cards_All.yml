@@ -6,6 +6,9 @@ info:
 http:
   method: GET
   url: 0.0.0.0:3000/api/dungeons/:id/cards
+  headers:
+    - name: x-dev-user-id
+      value: "100.0"
   params:
     - name: id
       value: "1"

@@ -6,6 +6,9 @@ info:
 http:
   method: POST
   url: 0.0.0.0:3000/api/cards
+  headers:
+    - name: x-dev-user-id
+      value: "100.0"
   body:
     type: json
     data: |-

@@ -1,4 +1,6 @@
-const { AppError, NotFoundError } = require('../utils/errors');
+const { AppError, NotFoundError, ForbiddenError } = require('../utils/errors');
+const { enforceOwnership } = require('../utils/authUtils');
+const db = require('../db');
 
 const decksRepo = require('../repositories/decksRepository');
 const cardsRepo = require('../repositories/cardsRepository');
@@ -15,36 +17,49 @@ module.exports = {
 		return decksRepo.getDeck(insert_result.lastInsertRowid);
 	},
 
-	async renameDeck(id, new_name) {
-		const update_result = decksRepo.updateDeckName(id, new_name)
-		if (update_result.changes === 0) {
-			throw new NotFoundError('Deck ID not found');
-		}
+	async renameDeck(id, new_name, user_id) {
+		const rename_transaction = db.transaction(() => {
+			const owner = decksRepo.getOwnerOfDeck(id);
 
+			enforceOwnership(owner, user_id, 'Deck');
+
+			const update_result = decksRepo.updateDeckName(id, new_name)
+		})
+
+		rename_transaction();
 		return decksRepo.getDeck(id);
 	},
 
-	async setDecksLevelXP(decks_level_info) {
-		try {
-			return decksRepo.setDecksLevelXP(decks_level_info);
-		} catch (error) {
-			throw error;
-		}
+	async setDecksLevelXP(decks_level_info, user_id) {
+		return decksRepo.setDecksLevelXP(decks_level_info, user_id);
 	},
 
-	async deleteDeck(id) {
-		const delete_result = decksRepo.deleteDeck(id);
-		if (delete_result.changes === 0) {
-			throw new NotFoundError('Deck ID not found');
-		}
+	async deleteDeck(id, user_id) {
+		const delete_transaction = db.transaction(() => {
+			const owner = decksRepo.getOwnerOfDeck(id);
+
+			enforceOwnership(owner, user_id, 'Deck');
+
+			const delete_result = decksRepo.deleteDeck(id);
+		})
+
+		delete_transaction();
 	},
 
-	async getDeckCards(id) {
-		const found = decksRepo.checkDeckExists(id);
-		if (!found) {
-			throw new NotFoundError('Deck ID not found');
-		}
+	async getDeckCards(id, user_id) {
+		const cards_transaction = db.transaction(() => {
+			const owner = decksRepo.getOwnerOfDeck(id);
 
-		return cardsRepo.getCardsOfDeck(id);
+			enforceOwnership(owner, user_id, 'Deck');
+
+			return cardsRepo.getCardsOfDeck(id);
+		})
+		// const found = decksRepo.checkDeckExists(id);
+		// if (!found) {
+		// 	throw new NotFoundError('Deck ID not found');
+		// }
+
+		// return cardsRepo.getCardsOfDeck(id);
+		return cards_transaction();
 	}
 };

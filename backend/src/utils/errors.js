@@ -16,13 +16,29 @@ class NotFoundError extends AppError {
 };
 
 class ValidationError extends AppError {
-    constructor(message = 'Validation failed') {
-        super(400, message);
+    constructor(validationErrorsArray) {
+        super(400, "Validation Error");
+
+        this.validationErrors = validationErrorsArray;
+    }
+};
+
+class UnauthError extends AppError {
+    constructor(message = 'Unauthorized') {
+        super(401, message);
+    }
+};
+
+class ForbiddenError extends AppError {
+    constructor(message = 'Forbidden') {
+        super(403, message);
     }
 };
 
 module.exports = {
     AppError,
     ValidationError,
-    NotFoundError
+    NotFoundError,
+    UnauthError,
+    ForbiddenError
 };

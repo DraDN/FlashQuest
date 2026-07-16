@@ -5,12 +5,15 @@ info:
 
 http:
   method: GET
-  url: 0.0.0.0:3000/api/account/check-status?user_id=100.0
+  url: 0.0.0.0:3000/api/account/check-status
+  headers:
+    - name: x-dev-user-id
+      value: "100.0"
   params:
     - name: user_id
       value: "100.0"
       type: query
-  auth: inherit
+      disabled: true
 
 settings:
   encodeUrl: true

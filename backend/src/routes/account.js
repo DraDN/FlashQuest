@@ -4,13 +4,14 @@ const router = express.Router();
 const { body } = require('express-validator');
 const validationHandler = require('../middleware/validationHandler');
 
+const authHandler = require('../middleware/authHandler');
+router.use(authHandler);
+
 const accountService = require('../services/accountService');
 
 router.get('/check-status', async (req, res, next) => {
-    const { user_id } = req.query;
-
     try {
-        const is_new = await accountService.ensureAccountIsInitialized(user_id);
+        const is_new = await accountService.ensureAccountIsInitialized(req.user_id);
 
         return res.status(200).json({ new: is_new });
     } catch (error) {
@@ -19,10 +20,8 @@ router.get('/check-status', async (req, res, next) => {
 });
 
 router.get('/level', async (req, res, next) => {
-    const { user_id } = req.query;
-
     try {
-        const level = await accountService.getAccountLevel(user_id);
+        const level = await accountService.getAccountLevel(req.user_id);
 
         return res.status(200).json(level);
     } catch (error) {
@@ -30,16 +29,28 @@ router.get('/level', async (req, res, next) => {
     }
 });
 
-router.post('/level-up', [
-    body('level')
-        .notEmpty().withMessage('\'level\' is required')
-        .isInt({ min: 0 }).withMessage('\'level\' must be a positive integer')
-        .toInt()
-], validationHandler, async (req, res, next) => {
-    const { user_id, level } = req.body;
+router.post('/level', async (req, res, next) => {
+    const { level } = req.body;
 
     try {
-        const updated_level = await accountService.setAccountLevel(user_id, level);
+        const updated_level = await accountService.setAccountLevel(req.user_id, level);
+
+        return res.status(200).json(updated_level);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.post('/level-up', [
+    body('added_levels')
+        .notEmpty().withMessage('\'added_levels\' is required')
+        .isInt({ min: 0 }).withMessage('\'added_levels\' must be a positive integer')
+        .toInt()
+], validationHandler, async (req, res, next) => {
+    const { added_levels } = req.body;
+
+    try {
+        const updated_level = await accountService.addAccountLevels(req.user_id, added_levels);
 
         return res.status(200).json(updated_level);
     } catch (error) {

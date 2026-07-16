@@ -37,6 +37,9 @@ app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok' });
 });
 
+const { clerkMiddleware } = require('@clerk/express');
+app.use(clerkMiddleware());
+
 const accountRouter = require('./routes/account');
 const decksRouter = require('./routes/decks');
 const cardsRouter = require('./routes/cards');

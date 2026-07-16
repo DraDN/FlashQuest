@@ -4,9 +4,12 @@ const router = express.Router();
 const { body } = require('express-validator');
 const validationHandler = require('../middleware/validationHandler');
 
+const authHandler = require('../middleware/authHandler');
+router.use(authHandler);
+
 const decksService = require('../services/decksService');
 
-router.get('/', async (req, res) => {
+router.get('/', authHandler, async (req, res) => {
     const { user_id } = req.query;
     const decks = await decksService.getUserDecks(user_id);
     return res.status(200).json(decks);
@@ -18,10 +21,10 @@ router.post('/', [
         .notEmpty().withMessage('\'name\' is required')
         .isLength({ max: decksService.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long')
 ], validationHandler, async (req, res, next) => {
-    const { user_id, name } = req.body;
+    const { name } = req.body;
 
     try {
-        const deck = await decksService.addDeck(user_id, name);
+        const deck = await decksService.addDeck(req.user_id, name);
 
         return res.status(200).json(deck);
     } catch (error) {
@@ -39,7 +42,7 @@ router.post('/:id/rename', [
     const { name } = req.body;
 
     try {
-        const renamed_deck = await decksService.renameDeck(id, name);
+        const renamed_deck = await decksService.renameDeck(id, name, req.user_id);
 
         return res.status(200).json(renamed_deck);
     } catch (error) {
@@ -53,7 +56,7 @@ router.post('/sync-xp', async (req, res, next) => {
     const { decks } = req.body;
 
     try {
-        await decksService.setDecksLevelXP(decks || []);
+        await decksService.setDecksLevelXP(decks || [], req.user_id);
         return res.status(204).send();
     } catch (error) {
         next(error);
@@ -64,7 +67,7 @@ router.delete('/:id', async (req, res, next) => {
     const { id } = req.params;
 
     try {
-        await decksService.deleteDeck(id);
+        await decksService.deleteDeck(id, req.user_id);
         return res.status(204).send();
     } catch (error) {
         next(error);
@@ -75,7 +78,7 @@ router.get('/:id/cards', async (req, res, next) => {
     const { id } = req.params;
 
     try {
-        const cards = await decksService.getDeckCards(id);
+        const cards = await decksService.getDeckCards(id, req.user_id);
 
         return res.status(200).json(cards);
     } catch (error) {

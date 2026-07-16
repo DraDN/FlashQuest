@@ -6,11 +6,13 @@ info:
 http:
   method: POST
   url: 0.0.0.0:3000/api/account/level-up
+  headers:
+    - name: x-dev-user-id
+      value: "100.0"
   body:
     type: json
     data: |-
       {
-        "user_id": "100.0",
         "added_levels": 1
       }
   auth: inherit
@@ -20,3 +22,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+​

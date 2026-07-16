@@ -6,6 +6,9 @@ info:
 http:
   method: POST
   url: 0.0.0.0:3000/api/dungeons/:id/edit
+  headers:
+    - name: x-dev-user-id
+      value: "100.0"
   params:
     - name: id
       value: "1"

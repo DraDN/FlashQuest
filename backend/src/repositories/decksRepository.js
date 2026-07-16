@@ -1,10 +1,11 @@
 const db = require('../db');
 
-const { NotFoundError } = require('../utils/errors');
+const { enforceOwnership } = require('../utils/authUtils');
 
 const getUserDecksStmt = db.prepare('SELECT * FROM decks WHERE user_id = ?');
 const getDeckByIDStmt = db.prepare('SELECT * FROM decks WHERE id = ?');
 const checkDeckExistsStmt = db.prepare('SELECT 1 FROM decks WHERE id = ?');
+const getOwnerOfDeckStmt = db.prepare('SELECT user_id FROM decks WHERE id = ?');
 const insertDeckStmt = db.prepare('INSERT INTO decks (user_id, name) VALUES (?, ?)');
 const updateDeckNameStmt = db.prepare('UPDATE decks SET name = ? WHERE id = ?');
 const updateDeckLevelStmt = db.prepare('UPDATE decks SET xp = ?, level = ? WHERE id = ?');
@@ -25,9 +26,13 @@ module.exports = {
 		return getDeckByIDStmt.get(id);
 	},
 
+	getOwnerOfDeck(id) {
+		return getOwnerOfDeckStmt.get(id).user_id;
+	},
+
 	insertDeck(user_id, name) {
 		return insertDeckStmt.run(user_id, name);
-	},
+	}, // TODO maybe return .changes > 0
 
 	updateDeckName(id, new_name) {
 		return updateDeckNameStmt.run(new_name, id);
@@ -37,11 +42,13 @@ module.exports = {
 		return updateDeckLevelStmt.run(Math.round(new_xp), new_level, id);
 	},
 
-	setDecksLevelXP: db.transaction((decks_level_infos) => {
+	setDecksLevelXP: db.transaction((decks_level_infos, user_id) => {
 		for (const deck_level_info of decks_level_infos) {
-			if (updateDeckLevelStmt.run(deck_level_info.xp, Math.round(deck_level_info.level), deck_level_info.id).changes === 0) {
-				throw new NotFoundError(`Deck progress update failed. Deck ID ${deck_level_info.id} does not exist.`);
-			}
+			const owner = getOwnerOfDeckStmt.get(deck_level_info.id).user_id;
+
+			enforceOwnership(owner, user_id, `Deck ${deck_level_info.id}`);
+
+			updateDeckLevelStmt.run(Math.round(deck_level_info.xp), Math.round(deck_level_info.level), deck_level_info.id);
 		}
 	}),
 

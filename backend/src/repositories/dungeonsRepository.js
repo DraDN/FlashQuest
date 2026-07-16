@@ -2,6 +2,7 @@ const db = require('../db');
 
 const getUserDungeonsStmt = db.prepare('SELECT * FROM dungeons WHERE user_id = ?');
 const getDungeonByIDStmt = db.prepare('SELECT * FROM dungeons WHERE id = ?');
+const getOwnerOfDungeonStmt = db.prepare('SELECT user_id FROM dungeons WHERE id = ?');
 const checkDungeonExistsStmt = db.prepare('SELECT 1 FROM dungeons WHERE id = ?');
 const insertDungeonStmt = db.prepare('INSERT INTO dungeons (user_id, name) VALUES (?, ?)');
 const insertDungeonDeckStmt = db.prepare('INSERT INTO dungeon_decks (dungeon_id, deck_id) VALUES (?, ?)');
@@ -14,6 +15,10 @@ const { checkDeckExists } = require('./decksRepository');
 module.exports = {
 	getDungeon(id) {
 		return getDungeonByIDStmt.get(id);
+	},
+
+	getOwnerOfDungeon(id) {
+		return getOwnerOfDungeonStmt.get(id).user_id;
 	},
 
 	getUserDungeons(user_id) {

@@ -1,6 +1,7 @@
 const db = require('../db');
 
 const getCardByIDStmt = db.prepare('SELECT * FROM cards WHERE id = ?');
+const getOwnderOfCardStmt = db.prepare('SELECT decks.user_id FROM decks INNER JOIN cards ON decks.id = cards.deck_id WHERE cards.id = ?');
 const insertCardIntoDeckStmt = db.prepare('INSERT INTO cards (deck_id, question, answer) VALUES (?, ?, ?)');
 const updateCardStmt = db.prepare('UPDATE cards SET question = ?, answer = ? WHERE id = ?');
 const deleteCardStmt = db.prepare('DELETE FROM cards WHERE id = ?');
@@ -11,6 +12,10 @@ const getCardsOfDungeonStmt = db.prepare('SELECT * FROM cards WHERE deck_id IN (
 module.exports = {
 	getCard(id) {
 		return getCardByIDStmt.get(id);
+	},
+
+	getOwnerOfCard(id) {
+		return getOwnderOfCardStmt.get(id).user_id;
 	},
 
 	getCardsOfDeck(deck_id) {

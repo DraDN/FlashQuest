@@ -5,7 +5,14 @@ info:
 
 http:
   method: DELETE
-  url: 0.0.0.0:3000/api/cards/2
+  url: 0.0.0.0:3000/api/cards/:id
+  headers:
+    - name: x-dev-user-id
+      value: "100.0"
+  params:
+    - name: id
+      value: "1"
+      type: path
   auth: inherit
 
 settings:

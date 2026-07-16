@@ -1,5 +1,7 @@
 const db = require('../db');
 
+const { enforceOwnership } = require('../utils/authUtils');
+
 const dungeonsRepo = require('../repositories/dungeonsRepository');
 const decksRepo = require('../repositories/decksRepository');
 const cardsRepo = require('../repositories/cardsRepository');
@@ -11,93 +13,85 @@ module.exports = {
 		return dungeonsRepo.getUserDungeons(user_id);
 	},
 
-	async getDungeonDecks(id) {
-		const found = dungeonsRepo.checkDungeonExists(id);
-		if (!found) {
-			throw new Error('NOT_FOUND');
-		}
+	async getDungeonDecks(id, user_id) {
+		const decks_transaction = db.transaction(() => {
+			const owner = dungeonsRepo.getOwnerOfDungeon(id);
 
-		return decksRepo.getDecksOfDungeon(id);
+			enforceOwnership(owner, user_id, 'Dungeon');
+
+			return decksRepo.getDecksOfDungeon(id);
+		})
+
+		return decks_transaction();
 	},
 
-	async getDungeonCards(id) {
-		const found = dungeonsRepo.checkDungeonExists(id);
-		if (!found) {
-			throw new Error('NOT_FOUND');
-		}
+	async getDungeonCards(id, user_id) {
+		const cards_transaction = db.transaction(() => {
+			const owner = dungeonsRepo.getOwnerOfDungeon(id);
 
-		return cardsRepo.getCardsOfDungeon(id);
+			enforceOwnership(owner, user_id, 'Dungeon');
+
+			return cardsRepo.getCardsOfDungeon(id);
+		})
+
+		return cards_transaction();
 	},
 
 	async addDungeon(user_id, name, deck_ids) {
-		const add_transaction = db.transaction((userId, dungeonName, deckIds) => {
-			for (const deckId of deckIds) {
-				const deck_exists = decksRepo.checkDeckExists(deckId);
-				if (!deck_exists) {
-					throw new Error(`NOT_FOUND:${deckId}`);
-				}
+		const add_transaction = db.transaction(() => {
+			for (const deck_id of deck_ids) {
+				const owner = decksRepo.getOwnerOfDeck(deck_id);
+				enforceOwnership(owner, user_id, 'Deck');
 			} 
 
-			const insert_result = dungeonsRepo.insertDungeon(userId, dungeonName);
+			const insert_result = dungeonsRepo.insertDungeon(user_id, name);
 			const dungeonId = insert_result.lastInsertRowid;
 
-			for (const deckId of deckIds) {
+			for (const deckId of deck_ids) {
 				dungeonsRepo.linkDeckToDungeon(dungeonId, deckId);
 			}
 
 			return dungeonsRepo.getDungeon(dungeonId);
 		});
 
-		try {
-			return add_transaction(user_id, name, deck_ids);
-		} catch (error) {
-			if (error.message.startsWith('NOT_FOUND:')) {
-                const missingId = error.message.split(':')[1];
-                throw new Error(`Cannot create dungeon. Deck ID ${missingId} does not exist.`);
-            }
-            throw error;
-		}
+		return add_transaction();
 	},
 
-	async editDungeon(id, new_name, new_deck_ids) {
-		const edit_transaction = db.transaction((dungeonId, newDungeonName, newDeckIds) => {
-			for (const deckId of newDeckIds) {
-				if (!decksRepo.checkDeckExists(deckId)) {
-					throw new Error(`DECK_NOT_FOUND:${deckId}`);
-				}
+	async editDungeon(id, new_name, new_deck_ids, user_id) {
+		const edit_transaction = db.transaction(() => {
+			for (const deck_id of new_deck_ids) {
+				const owner = decksRepo.getOwnerOfDeck(deck_id);
+				enforceOwnership(owner, user_id, 'Deck');
 			}
 
-			const rename_result = dungeonsRepo.updateDungeonName(dungeonId, newDungeonName);
+			const owner = dungeonsRepo.getOwnerOfDungeon(id);
+			enforceOwnership(owner, user_id, 'Dungeon');
+
+			const rename_result = dungeonsRepo.updateDungeonName(id, new_name);
 			if (rename_result.changes === 0) {
 				throw new Error('DUNGEON_NOT_FOUND');
 			}
 
-			dungeonsRepo.updateDungeonName(dungeonId, newDungeonName);
-			for (const deckId of newDeckIds) {
-				dungeonsRepo.linkDeckToDungeon(dungeonId, deckId);
+			dungeonsRepo.updateDungeonName(id, new_name);
+			for (const deckId of new_deck_ids) {
+				dungeonsRepo.linkDeckToDungeon(id, deckId);
 			}
 
-			return dungeonsRepo.getDungeon(dungeonId);
+			return dungeonsRepo.getDungeon(id);
 		});
 
-		try {
-			return edit_transaction(id, new_name, new_deck_ids);
-		} catch (error) {
-			if (error.message.startsWith('DECK_NOT_FOUND:')) {
-                const missingId = error.message.split(':')[1];
-                throw new Error(`Cannot create dungeon. Deck ID ${missingId} does not exist.`);
-            } else if (error.message === 'DUNGEON_NOT_FOUND') {
-				throw new Error('NOT_FOUND')
-			}
-
-            throw error;
-		}
+		return edit_transaction();
 	},
 
 	async deleteDungeon(id) {
-		const delete_result = dungeonsRepo.deleteDungeon(id);
-		if (delete_result.changes === 0) {
-			throw new Error('NOT_FOUND');
-		}
+		const delete_transaction = db.transaction(() => {
+			const owner = dungeonsRepo.getOwnerOfDungeon(id);
+
+			enforceOwnership(owner, user_id, 'Dungeon');
+
+			dungeonsRepo.deleteDungeon(id);
+		})
+
+		delete_transaction();
 	}
 };
