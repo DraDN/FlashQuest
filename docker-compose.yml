@@ -1,8 +1,6 @@
 services:
   frontend:
     build: ./frontend
-    # ports:
-      # - "5173:5173"
     restart: unless-stopped
     volumes:
       - ./frontend:/app # syncs the lxc code files (the ones i edit) with the files inside the container (for hot reload)
@@ -17,8 +15,6 @@ services:
     
   backend:
     build: ./backend
-    # ports:
-      # - "3000:3000"
     restart: unless-stopped
     volumes:
       - ./backend:/app # syncs the lxc code files (the ones i edit) with the files inside the container (for hot reload)
@@ -26,3 +22,4 @@ services:
       - ./data:/app/database_files
     environment:
       - DB_PATH=/app/database_files/db.sqlite
+      - CORS_ORIGINS=${CORS_ORIGINS}

@@ -6,7 +6,26 @@ const app = express();
 app.set('trust proxy', 1); // trust the nginx proxy (when in production)
 
 app.use(helmet());
-app.use(cors());
+
+const allowedOrigins = process.env.CORS_ORIGINS ?
+    process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim()) :
+    ['http://localhost:5173'];
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Blocked by CORS policy'));
+        }
+    },
+    credentials: true,
+    allowedMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
