@@ -5,7 +5,14 @@ info:
 
 http:
   method: GET
-  url: 0.0.0.0:3000/api/decks/1/cards
+  url: 0.0.0.0:3000/api/decks/:id/cards
+  headers:
+    - name: x-dev-user-id
+      value: "100.0"
+  params:
+    - name: id
+      value: "2"
+      type: path
   auth: inherit
 
 settings:

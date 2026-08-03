@@ -11,6 +11,7 @@ const __dirname = dirname(__filename);
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '');
+  const hostsString = env.VITE_HOSTS || 'localhost';
 
   return {
     plugins: [
@@ -20,16 +21,21 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
       port: 5173,
-      allowedHosts: env.VITE_HOSTS.split(',').map((host) => host.trim()),
+
+
+      allowedHosts: hostsString.split(',').map((host) => host.trim()),
+
       hmr: {
-        host: env.VITE_HMR_HOST,
-        clientPort: env.VITE_HMR_PROTOCOL === 'wss' ? 443 : 80,
-        protocol: env.VITE_HMR_PROTOCOL
+        host: env.VITE_HMR_HOST || 'localhost',
+        protocol: env.VITE_HMR_PROTOCOL || 'ws',
+        clientPort: env.VITE_HMR_PORT ? parseInt(env.VITE_HMR_PORT) : 5173,
+        port: 5173
       },
+
       strictPort: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:3000',
+          target: 'http://backend:3000',
           changeOrigin: true,
         },
       },

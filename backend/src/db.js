@@ -5,6 +5,8 @@ const path = require('path');
 const dbPath = process.env.DB_PATH || path.join(__dirname, 'database_files/db.sqlite');
 const db = new Database(dbPath);
 
+db.pragma('foreign_keys = ON');
+
 db.exec(`
     CREATE TABLE IF NOT EXISTS decks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

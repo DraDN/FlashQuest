@@ -1,20 +1,18 @@
 info:
-  name: Deck_Create
+  name: Dungeons_Get_Cards_All
   type: http
   seq: 1
 
 http:
-  method: POST
-  url: 0.0.0.0:3000/api/decks
+  method: GET
+  url: 0.0.0.0:3000/api/dungeons/:id/cards
   headers:
     - name: x-dev-user-id
       value: "100.0"
-  body:
-    type: json
-    data: |-
-      {
-        "name": "Test Deck"
-      }
+  params:
+    - name: id
+      value: "1"
+      type: path
   auth: inherit
 
 settings:
