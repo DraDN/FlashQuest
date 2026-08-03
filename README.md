@@ -156,7 +156,7 @@ The best way to experience FlashQuest is to [try the live version](https://flash
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Security overhaul
+- [x] Security overhaul
 - [ ] Enemy system rewrite + more enemeies
 - [ ] Spaced Repetition function
 - [ ] CSV import / export of decks
