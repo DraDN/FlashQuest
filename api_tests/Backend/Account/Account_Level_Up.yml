@@ -1,11 +1,11 @@
 info:
-  name: Deck_Create
+  name: Account_Level_Up
   type: http
   seq: 1
 
 http:
   method: POST
-  url: 0.0.0.0:3000/api/decks
+  url: 0.0.0.0:3000/api/account/level-up
   headers:
     - name: x-dev-user-id
       value: "100.0"
@@ -13,7 +13,7 @@ http:
     type: json
     data: |-
       {
-        "name": "Test Deck"
+        "added_levels": 1
       }
   auth: inherit
 
@@ -22,3 +22,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+​

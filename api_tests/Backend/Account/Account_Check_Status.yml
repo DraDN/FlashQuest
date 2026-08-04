@@ -1,19 +1,22 @@
 info:
-  name: Dungeon_Get_All
+  name: Account_Check_Status
   type: http
-  seq: 4
+  seq: 1
 
 http:
   method: GET
-  url: 0.0.0.0:3000/api/dungeons?user_id=100.0
+  url: 0.0.0.0:3000/api/account/check-status
+  headers:
+    - name: x-dev-user-id
+      value: "100.0"
   params:
     - name: user_id
       value: "100.0"
       type: query
+      disabled: true
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-​

@@ -1,10 +1,9 @@
 # FROM node:20-alpine
-FROM node:20-slim
+FROM node:24-slim
 
 WORKDIR /app
 
 # install build essentials for better-sqlite3
-# RUN apk add --no-cache --update python3 make g++
 RUN apt-get update && apt-get install -y \
     python3 \
     make \

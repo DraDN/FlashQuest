@@ -1,19 +1,24 @@
 info:
-  name: Deck_Create
+  name: Dungeons_Edit
   type: http
   seq: 1
 
 http:
   method: POST
-  url: 0.0.0.0:3000/api/decks
+  url: 0.0.0.0:3000/api/dungeons/:id/edit
   headers:
     - name: x-dev-user-id
       value: "100.0"
+  params:
+    - name: id
+      value: "1"
+      type: path
   body:
     type: json
     data: |-
       {
-        "name": "Test Deck"
+        "name": "Test dungeon Renamed",
+        "deck_ids": [ 2 ]
       }
   auth: inherit
 
