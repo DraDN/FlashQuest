@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { getCards, createCard, editCard, deleteCard } from "../api";
+import { getCards, createCard, editCard, deleteCard } from "../utils/api";
 import CardModal from "../components/CardModal";
 
 export default function DeckEditor({ deck, onNavigate }) {

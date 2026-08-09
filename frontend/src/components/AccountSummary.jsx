@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useUser, UserAvatar } from "@clerk/clerk-react";
 
-import { getAccountLevel, checkAccountStatus } from "../api";
+import { getAccountLevel, checkAccountStatus } from "../utils/api";
 
 export default function AccountSummary() {
     const { user } = useUser();

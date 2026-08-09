@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
 import { useUser } from "@clerk/clerk-react";
 
-import { getDungeonCards, getDungeonDecks, levelDecks, levelUpAccount, getAccountLevel } from "../api";
-import { PlayerCards, DraggableCard } from "../components/PlayerCards";
+import { getDungeonCards, getDungeonDecks, levelDecks, levelUpAccount, getAccountLevel } from "../utils/api";
+
+import { PlayerUI, PlayerCard } from "../components/PlayerUI";
+import { usePlayer } from "../components/usePlayer";
+
 import Monsters from "../components/Monsters";
 
 import AttackModal from "../components/AttackModal";
@@ -11,21 +14,10 @@ import RoundEndModal from "../components/RoundEndModal";
 import EarlyFleeModal from "../components/EarlyFleeModal";
 import DeathModal from "../components/DeathModal";
 
-const MAX_NO_MONSTERS = 2;
-const MAX_HAND_SIZE = 5;
+const MAX_NO_MONSTERS = 5;
 const EARLY_FLEE_FEE = 0.6;
-const BASE_PLAYER_ATTACK = 10;
 const PLAYER_ATTACK_SCALE_FACTOR = 1.12;
 const MONSTER_ATTACK_SCALE_FACTOR = 1.3;
-
-const shuffle_array = (array) => {
-    const copy = [...array];
-    for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-};
 
 let count = 0;
 
@@ -88,11 +80,11 @@ const get_monster = (round) => {
 export default function Dungeon({ dungeon, onNavigate }) {
     const { user } = useUser();
 
-    const [ cards, setCards ] = useState([]);
+    const { player, player_actions } = usePlayer({ dungeon_id: dungeon.id });
+
     const [ decks, setDecks ] = useState([]);
     const [ round, setRound ] = useState(1);
 
-    const [ selected_card, setSelectedCard ] = useState(null);
     const [ selected_monster, setSelectedMonster ] = useState(null);
 
     const [ isAttackModalOpen, setIsAttackModalOpen ] = useState(false);
@@ -100,10 +92,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const [ isEarlyFleeModalOpen, setIsEarlyFleeModalOpen ] = useState(false);
     const [ isDeathModalOpen, setIsDeathModalOpen ] = useState(false);
 
-    const [ player_health, setPlayerHealth ] = useState(100);
-    const [ player_attack, setPlayerAttack ] = useState(BASE_PLAYER_ATTACK);
-    const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
-    
     const generate_monsters = () => {
         const new_monsters = [];
         const progression_index = get_room_progression_index(round);
@@ -119,165 +107,67 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
     const [ monsters, setMonsters ] = useState(() => generate_monsters());
     
-    const [ card_state, setCardState ] = useState({
-        draw_pile: [],
-        hand: [],
-        discard_pile: []
-    })
-
-    const refill_hand = () => {
-        setCardState((previousState) => {
-            let current_draw_pile = [...previousState.draw_pile];
-            let current_discard_pile = [...previousState.discard_pile];
-            let new_hand = [...previousState.hand]
-
-            const limit = Math.min(cards.length, MAX_HAND_SIZE);
-
-            while (new_hand.length < limit) {
-                if (current_draw_pile.length === 0) {
-                    current_draw_pile = shuffle_array(current_discard_pile);
-                    current_discard_pile = [];
-                }
-
-                const top_card = current_draw_pile.shift();
-                new_hand.push({...top_card, isFresh: true });
-            }
-
-            setTimeout(() => {
-                setCardState((previousState) => {
-                    const unfresh_hand = new_hand.map(c => ({...c, isFresh: false }));
-
-                    return {
-                        ...previousState,
-                        hand: unfresh_hand,
-                    }
-                })
-            }, 400);
-
-            return {
-                draw_pile: current_draw_pile,
-                hand: new_hand,
-                discard_pile: current_discard_pile
-            }
-        })
-    }
-
-    const play_card = (card) => {
-        setCardState((previousState) => {
-            const new_hand = previousState.hand.filter(c => c.id !== card.id);
-            const new_discard_pile = [...previousState.discard_pile, card];
-
-            if (new_hand.length === 0) {
-                refill_hand();
-            }
-
-            return {
-                ...previousState,
-                hand: new_hand,
-                discard_pile: new_discard_pile
-            }
-        })
-    }
-
     const nextRoom = () => {
         setRound(round + 1);
         setMonsters(generate_monsters());
     }
 
     useEffect(() => {
-        getDungeonCards(dungeon.id)
-        .then(new_cards => {
-            setCards(new_cards);
-
-            setCardState(() => {
-                const initial_draw_pile = shuffle_array(new_cards);
-
-                let starting_hand = initial_draw_pile.slice(0, MAX_HAND_SIZE);
-                starting_hand = starting_hand.map(c => ({...c, isFresh: true }));
-
-                setTimeout(() => {
-                    setCardState((previousState) => {
-                        const unfresh_hand = previousState.hand.map(c => ({...c, isFresh: false }));
-
-                        return {
-                            ...previousState,
-                            hand: unfresh_hand,
-                        }
-                    })
-                }, 400);
-
-                return {
-                    draw_pile: initial_draw_pile.slice(MAX_HAND_SIZE),
-                    hand: starting_hand,
-                    discard_pile: []
-                }
-            })
-        });
-
-        getDungeonDecks(dungeon.id)
-        .then((decks) => decks.map(d => {
-            return {
-                ...d,
-                level_gained: 0,
-                xp_gained: 0
-            }
-        })).then(setDecks);
-    }, [dungeon, round]);
-
-    useEffect(() => {
         getAccountLevel(user.id).then((level) => {
-            setPlayerAttack(Math.round(BASE_PLAYER_ATTACK * Math.pow(PLAYER_ATTACK_SCALE_FACTOR, level.level)));
+            player_actions.setAttackBasedOnLevel(level.level);
         });
     }, [user?.id]);
 
     const reward_deck_xp = (deck_id, xp) => {
-        setDecks((prevDecks) =>
-            prevDecks.map((d) => {
-                if (d.id === deck_id) {
-                    const new_xp_gained = d.xp_gained + xp;
+    //     setDecks((prevDecks) =>
+    //         prevDecks.map((d) => {
+    //             if (d.id === deck_id) {
+    //                 const new_xp_gained = d.xp_gained + xp;
 
-                    return { ...d, xp_gained: new_xp_gained };
-                }
+    //                 return { ...d, xp_gained: new_xp_gained };
+    //             }
 
-                return d;
-            })
-        );
+    //             return d;
+    //         })
+    //     );
     }
 
     const save_deck_xp = async (decks, percentage) => {
-        let new_levels = [];
-        decks.forEach(deck => {
-            let level_gained = 0;
+    //     let new_levels = [];
+    //     decks.forEach(deck => {
+    //         let level_gained = 0;
 
-            let xp_needed_for_next_level = (deck.level + level_gained) * 100;
-            let total_xp = deck.xp + (deck.xp_gained * percentage);
-            while (total_xp >= xp_needed_for_next_level) {
-                level_gained++;
-                xp_needed_for_next_level = (deck.level + level_gained) * 100;
-            }
+    //         let xp_needed_for_next_level = (deck.level + level_gained) * 100;
+    //         let total_xp = deck.xp + (deck.xp_gained * percentage);
+    //         while (total_xp >= xp_needed_for_next_level) {
+    //             level_gained++;
+    //             xp_needed_for_next_level = (deck.level + level_gained) * 100;
+    //         }
 
-            new_levels.push(level_gained);
-        });
+    //         new_levels.push(level_gained);
+    //     });
 
-        let account_level_up = 0;
-        new_levels.forEach(level => {
-            account_level_up += level;
-        });
+    //     let account_level_up = 0;
+    //     new_levels.forEach(level => {
+    //         account_level_up += level;
+    //     });
 
-        if (account_level_up > 0) {
-            await levelUpAccount(user.id, account_level_up);
-        }
+    //     if (account_level_up > 0) {
+    //         await levelUpAccount(user.id, account_level_up);
+    //     }
 
-        const updated_deck_values = decks.map((d, index) => ({
-           ...d,
-           level_gained: new_levels[index],
-           xp: d.xp + d.xp_gained * percentage,
-           level: (d.level + new_levels[index]),
-        }))
-        await levelDecks(updated_deck_values);
-        return updated_deck_values;
+    //     const updated_deck_values = decks.map((d, index) => ({
+    //        ...d,
+    //        level_gained: new_levels[index],
+    //        xp: d.xp + d.xp_gained * percentage,
+    //        level: (d.level + new_levels[index]),
+    //     }))
+    //     await levelDecks(updated_deck_values);
+    //     return updated_deck_values;
+        return decks;
     }
 
+    // TODO: move to /utils?
     const mouse_sensor = useSensor(MouseSensor, {
         activationConstraint: {
             distance: 5,
@@ -292,7 +182,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const sensors = useSensors(mouse_sensor, touch_sensor);
 
     const handleDragStart = (event) => {
-        setSelectedCard(card_state.hand[event.active.id]);
+        player_actions.setSelected(event.active.id);
     }
 
     const handleDragEnd = (event) => {
@@ -302,16 +192,17 @@ export default function Dungeon({ dungeon, onNavigate }) {
             setSelectedMonster(monsters[over.id]);
             setIsAttackModalOpen(true);
         } else {
-            setSelectedCard(null);
+            player_actions.setSelected(null);
             setSelectedMonster(null);
         }
     }
 
     const handleSubmitAttack = (answer) => {
-        let new_answer_stats = {...answer_stats};
+        const card_answer = player_actions.getSelectedAnswer();
+        const is_correct = answer.toLowerCase() === card_answer || answer.toLowerCase() === "test";
 
-        if (answer && (selected_card.answer.toLowerCase() === answer.toLowerCase() || answer.toLowerCase() === "test")) {
-            const hurt_monsters = monsters.map(mon => mon.id === selected_monster.id ? { ...mon, health: mon.health - player_attack, is_hit: true } : mon);
+        if (answer && is_correct) {
+            const hurt_monsters = monsters.map(mon => mon.id === selected_monster.id ? { ...mon, health: mon.health - player.attack, is_hit: true } : mon);
 
             setMonsters(hurt_monsters);
 
@@ -328,37 +219,28 @@ export default function Dungeon({ dungeon, onNavigate }) {
                 });
             }, 800);
 
-            play_card(selected_card);
+            player_actions.playCard(player_actions.getSelected());
 
-            reward_deck_xp(selected_card.deck_id, selected_monster.xp_reward);
-
-            new_answer_stats.correct += 1;
+            // reward_deck_xp(selected_card.deck_id, selected_monster.xp_reward);
         } else {
-            setPlayerHealth(player_health - selected_monster.attack);
-
-            // if (player_health <= 0) {
-            //     setIsDeathModalOpen(true);
-            //     return;
-            // }
-
-            new_answer_stats.wrong += 1;
+            player_actions.hit(selected_monster.attack);
         }
 
-        setSelectedCard(null);
+        player_actions.setSelected(null);
         setSelectedMonster(null);
-        setAnswerStats(new_answer_stats);
+        player_actions.updateStats(is_correct);
     }
 
     useEffect(() => {
         setTimeout(() => {
-            if (player_health <= 0) {
+            if (player_actions.isDead()) {
                 setIsDeathModalOpen(true);
             }
         }, 1000);
-    }, [player_health]);
+    }, [player.health]);
 
     const handleCloseAttackModal = () => {
-        setSelectedCard(null);
+        player_actions.setSelected(null);
         setSelectedMonster(null);
         setIsAttackModalOpen(false);
     }
@@ -372,7 +254,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
         const new_decks = await save_deck_xp(decks, xp_percentage);
         const results = {
             decks: new_decks, // NEW_DECKS THATS HERE DOESN'T HAVE UPDATED XP (IN CASE OF FEE ETC)
-            answer_stats: answer_stats
+            answer_stats: player.answer_stats
         }
         onNavigate({name: 'results', related_object: results});
     }
@@ -381,7 +263,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="w-full flex flex-col bg-dungeon-dark-900 min-h-screen relative">
                 <button className="text-dungeon-red-900 border border-dungeon-red-900 hover:text-dungeon-dark-900 hover:bg-dungeon-red-900 px-2 py-1 rounded-lg absolute top-4 left-4" onClick={() => {setIsEarlyFleeModalOpen(true)}}>{`Flee`}</button>
-                {cards && cards.length === 0 ? (
+                {!player_actions.hasCards() ? (
                     <div className="text-white font-bold flex flex-col h-full justify-center text-center">
                         <h1>No cards in decks!</h1>
                         <h2>Please add some cards to your decks and come back.</h2>
@@ -390,13 +272,13 @@ export default function Dungeon({ dungeon, onNavigate }) {
                     <div className="flex flex-col w-full h-full">
                         <Monsters monsters={monsters} />
                         
-                        <PlayerCards hand={card_state.hand} player_health={player_health}/>
+                        <PlayerUI player={player} player_actions={player_actions} />
 
                         {isAttackModalOpen && (
                             <AttackModal
                                 onClose={handleCloseAttackModal}
                                 onSave={handleSubmitAttack}
-                                card={selected_card}
+                                card={player_actions.getCard(player_actions.getSelected())}
                             />
                         )}
                         {isRoundEndModalOpen && (
@@ -419,8 +301,8 @@ export default function Dungeon({ dungeon, onNavigate }) {
                             />
                         )}
                         <DragOverlay dropAnimation={null}>
-                            {selected_card !== null ? (
-                                <DraggableCard card={selected_card} />
+                            {player_actions.getSelected() !== null ? (
+                                <PlayerCard card={player_actions.getCard(player_actions.getSelected())} fresh={false} />
                             ) : null}
                         </DragOverlay>
                     </div>

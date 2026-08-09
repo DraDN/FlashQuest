@@ -4,7 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import DungeonModal from './DungeonModal';
 import DungeonCard from './DungeonCard';
 
-import { getDungeons, createDungeon, editDungeon, deleteDungeon } from '../api';
+import { getDungeons, createDungeon, editDungeon, deleteDungeon } from '../utils/api';
 
 export default function Dungeons({ onDungeonSelect }) {
     const { user } = useUser();

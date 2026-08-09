@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { getDungeonDecks } from "../api";
+import { getDungeonDecks } from "../utils/api";
 
 export default function DungeonCard({ dungeon, onDelete, onEdit, onPlay }) {
     const [ decks, setDecks ] = useState([]);
