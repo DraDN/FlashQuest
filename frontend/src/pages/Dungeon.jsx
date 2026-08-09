@@ -7,7 +7,7 @@ import { getDungeonCards, getDungeonDecks, levelDecks, levelUpAccount, getAccoun
 import { PlayerUI, PlayerCard } from "../components/PlayerUI";
 import { usePlayer } from "../components/usePlayer";
 
-import Monsters from "../components/Monsters";
+import Monsters from "../components/MonsterUI";
 
 import AttackModal from "../components/AttackModal";
 import RoundEndModal from "../components/RoundEndModal";
@@ -16,7 +16,6 @@ import DeathModal from "../components/DeathModal";
 
 const MAX_NO_MONSTERS = 5;
 const EARLY_FLEE_FEE = 0.6;
-const PLAYER_ATTACK_SCALE_FACTOR = 1.12;
 const MONSTER_ATTACK_SCALE_FACTOR = 1.3;
 
 let count = 0;

@@ -4,6 +4,7 @@ import { shuffle_array } from "../utils/shuffle";
 
 const MAX_HAND_SIZE = 5;
 const BASE_PLAYER_ATTACK = 10;
+const ATTACK_SCALE_FACTOR = 1.12;
 const BASE_PLAYER_HEALTH = 100;
 
 export function usePlayer({ dungeon_id }) {
@@ -48,7 +49,7 @@ export function usePlayer({ dungeon_id }) {
     }, [dungeon_id]);
 
     const setAttackBasedOnLevel = (level) => {
-        setAttack(Math.round(BASE_PLAYER_ATTACK * Math.pow(PLAYER_ATTACK_SCALE_FACTOR, level)));
+        setAttack(Math.round(BASE_PLAYER_ATTACK * Math.pow(ATTACK_SCALE_FACTOR, level)));
     }
 
     const refillHand = useCallback((previousState) => {
