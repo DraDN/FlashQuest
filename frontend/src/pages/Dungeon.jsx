@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { DndContext, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
+import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useUser } from "@clerk/clerk-react";
 
 import { getDungeonCards, getDungeonDecks, levelDecks, levelUpAccount, getAccountLevel } from "../utils/api";
+
+import useSensorsConfig from "../utils/sensors";
 
 import { PlayerUI, PlayerCard } from "../components/PlayerUI";
 import { usePlayer } from "../components/usePlayer";
@@ -30,12 +32,15 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const [ isRoundEndModalOpen, setIsRoundEndModalOpen ] = useState(false);
     const [ isEarlyFleeModalOpen, setIsEarlyFleeModalOpen ] = useState(false);
     const [ isDeathModalOpen, setIsDeathModalOpen ] = useState(false);
+
+    const sensors_conf = useSensorsConfig();
     
     const nextRoom = () => {
         setRound(round + 1);
         monster_actions.generateRound(round + 1);
     }
 
+    // maybe move to usePlayer?
     useEffect(() => {
         getAccountLevel(user.id).then((level) => {
             player_actions.setAttackBasedOnLevel(level.level);
@@ -90,20 +95,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
     //     return updated_deck_values;
         return decks;
     }
-
-    // TODO: move to /utils?
-    const mouse_sensor = useSensor(MouseSensor, {
-        activationConstraint: {
-            distance: 5,
-        },
-    });
-    const touch_sensor = useSensor(TouchSensor, {
-        activationConstraint: {
-            delay: 200,
-            tolerance: 5,
-        },
-    });
-    const sensors = useSensors(mouse_sensor, touch_sensor);
 
     const handleDragStart = (event) => {
         player_actions.setSelected(event.active.id);
@@ -175,7 +166,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     return (
-        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors_conf} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="w-full flex flex-col bg-dungeon-dark-900 min-h-screen relative">
                 <button className="text-dungeon-red-900 border border-dungeon-red-900 hover:text-dungeon-dark-900 hover:bg-dungeon-red-900 px-2 py-1 rounded-lg absolute top-4 left-4" onClick={() => {setIsEarlyFleeModalOpen(true)}}>{`Flee`}</button>
                 {!player_actions.hasCards() ? (
