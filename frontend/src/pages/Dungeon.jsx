@@ -7,108 +7,33 @@ import { getDungeonCards, getDungeonDecks, levelDecks, levelUpAccount, getAccoun
 import { PlayerUI, PlayerCard } from "../components/PlayerUI";
 import { usePlayer } from "../components/usePlayer";
 
-import Monsters from "../components/MonsterUI";
+import { MonsterUI } from "../components/MonsterUI";
+import { useMonster } from "../components/useMonster";
 
 import AttackModal from "../components/AttackModal";
 import RoundEndModal from "../components/RoundEndModal";
 import EarlyFleeModal from "../components/EarlyFleeModal";
 import DeathModal from "../components/DeathModal";
 
-const MAX_NO_MONSTERS = 5;
 const EARLY_FLEE_FEE = 0.6;
-const MONSTER_ATTACK_SCALE_FACTOR = 1.3;
-
-let count = 0;
-
-const MONSTER_TEMPLATES = [
-    { id: "skeleton", name: "Skeleton" },
-    { id: "goblin", name: "Goblin" },
-    { id: "orc", name: "Orc" },
-]
-
-const TIER_TEMPLATES = [
-    { id: "Weak", base_health: 10, base_attack: 5, base_xp: 5 },
-    { id: "Normal", base_health: 20, base_attack: 10, base_xp: 10 },
-    { id: "Hard", base_health: 30, base_attack: 10, base_xp: 15 },
-    { id: "Elite", base_health: 40, base_attack: 15, base_xp: 25 },
-    { id: "Boss", base_health: 100, base_attack: 20, base_xp: 50 },
-]
-
-const MONSTER_ASSETS = MONSTER_TEMPLATES.map(monster => ({
-    name: monster.name,
-    image: `/monsters/${monster.id}.png`
-}))
-
-const get_room_progression_index = (round) => {
-    return ((round - 1) % 10) + 1;
-}
-
-const get_monster = (round) => {
-    const floor_index = Math.floor((round - 1) / 10);
-    const floor_mult = Math.pow(MONSTER_ATTACK_SCALE_FACTOR, floor_index);
-    const room_pregression_index = get_room_progression_index(round);
-
-    let tier_id = "Normal";
-    if (room_pregression_index >= 4 && room_pregression_index <= 6) tier_id = "Hard";
-    else if (room_pregression_index >= 7 && room_pregression_index <= 8) tier_id = "Elite";
-    else if (room_pregression_index == 9) tier_id = "Weak";
-    else if (room_pregression_index == 10) tier_id = "Boss";
-
-    let tier = TIER_TEMPLATES.find(tier => tier.id === tier_id);
-
-    const monster_asset = MONSTER_ASSETS[Math.floor(Math.random() * MONSTER_ASSETS.length)];
-
-    const max_health = Math.round(tier.base_health * floor_mult + Math.random() * 5);
-
-    const attack = Math.round(tier.base_attack * floor_mult + Math.random() * 5);
-
-    const xp = Math.round(tier.base_xp * floor_mult + Math.random() * 5);
-
-    return {
-        id: count++,
-        tier: tier.id,
-        asset: monster_asset,
-        health: max_health,
-        max_health: max_health,
-        attack: attack,
-        xp_reward: xp,
-        is_hit: false
-    }
-}
 
 export default function Dungeon({ dungeon, onNavigate }) {
     const { user } = useUser();
 
-    const { player, player_actions } = usePlayer({ dungeon_id: dungeon.id });
-
     const [ decks, setDecks ] = useState([]);
     const [ round, setRound ] = useState(1);
 
-    const [ selected_monster, setSelectedMonster ] = useState(null);
+    const { player, player_actions } = usePlayer({ dungeon_id: dungeon.id });
+    const { monsters, monster_actions } = useMonster({ round: round });
 
     const [ isAttackModalOpen, setIsAttackModalOpen ] = useState(false);
     const [ isRoundEndModalOpen, setIsRoundEndModalOpen ] = useState(false);
     const [ isEarlyFleeModalOpen, setIsEarlyFleeModalOpen ] = useState(false);
     const [ isDeathModalOpen, setIsDeathModalOpen ] = useState(false);
-
-    const generate_monsters = () => {
-        const new_monsters = [];
-        const progression_index = get_room_progression_index(round);
-        let number_of_monsters = Math.round(Math.random() * (MAX_NO_MONSTERS - 1) + 1);
-        if (progression_index >= 4 && progression_index <= 6) { number_of_monsters = Math.round(Math.random() * MAX_NO_MONSTERS / 2) + 1; }
-        else if (progression_index >= 7 && progression_index <= 8) { number_of_monsters = Math.round(Math.random() * MAX_NO_MONSTERS / 4) + 1; }
-        else if (progression_index == 9) { number_of_monsters = Math.round(Math.random() * MAX_NO_MONSTERS/2 + MAX_NO_MONSTERS/2); }
-        else if (progression_index == 10) { number_of_monsters = 1; }
-        for (let i = 0; i < number_of_monsters; i++) {
-            new_monsters.push(get_monster(round));
-        }
-        return new_monsters;
-    }
-    const [ monsters, setMonsters ] = useState(() => generate_monsters());
     
     const nextRoom = () => {
         setRound(round + 1);
-        setMonsters(generate_monsters());
+        monster_actions.generateRound(round + 1);
     }
 
     useEffect(() => {
@@ -188,11 +113,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
         const { over } = event;
 
         if (over) {
-            setSelectedMonster(monsters[over.id]);
+            monster_actions.setSelected(over.id);
             setIsAttackModalOpen(true);
         } else {
             player_actions.setSelected(null);
-            setSelectedMonster(null);
+            monster_actions.setSelected(null);
         }
     }
 
@@ -201,32 +126,15 @@ export default function Dungeon({ dungeon, onNavigate }) {
         const is_correct = answer.toLowerCase() === card_answer || answer.toLowerCase() === "test";
 
         if (answer && is_correct) {
-            const hurt_monsters = monsters.map(mon => mon.id === selected_monster.id ? { ...mon, health: mon.health - player.attack, is_hit: true } : mon);
+            monster_actions.hitSelected(player.attack);
 
-            setMonsters(hurt_monsters);
-
-            setTimeout(() => {
-                setMonsters(prevMonsters => {
-                    const unhurt_monsters = prevMonsters.map(mon => ({...mon, is_hit: false }));
-                    const updated_monsters = unhurt_monsters.filter(mon => mon.health > 0);
-                    if (updated_monsters.length === 0) {
-                        setTimeout(() => {
-                            setIsRoundEndModalOpen(true);
-                        }, 1000);
-                    }
-                    return updated_monsters;
-                });
-            }, 800);
-
-            player_actions.playCard(player_actions.getSelected());
+            player_actions.playCard();
 
             // reward_deck_xp(selected_card.deck_id, selected_monster.xp_reward);
         } else {
-            player_actions.hit(selected_monster.attack);
+            player_actions.hit(monster_actions.getAttackSelected());
         }
 
-        player_actions.setSelected(null);
-        setSelectedMonster(null);
         player_actions.updateStats(is_correct);
     }
 
@@ -238,9 +146,17 @@ export default function Dungeon({ dungeon, onNavigate }) {
         }, 1000);
     }, [player.health]);
 
+    useEffect(() => {
+        setTimeout(() => {
+            if (monsters.length === 0) {
+                setIsRoundEndModalOpen(true);
+            }
+        }, 1000);
+    }, [monsters.length]);
+
     const handleCloseAttackModal = () => {
         player_actions.setSelected(null);
-        setSelectedMonster(null);
+        monster_actions.setSelected(null);
         setIsAttackModalOpen(false);
     }
 
@@ -269,7 +185,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                     </div>
                     ) : (
                     <div className="flex flex-col w-full h-full">
-                        <Monsters monsters={monsters} />
+                        <MonsterUI monsters={monsters} />
                         
                         <PlayerUI player={player} player_actions={player_actions} />
 
