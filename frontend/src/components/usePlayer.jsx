@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getDungeonCards, getDungeonDecks } from "../utils/api";
 import { shuffle_array } from "../utils/shuffle";
 
@@ -11,6 +11,7 @@ export function usePlayer({ dungeon_id }) {
     const [ cards, setCards ] = useState([]);
 
     const [ selected_card, setSelectedCard ] = useState(null);
+    const selected_card_ref = useRef(null);
     const [ card_state, setCardState ] = useState({
         draw: [],
         hand: [],
@@ -69,21 +70,23 @@ export function usePlayer({ dungeon_id }) {
             new_hand.push(card_to_add);
         }
 
-        return {
+        const new_state = {
             draw: current_draw,
             hand: new_hand,
             discard: current_discard,
         };
+
+        return new_state;
     });
 
     const playCard = useCallback(() => {
         setCardState((previousState) => {
-            const new_discard = [...previousState.discard, selected_card];
+            const new_discard = [...previousState.discard, { id: selected_card } ];
 
-            if (new_hand.length === 0) {
+            if (previousState.hand.length === 0) {
                 return refillHand({
                     draw: previousState.draw,
-                    hand: new_hand,
+                    hand: [],
                     discard: new_discard
                 });
             }
@@ -93,9 +96,13 @@ export function usePlayer({ dungeon_id }) {
                 discard: new_discard
             }
         });
-    }, [refillHand, card_state, selected_card]);
 
-    const remove_card = (card_id) => {
+        setSelectedCard(null);
+        selected_card_ref.current = null;
+    }, [refillHand, card_state, selected_card, selected_card_ref]);
+
+    const remove_card_from_hand = (card_id) => {
+        // TODO: add check for card id boundary
         setCardState((previousState) => {
             const new_hand = previousState.hand.filter((card) => card.id !== card_id);
             return {
@@ -105,7 +112,8 @@ export function usePlayer({ dungeon_id }) {
         })
     }
 
-    const add_card = (card_id) => {
+    const add_card_to_hand = (card_id) => {
+        // TODO: add check for card id boundary
         setCardState((previousState) => {
             const new_hand = [...previousState.hand, { id: card_id }];
             return {
@@ -134,20 +142,25 @@ export function usePlayer({ dungeon_id }) {
     });
 
     const getCard = useCallback((card_id) => {
+        // TODO: add check for card id boundary
         return cards.at(card_id);
     }, [cards]);
 
     const setSelected = useCallback((card_id) => {
-        if (selected_card !== null && card_id !== selected_card) {
-            add_card(selected_card);
+        // TODO: add check for card id boundary
+        // if we already have a card selected, put it back
+        if (selected_card_ref.current !== null && card_id !== selected_card_ref.current) {
+            add_card_to_hand(selected_card_ref.current);
         }
 
+        // if we select a new card, move it from hand to "selected"
         if (card_id !== null) {
-            remove_card(card_id);
+            remove_card_from_hand(card_id);
         }
 
         setSelectedCard(card_id);
-    });
+        selected_card_ref.current = card_id;
+    }, [selected_card_ref.current, add_card_to_hand, remove_card_from_hand]);
 
     const getSelected = useCallback(() => {
         return selected_card;
