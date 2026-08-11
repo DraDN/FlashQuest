@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useUser } from "@clerk/clerk-react";
 
-import { getDungeonCards, getDungeonDecks, levelDecks, levelUpAccount, getAccountLevel } from "../utils/api";
+import { getDungeonCards, getDungeonDecks, levelUpDecks, levelUpAccount, getAccountLevel } from "../utils/api";
 
 import useSensorsConfig from "../utils/sensors";
 
@@ -22,7 +22,7 @@ const EARLY_FLEE_FEE = 0.6;
 export default function Dungeon({ dungeon, onNavigate }) {
     const { user } = useUser();
 
-    const [ decks, setDecks ] = useState([]);
+    // const [ decks, setDecks ] = useState([]);
     const [ round, setRound ] = useState(1);
 
     const { player, player_actions } = usePlayer({ dungeon_id: dungeon.id });

@@ -1,7 +1,7 @@
 // === ACCOUNT LEVEL ===
 
-export const checkAccountStatus = async () => 
-    fetch(`/api/account/check-status`).then(res => res.json());
+export const checkAccountInit = async () => 
+    fetch(`/api/account/check-init`).then(res => res.json());
 
 export const getAccountLevel = async () => 
     fetch(`/api/account/level`).then(res => res.json());
@@ -47,8 +47,8 @@ export const renameDeck = async (id, name) =>
         body: JSON.stringify({ name })
     }).then(res => res.json());
 
-export const levelDecks = async (decks) => {
-    return fetch(`/api/decks/sync-xp`, {
+export const levelUpDecks = async (decks) => {
+    return fetch(`/api/decks/level-up`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
