@@ -1,41 +1,41 @@
 // === ACCOUNT LEVEL ===
 
-export const checkAccountStatus = async (user_id) => 
-    fetch(`/api/account/check-status?user_id=${user_id}`).then(res => res.json());
+export const checkAccountStatus = async () => 
+    fetch(`/api/account/check-status`).then(res => res.json());
 
-export const getAccountLevel = async (user_id) => 
-    fetch(`/api/account/level?user_id=${user_id}`).then(res => res.json());
+export const getAccountLevel = async () => 
+    fetch(`/api/account/level`).then(res => res.json());
 
-export const setAccountLevel = async (user_id, level) =>
+export const setAccountLevel = async (level) =>
     fetch(`/api/account/level`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ user_id, level })
+        body: JSON.stringify({ level })
     }).then(res => res.json());
 
-export const levelUpAccount = async (user_id, added_levels) =>
+export const levelUpAccount = async (added_levels) =>
     fetch(`/api/account/level-up`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ user_id, added_levels })
+        body: JSON.stringify({ added_levels })
     }).then(res => res.json());
 
 // === DECKS API ===
 
-export const getDecks = async (user_id) => 
-    fetch(`/api/decks?user_id=${user_id}`).then(res => res.json());
+export const getDecks = async () => 
+    fetch(`/api/decks`).then(res => res.json());
 
-export const createDeck = async (user_id, name) => 
+export const createDeck = async (name) => 
     fetch(`/api/decks`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ user_id, name })
+        body: JSON.stringify({ name })
     }).then(res => res.json());
 
 export const renameDeck = async (id, name) =>
@@ -96,8 +96,8 @@ export const deleteCard = async (id) =>
 
 // === DUNGEONS API ===
 
-export const getDungeons = async (user_id) => 
-    fetch(`/api/dungeons?user_id=${user_id}`).then(res => res.json());
+export const getDungeons = async () => 
+    fetch(`/api/dungeons`).then(res => res.json());
 
 export const getDungeonDecks = async (dungeon_id) => 
     fetch(`/api/dungeons/${dungeon_id}/decks`).then(res => res.json());
@@ -105,13 +105,13 @@ export const getDungeonDecks = async (dungeon_id) =>
 export const getDungeonCards = async (dungeon_id) => 
     fetch(`/api/dungeons/${dungeon_id}/cards`).then(res => res.json());
 
-export const createDungeon = async (user_id, name, deck_ids) => 
+export const createDungeon = async (name, deck_ids) => 
     fetch(`/api/dungeons`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ user_id, name, deck_ids })
+        body: JSON.stringify({ name, deck_ids })
     }).then(res => res.json());
 
 export const editDungeon = async (id, name, deck_ids) => 

@@ -10,8 +10,7 @@ const authHandler = require('../middleware/authHandler');
 router.use(authHandler);
 
 router.get('/', async (req, res) => {
-    const { user_id } = req.query;
-    const dungeons = await dungeonsService.getUserDungeons(user_id);
+    const dungeons = await dungeonsService.getUserDungeons(req.user_id);
     return res.status(200).json(dungeons);
 });
 

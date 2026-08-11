@@ -10,8 +10,7 @@ router.use(authHandler);
 const decksService = require('../services/decksService');
 
 router.get('/', authHandler, async (req, res) => {
-    const { user_id } = req.query;
-    const decks = await decksService.getUserDecks(user_id);
+    const decks = await decksService.getUserDecks(req.user_id);
     return res.status(200).json(decks);
 });
 
