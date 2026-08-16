@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+## [0.2.0-alpha] - "Armadillo" - 2026-08-16
+
+### Security
+- Proper CORS configuration
+- Rate limiter
+- Helmet headers
+- Superior error handling on the backend
+- API input verifications
+- API auth verifications
+
+### Added
+
+- Frontend handles error to a limited degree
+
+### Changed
+
+- Refactored frontend and backend code
+- Deck XP bar now better shows XP progress towards the next level
+
+### Fix
+
+- Editing Dungeons now correctly refreshes the links to Decks
+
 ## [0.1.0-alpha] - 2026-07-04
 
 ### Added

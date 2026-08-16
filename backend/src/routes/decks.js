@@ -31,11 +31,12 @@ router.post('/', [
     }
 });
 
+// TODO: VALIDATE ID FOR EVERY ID RELATED ENDPOINT
 router.post('/:id/rename', [
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
-        .isLength({ max: decksService.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long')
+        .isLength({ max: decksService.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long'),
 ], validationHandler, async (req, res, next) => {
     const { id } = req.params;
     const { name } = req.body;

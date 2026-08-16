@@ -54,12 +54,7 @@ module.exports = {
 
 			return cardsRepo.getCardsOfDeck(id);
 		})
-		// const found = decksRepo.checkDeckExists(id);
-		// if (!found) {
-		// 	throw new NotFoundError('Deck ID not found');
-		// }
 
-		// return cardsRepo.getCardsOfDeck(id);
 		return cards_transaction();
 	}
 };
