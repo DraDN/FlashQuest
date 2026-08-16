@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useUser } from "@clerk/clerk-react";
 
-import { getDungeonCards, getDungeonDecks, levelUpDecks, levelUpAccount, getAccountLevel } from "../utils/api";
+import { getAccountLevel } from "../utils/api";
 
 import useSensorsConfig from "../utils/sensors";
 
@@ -11,6 +11,8 @@ import { usePlayer } from "../components/usePlayer";
 
 import { MonsterUI } from "../components/MonsterUI";
 import { useMonster } from "../components/useMonster";
+
+import { useXPManager } from "../components/useXPManager";
 
 import AttackModal from "../components/AttackModal";
 import RoundEndModal from "../components/RoundEndModal";
@@ -22,11 +24,12 @@ const EARLY_FLEE_FEE = 0.6;
 export default function Dungeon({ dungeon, onNavigate }) {
     const { user } = useUser();
 
-    // const [ decks, setDecks ] = useState([]);
     const [ round, setRound ] = useState(1);
 
     const { player, player_actions } = usePlayer({ dungeon_id: dungeon.id });
     const { monsters, monster_actions } = useMonster({ round: round });
+
+    const { xp_actions } = useXPManager({ dungeon_id: dungeon.id });
 
     const [ isAttackModalOpen, setIsAttackModalOpen ] = useState(false);
     const [ isRoundEndModalOpen, setIsRoundEndModalOpen ] = useState(false);
@@ -42,59 +45,10 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
     // maybe move to usePlayer?
     useEffect(() => {
-        getAccountLevel(user.id).then((level) => {
+        getAccountLevel().then((level) => {
             player_actions.setAttackBasedOnLevel(level.level);
         });
-    }, [user?.id]);
-
-    const reward_deck_xp = (deck_id, xp) => {
-    //     setDecks((prevDecks) =>
-    //         prevDecks.map((d) => {
-    //             if (d.id === deck_id) {
-    //                 const new_xp_gained = d.xp_gained + xp;
-
-    //                 return { ...d, xp_gained: new_xp_gained };
-    //             }
-
-    //             return d;
-    //         })
-    //     );
-    }
-
-    const save_deck_xp = async (decks, percentage) => {
-    //     let new_levels = [];
-    //     decks.forEach(deck => {
-    //         let level_gained = 0;
-
-    //         let xp_needed_for_next_level = (deck.level + level_gained) * 100;
-    //         let total_xp = deck.xp + (deck.xp_gained * percentage);
-    //         while (total_xp >= xp_needed_for_next_level) {
-    //             level_gained++;
-    //             xp_needed_for_next_level = (deck.level + level_gained) * 100;
-    //         }
-
-    //         new_levels.push(level_gained);
-    //     });
-
-    //     let account_level_up = 0;
-    //     new_levels.forEach(level => {
-    //         account_level_up += level;
-    //     });
-
-    //     if (account_level_up > 0) {
-    //         await levelUpAccount(user.id, account_level_up);
-    //     }
-
-    //     const updated_deck_values = decks.map((d, index) => ({
-    //        ...d,
-    //        level_gained: new_levels[index],
-    //        xp: d.xp + d.xp_gained * percentage,
-    //        level: (d.level + new_levels[index]),
-    //     }))
-    //     await levelDecks(updated_deck_values);
-    //     return updated_deck_values;
-        return decks;
-    }
+    });
 
     const handleDragStart = (event) => {
         player_actions.setSelected(event.active.id);
@@ -121,9 +75,9 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
             player_actions.playCard();
 
-            // reward_deck_xp(selected_card.deck_id, selected_monster.xp_reward);
+            xp_actions.rewardXPToDeck(player_actions.getSelected().deck_id, monster_actions.getSelected().xp_reward);
         } else {
-            player_actions.hit(monster_actions.getAttackSelected());
+            player_actions.hit(monster_actions.getSelected().attack);
         }
 
         player_actions.updateStats(is_correct);
@@ -157,7 +111,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
             return;
         }
 
-        const new_decks = await save_deck_xp(decks, xp_percentage);
+        const new_decks = await xp_actions.save(xp_percentage);
         const results = {
             decks: new_decks, // NEW_DECKS THATS HERE DOESN'T HAVE UPDATED XP (IN CASE OF FEE ETC)
             answer_stats: player.answer_stats

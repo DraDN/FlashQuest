@@ -6,13 +6,13 @@ import { getAccountLevel, checkAccountInit } from "../utils/api";
 export default function AccountSummary() {
     const { user } = useUser();
     const [ level, setLevel ] = useState(() => {
-        checkAccountInit(user.id); // TODO: maybe add greet for new users
+        checkAccountInit(); // TODO: maybe add greet for new users
         return 0;
     });
 
     useEffect(() => {
-        getAccountLevel(user.id).then((level) => setLevel(level.level));
-    }, [user?.id]);
+        getAccountLevel().then((level) => setLevel(level.level));
+    });
 
     return (
         <>

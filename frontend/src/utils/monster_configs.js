@@ -22,7 +22,7 @@ const MONSTER_ASSETS = MONSTER_TEMPLATES.map(monster => ({
 }))
 
 const FLOOR_CONFIG = [
-    { round_range: [1, 3], tier_id: "Normal", min_monsters: 1, max_monsters: MAX_NO_MONSTERS-1 },
+    { round_range: [1, 3], tier_id: "Normal", min_monsters: 1, max_monsters: 1 },
     { round_range: [3, 3], tier_id: "Hard", min_monsters: 0, max_monsters: 1 },
     { round_range: [4, 6], tier_id: "Hard", min_monsters: 1, max_monsters: MAX_NO_MONSTERS / 2 },
     { round_range: [7, 8], tier_id: "Elite", min_monsters: 1, max_monsters: MAX_NO_MONSTERS / 4 },

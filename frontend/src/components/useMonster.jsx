@@ -17,9 +17,13 @@ export function useMonster({ round }) {
         setSelectedMonster(monster_index);
     });
 
-    const getSelected = useCallback(() => {
+    const getSelectedID = useCallback(() => {
         return selected_monster;
     }, [selected_monster]);
+
+    const getSelected = useCallback(() => {
+        return monsters.at(selected_monster);
+    }, [monsters, selected_monster]);
 
     const hitSelected = useCallback((attack) => {
         if (selected_monster === null) { return; }
@@ -40,20 +44,15 @@ export function useMonster({ round }) {
         }, 800);
     }, [monsters, selected_monster]);
 
-    const getAttackSelected = useCallback(() => {
-        if (selected_monster === null) { return 0; }
-        return monsters.at(selected_monster).attack;
-    });
-
     return {
         monsters: monsters,
 
         monster_actions: {
             generateRound,
             setSelected,
+            getSelectedID,
             getSelected,
             hitSelected,
-            getAttackSelected
         }
     }
 }

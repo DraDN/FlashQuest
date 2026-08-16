@@ -38,15 +38,6 @@ export function usePlayer({ dungeon_id }) {
                 return filled_hand;
             });
         });
-
-        // getDungeonDecks(dungeon_id)
-        // .then((decks) => decks.map(d => {
-            // return {
-                // ...d,
-                // level_gained: 0,
-                // xp_gained: 0
-            // }
-        // })).then(setDecks);
     }, [dungeon_id]);
 
     const setAttackBasedOnLevel = (level) => {
@@ -162,8 +153,12 @@ export function usePlayer({ dungeon_id }) {
         selected_card_ref.current = card_id;
     }, [selected_card_ref.current, add_card_to_hand, remove_card_from_hand]);
 
-    const getSelected = useCallback(() => {
+    const getSelectedID = useCallback(() => {
         return selected_card;
+    }, [selected_card]);
+
+    const getSelected = useCallback(() => {
+        return getCard(selected_card);
     }, [selected_card]);
 
     const getSelectedAnswer = useCallback(() => {
@@ -190,6 +185,7 @@ export function usePlayer({ dungeon_id }) {
             updateStats,
             getCard,
             setSelected,
+            getSelectedID,
             getSelected,
             getSelectedAnswer,
             isDead,

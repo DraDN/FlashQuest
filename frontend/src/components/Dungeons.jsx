@@ -20,12 +20,12 @@ export default function Dungeons({ onDungeonSelect }) {
     }
 
     useEffect(() => {
-        getDungeons(user.id)
+        getDungeons()
         .then(setDungeons);
-    }, [user?.id]);
+    }, [user.id]);
 
     const handleDungeonCreation = async (name, deck_ids) => {
-        const new_dungeon = await createDungeon(user.id, name, deck_ids);
+        const new_dungeon = await createDungeon(name, deck_ids);
         setDungeons([...dungeons, new_dungeon]);
     }
 

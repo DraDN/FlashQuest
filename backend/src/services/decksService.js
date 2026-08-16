@@ -30,8 +30,8 @@ module.exports = {
 		return decksRepo.getDeck(id);
 	},
 
-	async setDecksLevelXP(decks_level_info, user_id) {
-		return decksRepo.setDecksLevelXP(decks_level_info, user_id);
+	async addDecksLevelXP(decks_level_info, user_id) {
+		return decksRepo.addDecksLevelXP(decks_level_info, user_id);
 	},
 
 	async deleteDeck(id, user_id) {

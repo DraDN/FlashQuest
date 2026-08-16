@@ -20,11 +20,11 @@ export default function Decks({ onDeckSelect }) {
     }
 
     useEffect(() => {
-        getDecks(user.id).then(setDecks);
-    }, [user?.id]);
+        getDecks().then(setDecks);
+    }, [user.id]);
 
     const handleDeckCreation = async (name) => {
-        const new_deck = await createDeck(user.id, name);
+        const new_deck = await createDeck(name);
         setDecks([...decks, new_deck]);
     }
 

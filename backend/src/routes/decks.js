@@ -55,7 +55,7 @@ router.post('/level-up', async (req, res, next) => {
     const { decks } = req.body;
 
     try {
-        await decksService.setDecksLevelXP(decks || [], req.user_id);
+        await decksService.addDecksLevelXP(decks || [], req.user_id);
         return res.status(204).send();
     } catch (error) {
         next(error);

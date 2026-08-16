@@ -13,8 +13,8 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
     const { user } = useUser();
 
     useEffect(() => {
-        getDecks(user.id).then(setDecks);
-    }, [user?.id]);
+        getDecks().then(setDecks);
+    });
 
     useEffect(() => {
         if (mode === 'edit') {
