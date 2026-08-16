@@ -1,5 +1,5 @@
 import { get_room_progression_index, get_floor_index } from "./dungeon_utils";
-import { MONSTER_ASSETS, MAX_NO_MONSTERS, MONSTER_SCALE_FACTOR, RANDOM_DEVIATION, get_monster_tier, get_floor_config } from "./monster_configs";
+import { MONSTER_ASSETS, MAX_NO_MONSTERS, MONSTER_SCALE_FACTOR, RANDOM_DEVIATION, get_monster_tier, get_floor_config } from "../config/monster_configs";
 
 const get_floor_mult = (floor_index) => {
     return Math.pow(MONSTER_SCALE_FACTOR, floor_index);

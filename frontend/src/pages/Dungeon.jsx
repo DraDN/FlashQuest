@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useUser } from "@clerk/clerk-react";
 
-import useSensorsConfig from "../utils/sensors";
+import useSensorsConfig from "../config/sensors";
 
 import { PlayerUI, PlayerCard } from "../components/PlayerUI";
 import { usePlayer } from "../hooks/usePlayer";
@@ -19,7 +19,7 @@ import DeathModal from "../components/DeathModal";
 
 import IntermittentMessage from "../components/IntermittentMessage";
 
-const EARLY_FLEE_FEE = 0.6;
+import * as DUNGEON_CONFIG from "../config/dungeon_configs";
 
 export default function Dungeon({ dungeon, onNavigate }) {
     const { user } = useUser();
@@ -82,7 +82,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
             if (player_actions.isDead()) {
                 setIsDeathModalOpen(true);
             }
-        }, 1000);
+        }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
     }, [player.health]);
 
     useEffect(() => {
@@ -90,7 +90,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
             if (monsters.length === 0) {
                 setIsRoundEndModalOpen(true);
             }
-        }, 1000);
+        }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
     }, [monsters.length]);
 
     const handleCloseAttackModal = () => {
@@ -157,7 +157,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                     )}
                     {isEarlyFleeModalOpen && (
                         <EarlyFleeModal
-                            onClose={async () => await handleExit(EARLY_FLEE_FEE)}
+                            onClose={async () => await handleExit(DUNGEON_CONFIG.EARLY_FLEE_FEE)}
                             onContinue={() => setIsEarlyFleeModalOpen(false)}
                             fee={EARLY_FLEE_FEE}
                         />

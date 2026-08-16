@@ -2,10 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { getDungeonCards, getDungeonDecks, getAccountLevel } from "../services/api";
 import { shuffle_array } from "../utils/shuffle";
 
-const MAX_HAND_SIZE = 5;
-const BASE_PLAYER_ATTACK = 10;
-const ATTACK_SCALE_FACTOR = 1.12;
-const BASE_PLAYER_HEALTH = 100;
+import * as PLAYER_CONFIG from "../config/player_configs";
 
 export function usePlayer({ dungeon_id }) {
     const [ cards, setCards ] = useState(undefined);
@@ -18,8 +15,8 @@ export function usePlayer({ dungeon_id }) {
         discard: [],
     });
 
-    const [ health, setHealth ] = useState(BASE_PLAYER_HEALTH);
-    const [ attack, setAttack ] = useState(BASE_PLAYER_ATTACK);
+    const [ health, setHealth ] = useState(PLAYER_CONFIG.BASE_PLAYER_HEALTH);
+    const [ attack, setAttack ] = useState(PLAYER_CONFIG.BASE_PLAYER_ATTACK);
 
     const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
 
@@ -58,7 +55,7 @@ export function usePlayer({ dungeon_id }) {
     }, [dungeon_id]);
 
     const setAttackBasedOnLevel = (level) => {
-        setAttack(Math.round(BASE_PLAYER_ATTACK * Math.pow(ATTACK_SCALE_FACTOR, level)));
+        setAttack(Math.round(PLAYER_CONFIG.BASE_PLAYER_ATTACK * Math.pow(PLAYER_CONFIG.ATTACK_SCALE_FACTOR, level)));
     }
 
     const refillHand = useCallback((previousState) => {
@@ -67,7 +64,7 @@ export function usePlayer({ dungeon_id }) {
         let new_hand = [...previousState.hand]
 
         const size = current_draw.length + current_discard.length + new_hand.length;
-        const limit = Math.min(size, MAX_HAND_SIZE);
+        const limit = Math.min(size, PLAYER_CONFIG.MAX_HAND_SIZE);
         while (new_hand.length < limit) {
             if (current_draw.length === 0) {
                 current_draw = shuffle_array(current_discard);

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { generate_monsters } from "../utils/monster_utils";
-import { MAX_NO_MONSTERS } from "../utils/monster_configs";
+import { MAX_NO_MONSTERS } from "../config/monster_configs";
 
 export function useMonster({ round }) {
     const [ monsters, setMonsters ] = useState(() => generate_monsters(round));
