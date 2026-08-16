@@ -6,10 +6,13 @@ import { getDecks, createDeck, renameDeck, deleteDeck } from '../services/api';
 import DeckModal from './DeckModal';
 import DeckCard from './DeckCard';
 
+import IntermittentMessage from './IntermittentMessage';
+
 export default function Decks({ onDeckSelect }) {
     const { user } = useUser();
-    const [ decks, setDecks ] = useState([]);
+    const [ decks, setDecks ] = useState(undefined);
     const [ modalConfig, setModalConfig ] = useState({ isOpen:false, mode: "create", deck_id: null, initial_value: "" });
+    const [ isDeckError, setIsDeckError ] = useState(false);
 
     const openCreateModal = () => {
         setModalConfig({ isOpen: true, mode: "create", deck_id: null, initial_value: "" });
@@ -20,21 +23,42 @@ export default function Decks({ onDeckSelect }) {
     }
 
     useEffect(() => {
-        getDecks().then(setDecks);
+        getDecks().then(res => {
+            if (!res.ok) {
+                setIsDeckError(true);
+                return;
+            }
+
+            setDecks(res.data);
+        });
     }, [user.id]);
 
     const handleDeckCreation = async (name) => {
-        const new_deck = await createDeck(name);
+        const res = await createDeck(name);
+        if (!res.ok) {
+            return;
+        }
+
+        const new_deck = res.data;
         setDecks([...decks, new_deck]);
     }
 
     const handleDeckRename = async (id, name) => {
-        const renamed_deck = await renameDeck(id, name);
+        const res = await renameDeck(id, name);
+        if (!res.ok) {
+            return;
+        }
+
+        const renamed_deck = res.data;
         setDecks(decks.map(d => d.id === id ? renamed_deck : d));
     }
 
     const handleDeckDeletion = async (id) => {
-        await deleteDeck(id);
+        const res = await deleteDeck(id);
+        if (!res.ok) {
+            return;
+        }
+
         setDecks(decks.filter(d => d.id !== id));
     }
 
@@ -46,23 +70,30 @@ export default function Decks({ onDeckSelect }) {
         }
     }
 
+    if (isDeckError) {
+        return (
+            <IntermittentMessage title="Error" subtitle="Could not load decks" />
+        );
+    } else if (!decks) {
+        return (
+            <IntermittentMessage title="Loading" subtitle="Please wait..." />
+        );
+    } else if (decks.length === 0) {
+        return (
+            <IntermittentMessage title="No decks found" subtitle="Click the button above to create a new deck" />
+        );
+    }
+
     return (
         <>
             <div className="text-white flex flex-col flex-1 w-full">
                 <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-4xl font-pixel-header' onClick={() => openCreateModal()}>- New deck -</button>
-                    {!decks || decks.length === 0 ? (
-                        <div className="flex grow flex-col gap-6 items-center justify-center">
-                            <h1 className='text-7xl font-bold'>No decks found</h1>
-                            <h2 className='text-lg font-medium'>Click the button above to create a new deck</h2>
-                        </div>
-                        ) : (
-                        <div className='overflow-y-auto custom-scroll'>
-                            {decks.map((deck) => (
-                                <DeckCard key={deck.id} deck={deck} onSelect={onDeckSelect} onRename={openRenameModal} onDelete={handleDeckDeletion} />
-                            ))}
-                        </div>
-                        )
-                    }
+                <div className='overflow-y-auto custom-scroll'>
+                    {decks.map((deck) => (
+                        <DeckCard key={deck.id} deck={deck} onSelect={onDeckSelect} onRename={openRenameModal} onDelete={handleDeckDeletion} />
+                    ))}
+                </div>
+                     
 
                 {modalConfig.isOpen && (
                     <DeckModal

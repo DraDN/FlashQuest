@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getDungeonCards, getDungeonDecks } from "../services/api";
+import { getDungeonCards, getDungeonDecks, getAccountLevel } from "../services/api";
 import { shuffle_array } from "../utils/shuffle";
 
 const MAX_HAND_SIZE = 5;
@@ -8,7 +8,7 @@ const ATTACK_SCALE_FACTOR = 1.12;
 const BASE_PLAYER_HEALTH = 100;
 
 export function usePlayer({ dungeon_id }) {
-    const [ cards, setCards ] = useState([]);
+    const [ cards, setCards ] = useState(undefined);
 
     const [ selected_card, setSelectedCard ] = useState(null);
     const selected_card_ref = useRef(null);
@@ -23,9 +23,17 @@ export function usePlayer({ dungeon_id }) {
 
     const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
 
+    const [ isError, setIsError ] = useState(false);
+
     useEffect(() => {
         getDungeonCards(dungeon_id)
-        .then(new_cards => {
+        .then(res => {
+            if (!res.ok) {
+                setIsError(true);
+                return;
+            }
+
+            const new_cards = res.data;
             setCards(new_cards);
 
             setCardState(() => {
@@ -38,6 +46,15 @@ export function usePlayer({ dungeon_id }) {
                 return filled_hand;
             });
         });
+
+        getAccountLevel().then(res => {
+            if (!res.ok) {
+                setIsError(true);
+                return;
+            }
+
+            setAttackBasedOnLevel(res.data.level);
+        })
     }, [dungeon_id]);
 
     const setAttackBasedOnLevel = (level) => {
@@ -134,7 +151,7 @@ export function usePlayer({ dungeon_id }) {
 
     const getCard = useCallback((card_id) => {
         // TODO: add check for card id boundary
-        return cards.at(card_id);
+        return cards?.at(card_id);
     }, [cards]);
 
     const setSelected = useCallback((card_id) => {
@@ -173,6 +190,14 @@ export function usePlayer({ dungeon_id }) {
         return (cards && cards.length > 0);
     }, [cards]);
 
+    const isLoading = useCallback(() => {
+        return (cards === undefined);
+    }, [cards]);
+
+    const hasError = useCallback(() => {
+        return isError;
+    }, [isError]);
+
     return {
         player: {
             card_state, health, attack, answer_stats
@@ -189,7 +214,9 @@ export function usePlayer({ dungeon_id }) {
             getSelected,
             getSelectedAnswer,
             isDead,
-            hasCards
+            hasCards,
+            isLoading,
+            hasError
         }
     };
 }

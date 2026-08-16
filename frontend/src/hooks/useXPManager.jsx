@@ -1,12 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getDungeonDecks, levelUpDecks, levelUpAccount } from "../services/api";
 import { calculateLevelXP } from "../utils/xp_utils";
 
 export function useXPManager({ dungeon_id }) {
-    const [ decks, setDecks ] = useState([]);
+    const [ decks, setDecks ] = useState(undefined);
+    const [ isError, setIsError ] = useState(false);
 
     useEffect(() => {
-        getDungeonDecks(dungeon_id).then((decks) => {
+        getDungeonDecks(dungeon_id).then(res => {
+            if (!res.ok) {
+                setIsError(true);
+                return;
+            }
+
+            const decks = res.data;
             const newDecks = decks.map((d) => ({
                 id: d.id,
                 name: d.name,
@@ -20,7 +27,7 @@ export function useXPManager({ dungeon_id }) {
         });
     }, [dungeon_id]);
 
-    const rewardXPToDeck = (deck_id, xp) => {
+    const rewardXPToDeck = useCallback((deck_id, xp) => {
         // TODO: maybe add guards like this in more places
         if (!deck_id || !xp) { return; }
 
@@ -34,9 +41,9 @@ export function useXPManager({ dungeon_id }) {
 
             return newDecks;
         });
-    };
+    });
 
-    const level_up_decks = (decks, percentage) => {
+    const level_up_decks = useCallback((decks, percentage) => {
         let total_levels_gained = 0;
         const leveled_decks = decks.map((d) => {
             let level_gained = 0;
@@ -63,24 +70,40 @@ export function useXPManager({ dungeon_id }) {
             leveled_decks: leveled_decks,
             levels_gained: total_levels_gained
         }
-    };
+    }, [decks]);
 
     const save = async (percentage) => {
         const { leveled_decks, levels_gained } = level_up_decks(decks, percentage);
 
+        // TODO: handle errors
+        console.log('test 1');
         if (levels_gained > 0) {
-            await levelUpAccount(levels_gained);
+            const res = await levelUpAccount(levels_gained);
         }
 
-        await levelUpDecks(leveled_decks);
+        console.log('test 2');
+        console.log(leveled_decks);
+        const res = await levelUpDecks(leveled_decks);
 
+
+        console.log('test 3');
         return leveled_decks;
     };
+
+    const isLoading = useCallback(() => {
+        return (decks === undefined);
+    }, [decks]);
+
+    const hasError = useCallback(() => {
+        return isError;
+    }, [isError]);
 
     return {
         xp_actions: {
             rewardXPToDeck,
-            save
+            save,
+            isLoading,
+            hasError
         }
     }
 }

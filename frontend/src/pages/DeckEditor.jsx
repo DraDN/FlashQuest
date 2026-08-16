@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 
-import { getCards, createCard, editCard, deleteCard } from "../utils/api";
+import { getCards, createCard, editCard, deleteCard } from "../services/api";
 import CardModal from "../components/CardModal";
 
+import IntermittentMessage from "../components/IntermittentMessage";
+
 export default function DeckEditor({ deck, onNavigate }) {
-    const [ cards, setCards ] = useState([]);
+    const [ cards, setCards ] = useState(undefined);
     const [ modalConfig, setModalConfig ] = useState({ isOpen: false, mode: "create", card_id: null, initial_value: { question: "", answer: "" } });
+    const [ isCardError, setIsCardError ] = useState(false);
 
     const openCreateModal = () => {
         setModalConfig({ isOpen: true, mode: "create", card_id: null, initial_value: { question: "", answer: "" } });
@@ -16,17 +19,31 @@ export default function DeckEditor({ deck, onNavigate }) {
     }
 
     const handleCardCreation = async (question, answer) => {
-        const new_card = await createCard(deck.id, question, answer);
+        const res = await createCard(deck.id, question, answer);
+        if (!res.ok) {
+            return;
+        }
+
+        const new_card = res.data;
         setCards([...cards, new_card]);
     }
 
     const handleCardEdit = async (id, question, answer) => {
-        const edited_card = await editCard(id, question, answer);
+        const res = await editCard(id, question, answer);
+        if (!res.ok) {
+            return;
+        }
+
+        const edited_card = res.data;
         setCards(cards.map(c => c.id === id ? edited_card : c));
     }
 
     const handleCardDeletion = async (id) => {
-        await deleteCard(id);
+        const res = await deleteCard(id);
+        if (!res.ok) {
+            return;
+        }
+
         setCards(cards.filter(c => c.id !== id));
     }
 
@@ -39,8 +56,29 @@ export default function DeckEditor({ deck, onNavigate }) {
     }
 
     useEffect(() => {
-        getCards(deck.id).then(setCards);
-    }, [deck]);
+        getCards(deck.id).then(res => {
+            if (!res.ok) {
+                setIsCardError(true);
+                return
+            }
+
+            setCards(res.data);
+        });
+    }, [deck.id]);
+
+    if (isCardError) {
+        return (
+            <IntermittentMessage title="Error" subtitle="Could not load cards" />
+        )
+    } else if (!cards) {
+        return (
+            <IntermittentMessage title="Loading" subtitle="Please wait" />
+        )
+    } else if (cards.length === 0) {
+        return (
+            <IntermittentMessage title="Deck is empty" subtitle="Please add some cards" />
+        )
+    }
 
     return (
         <>
@@ -50,32 +88,22 @@ export default function DeckEditor({ deck, onNavigate }) {
 
                     <button className="px-4 py-2 m-4 border border-dungeon-red-900 rounded-xl text-dungeon-red-900 font-bold hover:bg-dungeon-red-900 hover:text-dungeon-dark-900 transition-colors" onClick={() => onNavigate({name: 'home'})}>- Back -</button>
                 </div>
-                <div className="grow relative flex flex-col">
-                    {!cards || cards.length === 0 ? (
-                        <div className="grow flex flex-col items-center justify-center gap-6 bg-dungeon-dark-900">
-                            <h1 className="text-7xl font-bold">Deck is empty</h1>
-                            <h2 className="text-lg font-medium">Please add some cards</h2>
-                            <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-3xl font-pixel-header' onClick={() => openCreateModal()}>- New card -</button>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col grow bg-dungeon-dark-900">
-                            <div className="grid grid-cols-3 place-items-center font-pixel-header text-4xl *:p-5">
-                                <p>Question</p>
-                                <p>Answer</p>
-                                <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-3xl font-pixel-header' onClick={() => openCreateModal()}>- New card -</button>
-                            </div>
-                            {cards.map((card) => (
-                                <div key={card.id} className="grid grid-cols-3 text-xl items-center m-4 *:p-2 *:m-2 mb-2 border border-dungeon-yellow divide-x-2 divide-dungeon-yellow">
-                                        <p>{card.question}</p>
-                                        <p>{card.answer}</p>
-                                        <div className='*:p-2 *:rounded-xl *:hover:bg-dungeon-yellow *:transition-colors flex justify-center md:flex-row flex-col gap-2'>
-                                            <button className="bg-dungeon-red-900 grow" onClick={() => handleCardDeletion(card.id)}>Delete</button>
-                                            <button className="bg-dungeon-purple grow" onClick={() => openEditModal(card.id, card.question, card.answer)}>Edit</button>
-                                        </div>
+                <div className="flex flex-col grow relative bg-dungeon-dark-900">
+                    <div className="grid grid-cols-3 place-items-center font-pixel-header text-4xl *:p-5">
+                        <p>Question</p>
+                        <p>Answer</p>
+                        <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-3xl font-pixel-header' onClick={() => openCreateModal()}>- New card -</button>
+                    </div>
+                    {cards.map((card) => (
+                        <div key={card.id} className="grid grid-cols-3 text-xl items-center m-4 *:p-2 *:m-2 mb-2 border border-dungeon-yellow divide-x-2 divide-dungeon-yellow">
+                                <p>{card.question}</p>
+                                <p>{card.answer}</p>
+                                <div className='*:p-2 *:rounded-xl *:hover:bg-dungeon-yellow *:transition-colors flex justify-center md:flex-row flex-col gap-2'>
+                                    <button className="bg-dungeon-red-900 grow" onClick={() => handleCardDeletion(card.id)}>Delete</button>
+                                    <button className="bg-dungeon-purple grow" onClick={() => openEditModal(card.id, card.question, card.answer)}>Edit</button>
                                 </div>
-                            ))}
                         </div>
-                    )}
+                    ))}
                 </div>
 
                 {modalConfig.isOpen && (

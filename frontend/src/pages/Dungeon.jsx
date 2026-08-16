@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useUser } from "@clerk/clerk-react";
 
-import { getAccountLevel } from "../services/api";
-
 import useSensorsConfig from "../utils/sensors";
 
 import { PlayerUI, PlayerCard } from "../components/PlayerUI";
@@ -18,6 +16,8 @@ import AttackModal from "../components/AttackModal";
 import RoundEndModal from "../components/RoundEndModal";
 import EarlyFleeModal from "../components/EarlyFleeModal";
 import DeathModal from "../components/DeathModal";
+
+import IntermittentMessage from "../components/IntermittentMessage";
 
 const EARLY_FLEE_FEE = 0.6;
 
@@ -35,6 +35,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const [ isRoundEndModalOpen, setIsRoundEndModalOpen ] = useState(false);
     const [ isEarlyFleeModalOpen, setIsEarlyFleeModalOpen ] = useState(false);
     const [ isDeathModalOpen, setIsDeathModalOpen ] = useState(false);
+    const [ isError, setIsError ] = useState(false);
 
     const sensors_conf = useSensorsConfig();
     
@@ -42,13 +43,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
         setRound(round + 1);
         monster_actions.generateRound(round + 1);
     }
-
-    // maybe move to usePlayer?
-    useEffect(() => {
-        getAccountLevel().then((level) => {
-            player_actions.setAttackBasedOnLevel(level.level);
-        });
-    });
 
     const handleDragStart = (event) => {
         player_actions.setSelected(event.active.id);
@@ -113,60 +107,72 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
         const new_decks = await xp_actions.save(xp_percentage);
         const results = {
-            decks: new_decks, // NEW_DECKS THATS HERE DOESN'T HAVE UPDATED XP (IN CASE OF FEE ETC)
+            decks: new_decks,
             answer_stats: player.answer_stats
         }
         onNavigate({name: 'results', related_object: results});
+    }
+
+    if (player_actions.hasError() || xp_actions.hasError()) {
+        console.log('error');
+        return (
+            <IntermittentMessage title="Error" subtitle="Something went wrong. Please try again." />
+        );
+    } else if (player_actions.isLoading() || xp_actions.isLoading()) {
+        console.log('loading');
+        return (
+            <IntermittentMessage title="Loading" subtitle="Please wait a moment." />
+        );
+    } else if (!player_actions.hasCards()) {
+        console.log('no cards');
+        return (
+            <IntermittentMessage title="No cards in decks!" subtitle="Please add some cards to your decks and come back." />
+        );
+    } else {
+        console.log('loaded');
     }
 
     return (
         <DndContext sensors={sensors_conf} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="w-full flex flex-col bg-dungeon-dark-900 min-h-screen relative">
                 <button className="text-dungeon-red-900 border border-dungeon-red-900 hover:text-dungeon-dark-900 hover:bg-dungeon-red-900 px-2 py-1 rounded-lg absolute top-4 left-4" onClick={() => {setIsEarlyFleeModalOpen(true)}}>{`Flee`}</button>
-                {!player_actions.hasCards() ? (
-                    <div className="text-white font-bold flex flex-col h-full justify-center text-center">
-                        <h1>No cards in decks!</h1>
-                        <h2>Please add some cards to your decks and come back.</h2>
-                    </div>
-                    ) : (
-                    <div className="flex flex-col w-full h-full">
-                        <MonsterUI monsters={monsters} />
-                        
-                        <PlayerUI player={player} player_actions={player_actions} />
+                <div className="flex flex-col w-full h-full">
+                    <MonsterUI monsters={monsters} />
+                    
+                    <PlayerUI player={player} player_actions={player_actions} />
 
-                        {isAttackModalOpen && (
-                            <AttackModal
-                                onClose={handleCloseAttackModal}
-                                onSave={handleSubmitAttack}
-                                card={player_actions.getCard(player_actions.getSelected())}
-                            />
-                        )}
-                        {isRoundEndModalOpen && (
-                            <RoundEndModal
-                                onClose={async () => await handleExit(1)}
-                                onNext={() => {nextRoom(); setIsRoundEndModalOpen(false);}}
-                                round={round}
-                            />
-                        )}
-                        {isEarlyFleeModalOpen && (
-                            <EarlyFleeModal
-                                onClose={async () => await handleExit(EARLY_FLEE_FEE)}
-                                onContinue={() => setIsEarlyFleeModalOpen(false)}
-                                fee={EARLY_FLEE_FEE}
-                            />
-                        )}
-                        {isDeathModalOpen && (
-                            <DeathModal
-                                onExit={async () => await handleExit(0)}
-                            />
-                        )}
-                        <DragOverlay dropAnimation={null}>
-                            {player_actions.getSelected() !== null ? (
-                                <PlayerCard card={player_actions.getCard(player_actions.getSelected())} fresh={false} />
-                            ) : null}
-                        </DragOverlay>
-                    </div>
-                )}
+                    {isAttackModalOpen && (
+                        <AttackModal
+                            onClose={handleCloseAttackModal}
+                            onSave={handleSubmitAttack}
+                            card={player_actions.getCard(player_actions.getSelected())}
+                        />
+                    )}
+                    {isRoundEndModalOpen && (
+                        <RoundEndModal
+                            onClose={async () => await handleExit(1)}
+                            onNext={() => {nextRoom(); setIsRoundEndModalOpen(false);}}
+                            round={round}
+                        />
+                    )}
+                    {isEarlyFleeModalOpen && (
+                        <EarlyFleeModal
+                            onClose={async () => await handleExit(EARLY_FLEE_FEE)}
+                            onContinue={() => setIsEarlyFleeModalOpen(false)}
+                            fee={EARLY_FLEE_FEE}
+                        />
+                    )}
+                    {isDeathModalOpen && (
+                        <DeathModal
+                            onExit={async () => await handleExit(0)}
+                        />
+                    )}
+                    <DragOverlay dropAnimation={null}>
+                        {player_actions.getSelected() !== null ? (
+                            <PlayerCard card={player_actions.getCard(player_actions.getSelected())} fresh={false} />
+                        ) : null}
+                    </DragOverlay>
+                </div>
             </div>
         </DndContext>
     )

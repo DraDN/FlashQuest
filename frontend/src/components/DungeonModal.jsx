@@ -8,19 +8,30 @@ const MAX_CHARACTERS = 50;
 
 export default function DungeonModal({ onClose, onSave, mode, id, initial_name }) {
     const [dungeonName, setDungeonName] = useState(mode === 'edit' ? initial_name : '');
-    const [decks, setDecks] = useState([]);
-    const [selectedDecksID, setSelectedDecksID] = useState([]);
+    const [decks, setDecks] = useState(undefined);
+    const [selectedDecksID, setSelectedDecksID] = useState(undefined);
     const { user } = useUser();
+    const [ isDeckError, setIsDeckError ] = useState(false);
 
     useEffect(() => {
-        getDecks().then(setDecks);
+        getDecks().then(res => {
+            if (res.ok) {
+                setDecks(res.data);
+            } else {
+                setIsDeckError(true);
+            }
+        });
     });
 
     useEffect(() => {
         if (mode === 'edit') {
             getDungeonDecks(id)
-            .then(decks => {
-                setSelectedDecksID(decks.map(d => d.id));
+            .then(res => {
+                if (!res.ok) {
+                    setIsDeckError(true);
+                }
+
+                setSelectedDecksID(res.data.map(d => d.id));
             });
         }
     }, [mode, id]);
@@ -46,10 +57,43 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
         onClose();
     };
 
+    const getDeckState = () => {
+        if (isDeckError) {
+            return (
+                <p className="text-sm text-red-400">Could not load decks</p>
+            )
+        } else if (!decks || !selectedDecksID) {
+            return (
+                <p className="text-sm text-zinc-400">Loading decks...</p>
+            )
+        } else {
+            return decks.map((deck) => (
+                <div key={deck.id} className="flex items-center space-x-2">
+                    <input
+                        type="checkbox"
+                        checked={selectedDecksID.includes(deck.id)}
+                        onChange={() => handleSelectionChange(deck.id)}
+                    />
+                    <label>{deck.name}</label>
+                </div>
+            ));
+        }
+    }
+
+    if (decks && decks.length === 0) {
+        return (
+            <Modal children={(
+                <div className="w-full max-w-md relative p-6 bg-zinc-900">
+                    <h1 className="text-xl font-bold text-white mb-4">No decks to create a dungeon with!</h1>
+                    <h3 className="text-xl font-bold text-white mb-4">Please create a deck first</h3>
+                </div>
+            )} onClose={onClose} />
+        )
+    }
+
     return (
         <Modal children={(
             <>
-                {decks && ( 
                 <div>
                     <h1 className="text-2xl font-bold text-white mb-4">{mode === 'create' ? 'Create New Dungeon' : 'Edit Dungeon'}</h1>
 
@@ -73,15 +117,7 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
 
                         <div className="flex-1 overflow-y-auto space-y-2">
                             <label className="lock text-md font-medium text-zinc-400 mb-2"> Select decks to pull flashcards from: </label>
-                            {decks.length === 0 ? (
-                                <p className="text-sm text-zinc-400">No decks found.</p>
-                            ) : (decks.map((d) => (
-                                <div key={d.id} className="flex items-center gap-2">
-                                    <input type="checkbox" checked={selectedDecksID.includes(d.id)} onChange={() => handleSelectionChange(d.id)} />
-                                    <label htmlFor={d.id}>{d.name}</label>
-                                </div>
-                            ))
-                            )}
+                            {getDeckState()}
                         </div>
                         
                          <div className="flex justify-end gap-3 pt-2 *:px-4 *:py-2 *:rounded-lg *:font-semibold *:text-sm *:transition-colors">
@@ -100,14 +136,7 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
                         </div>
                     </form>
                 </div>
-                )}
-                {!decks && (
-                    <div className="w-full max-w-md relative p-6 bg-zinc-900">
-                        <h1 className="text-xl font-bold text-white mb-4">No decks to create a dungeon with!</h1>
-                        <h3 className="text-xl font-bold text-white mb-4">Please create a deck first</h3>
-                    </div>
-                )}
             </>
-            )} />
+        )} />
     )
 }
