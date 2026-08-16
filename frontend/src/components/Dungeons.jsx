@@ -51,8 +51,6 @@ export default function Dungeons({ onDungeonSelect }) {
             return;
         }
 
-        console.log(res);
-
         const edited_dungeon = res.data;
         setDungeons(dungeons.map(d => d.id === id ? edited_dungeon : d));
     }

@@ -114,22 +114,17 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     if (player_actions.hasError() || xp_actions.hasError()) {
-        console.log('error');
         return (
             <IntermittentMessage title="Error" subtitle="Something went wrong. Please try again." />
         );
     } else if (player_actions.isLoading() || xp_actions.isLoading()) {
-        console.log('loading');
         return (
             <IntermittentMessage title="Loading" subtitle="Please wait a moment." />
         );
     } else if (!player_actions.hasCards()) {
-        console.log('no cards');
         return (
             <IntermittentMessage title="No cards in decks!" subtitle="Please add some cards to your decks and come back." />
         );
-    } else {
-        console.log('loaded');
     }
 
     return (

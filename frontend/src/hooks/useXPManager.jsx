@@ -76,17 +76,12 @@ export function useXPManager({ dungeon_id }) {
         const { leveled_decks, levels_gained } = level_up_decks(decks, percentage);
 
         // TODO: handle errors
-        console.log('test 1');
         if (levels_gained > 0) {
             const res = await levelUpAccount(levels_gained);
         }
 
-        console.log('test 2');
-        console.log(leveled_decks);
         const res = await levelUpDecks(leveled_decks);
 
-
-        console.log('test 3');
         return leveled_decks;
     };
 
