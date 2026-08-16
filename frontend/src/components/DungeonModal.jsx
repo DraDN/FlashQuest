@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 
-import { getDecks, getDungeonDecks } from '../utils/api';
+import { getDecks, getDungeonDecks } from '../services/api';
 import Modal from "./Modal";
 
 const MAX_CHARACTERS = 50;

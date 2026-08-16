@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 
-import { getDecks, createDeck, renameDeck, deleteDeck } from '../utils/api';
+import { getDecks, createDeck, renameDeck, deleteDeck } from '../services/api';
 
 import DeckModal from './DeckModal';
 import DeckCard from './DeckCard';

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getDungeonCards, getDungeonDecks } from "../utils/api";
+import { getDungeonCards, getDungeonDecks } from "../services/api";
 import { shuffle_array } from "../utils/shuffle";
 
 const MAX_HAND_SIZE = 5;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getDungeonDecks, levelUpDecks, levelUpAccount } from "../utils/api";
+import { getDungeonDecks, levelUpDecks, levelUpAccount } from "../services/api";
 import { calculateLevelXP } from "../utils/xp_utils";
 
 export function useXPManager({ dungeon_id }) {

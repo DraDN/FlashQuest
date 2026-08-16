@@ -2,17 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useUser } from "@clerk/clerk-react";
 
-import { getAccountLevel } from "../utils/api";
+import { getAccountLevel } from "../services/api";
 
 import useSensorsConfig from "../utils/sensors";
 
 import { PlayerUI, PlayerCard } from "../components/PlayerUI";
-import { usePlayer } from "../components/usePlayer";
+import { usePlayer } from "../hooks/usePlayer";
 
 import { MonsterUI } from "../components/MonsterUI";
-import { useMonster } from "../components/useMonster";
+import { useMonster } from "../hooks/useMonster";
 
-import { useXPManager } from "../components/useXPManager";
+import { useXPManager } from "../hooks/useXPManager";
 
 import AttackModal from "../components/AttackModal";
 import RoundEndModal from "../components/RoundEndModal";
