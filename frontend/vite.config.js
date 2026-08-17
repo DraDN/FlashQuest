@@ -3,10 +3,10 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import path from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -18,6 +18,13 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss()
     ],
+
+    resolve: {
+      alias: {
+        '@assets': path.resolve(__dirname, './src/assets'),
+      }
+    },
+
     server: {
       host: '0.0.0.0',
       port: 5173,

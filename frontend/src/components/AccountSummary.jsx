@@ -1,18 +1,29 @@
 import { useState, useEffect } from "react";
 import { useUser, UserAvatar } from "@clerk/clerk-react";
 
-import { getAccountLevel, checkAccountStatus } from "../api";
+import { getAccountLevel, checkAccountInit } from "../services/api";
 
 export default function AccountSummary() {
     const { user } = useUser();
     const [ level, setLevel ] = useState(() => {
-        checkAccountStatus(user.id); // TODO: maybe add greet for new users
+        const res = checkAccountInit(); // TODO: maybe add greet for new users
+        if (!res.ok) {
+            return -1;
+        }
+
         return 0;
     });
 
     useEffect(() => {
-        getAccountLevel(user.id).then((level) => setLevel(level.level));
-    }, [user?.id]);
+        // TODO: add error handling
+        getAccountLevel().then(res => {
+            if (!res.ok) {
+                setLevel(-99999);
+            }
+
+            setLevel(res.data.level);
+        })
+    });
 
     return (
         <>

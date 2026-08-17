@@ -72,7 +72,7 @@ module.exports = {
 				throw new Error('DUNGEON_NOT_FOUND');
 			}
 
-			dungeonsRepo.updateDungeonName(id, new_name);
+			dungeonsRepo.unlinkDecksFromDungeon(id);
 			for (const deckId of new_deck_ids) {
 				dungeonsRepo.linkDeckToDungeon(id, deckId);
 			}

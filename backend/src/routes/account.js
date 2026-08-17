@@ -9,7 +9,7 @@ router.use(authHandler);
 
 const accountService = require('../services/accountService');
 
-router.get('/check-status', async (req, res, next) => {
+router.get('/check-init', async (req, res, next) => {
     try {
         const is_new = await accountService.ensureAccountIsInitialized(req.user_id);
 

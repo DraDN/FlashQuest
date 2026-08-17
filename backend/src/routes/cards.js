@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const validationHandler = require('../middleware/validationHandler');
 
 const authHandler = require('../middleware/authHandler');
@@ -31,6 +31,10 @@ router.post('/', [
 });
 
 router.post('/:id/edit', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number'),
     body('question')
         .trim()
         .notEmpty().withMessage('\'question\' is required')
@@ -52,7 +56,12 @@ router.post('/:id/edit', [
     }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number')
+], validationHandler, async (req, res, next) => {
     const { id } = req.params;
 
     try {

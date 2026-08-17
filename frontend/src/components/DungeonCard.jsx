@@ -1,13 +1,20 @@
 import { useState, useEffect } from "react";
 
-import { getDungeonDecks } from "../api";
+import { getDungeonDecks } from "../services/api";
 
 export default function DungeonCard({ dungeon, onDelete, onEdit, onPlay }) {
     const [ decks, setDecks ] = useState([]);
+    const [ isDeckError, setIsDeckError ] = useState(false);
 
     useEffect(() => {
         getDungeonDecks(dungeon.id)
-        .then(setDecks);
+        .then(res => {
+            if (!res.ok) {
+                setIsDeckError(true);
+            }
+
+            setDecks(res.data);
+        });
     }, [dungeon]);
 
     return (
@@ -24,7 +31,7 @@ export default function DungeonCard({ dungeon, onDelete, onEdit, onPlay }) {
                 <div className="px-5 pb-5 text-lg">
                     <span className="text-xl text-dungeon-green-200 font-medium mb-2">Containing decks:</span>
                     <ul>
-                        {decks.map(d => <li key={d.id}> - {d.name}</li>)}
+                        {isDeckError ? <li>Could not load decks</li> : decks.map(d => <li key={d.id}> - {d.name}</li>)}
                     </ul>
                 </div>
             </div>

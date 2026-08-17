@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const validationHandler = require('../middleware/validationHandler');
 
 const authHandler = require('../middleware/authHandler');
@@ -10,8 +10,7 @@ router.use(authHandler);
 const decksService = require('../services/decksService');
 
 router.get('/', authHandler, async (req, res) => {
-    const { user_id } = req.query;
-    const decks = await decksService.getUserDecks(user_id);
+    const decks = await decksService.getUserDecks(req.user_id);
     return res.status(200).json(decks);
 });
 
@@ -32,7 +31,12 @@ router.post('/', [
     }
 });
 
+// TODO: VALIDATE ID FOR EVERY ID RELATED ENDPOINT
 router.post('/:id/rename', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number'),
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
@@ -52,18 +56,23 @@ router.post('/:id/rename', [
 
 // TODO limit possible deck number
 // TOOO FIX if this fails, account level still gets updated!!!
-router.post('/sync-xp', async (req, res, next) => {
+router.post('/level-up', async (req, res, next) => {
     const { decks } = req.body;
 
     try {
-        await decksService.setDecksLevelXP(decks || [], req.user_id);
+        await decksService.addDecksLevelXP(decks || [], req.user_id);
         return res.status(204).send();
     } catch (error) {
         next(error);
     }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number')
+], async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -74,7 +83,12 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
-router.get('/:id/cards', async (req, res, next) => {
+router.get('/:id/cards', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number')
+], async (req, res, next) => {
     const { id } = req.params;
 
     try {

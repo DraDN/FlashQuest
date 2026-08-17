@@ -1,11 +1,11 @@
 import { useDroppable } from "@dnd-kit/core";
 
-export default function Monsters({ monsters }) {
+export function MonsterUI({ monsters }) {
     return (
         <>
             <div className="flex flex-row grow gap-4 p-4 h-2/3 items-center justify-center flex-wrap dungeon-bg">
                 {monsters.map((mon, index) => (
-                    <MonsterCard key={mon.id} monster={mon} index={index} />
+                    <MonsterCard key={index} monster={mon} index={index} />
                 ))}
             </div>
         </>
