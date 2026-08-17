@@ -30,8 +30,8 @@ module.exports = {
 		return decksRepo.getDeck(id);
 	},
 
-	async setDecksLevelXP(decks_level_info, user_id) {
-		return decksRepo.setDecksLevelXP(decks_level_info, user_id);
+	async addDecksLevelXP(decks_level_info, user_id) {
+		return decksRepo.addDecksLevelXP(decks_level_info, user_id);
 	},
 
 	async deleteDeck(id, user_id) {
@@ -54,12 +54,7 @@ module.exports = {
 
 			return cardsRepo.getCardsOfDeck(id);
 		})
-		// const found = decksRepo.checkDeckExists(id);
-		// if (!found) {
-		// 	throw new NotFoundError('Deck ID not found');
-		// }
 
-		// return cardsRepo.getCardsOfDeck(id);
 		return cards_transaction();
 	}
 };

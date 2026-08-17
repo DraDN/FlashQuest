@@ -1,3 +1,5 @@
+import { calculateNextLevelProgression } from '../utils/xp_utils';
+
 export default function DeckCard({ deck, onSelect, onRename, onDelete }) {
     return (
         <div className="bg-dungeon-dark-500 border border-dungeon-yellow text-2xl font-bold flex items-center justify-between m-5 gap-4 p-4">
@@ -10,7 +12,7 @@ export default function DeckCard({ deck, onSelect, onRename, onDelete }) {
                     <div className='relative space-y-1.5 grow bg-dungeon-dark-900 border border-dungeon-yellow-glow rounded-xl'>
                         <div className="w-full h-4.5 flex grow">
                             {deck.xp > 0 && (
-                                <div className="flex flex-row bg-linear-to-r from-dungeon-yellow to-dungeon-yellow-glow rounded-xl transition-all duration-500 ease-out" style={{ width: `${(deck.xp / ((deck.level + 1) * 100)) * 100}%` }}></div>
+                                <div className="flex flex-row bg-linear-to-r from-dungeon-yellow to-dungeon-yellow-glow rounded-xl transition-all duration-500 ease-out" style={{ width: `${calculateNextLevelProgression(deck.xp, deck.level)}%` }}></div>
                             )}
                         </div>
                     </div>

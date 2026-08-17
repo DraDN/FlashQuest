@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const validationHandler = require('../middleware/validationHandler');
 
 const dungeonsService = require('../services/dungeonsService');
@@ -10,12 +10,16 @@ const authHandler = require('../middleware/authHandler');
 router.use(authHandler);
 
 router.get('/', async (req, res) => {
-    const { user_id } = req.query;
-    const dungeons = await dungeonsService.getUserDungeons(user_id);
+    const dungeons = await dungeonsService.getUserDungeons(req.user_id);
     return res.status(200).json(dungeons);
 });
 
-router.get('/:id/decks', async (req, res, next) => {
+router.get('/:id/decks', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number')
+], async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -27,7 +31,12 @@ router.get('/:id/decks', async (req, res, next) => {
     }
 });
 
-router.get('/:id/cards', async (req, res, next) => {
+router.get('/:id/cards', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number')
+], async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -58,6 +67,10 @@ router.post('/', [
 });
 
 router.post('/:id/edit', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number'),
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
@@ -74,7 +87,12 @@ router.post('/:id/edit', [
     }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number')
+], async (req, res, next) => {
     const { id } = req.params;
 
     try {

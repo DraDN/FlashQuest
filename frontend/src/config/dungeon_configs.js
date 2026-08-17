@@ -1,0 +1,7 @@
+const EARLY_FLEE_FEE = 0.6;
+const MODAL_POPUP_DELAY = 1000;
+
+export {
+    EARLY_FLEE_FEE,
+    MODAL_POPUP_DELAY
+};

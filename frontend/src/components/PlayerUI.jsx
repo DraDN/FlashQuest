@@ -1,19 +1,19 @@
 import { useDraggable } from '@dnd-kit/core';
 
-export function PlayerCards({ hand, player_health }) {
+export function PlayerUI({ player, player_actions }) {
     return (
         <div className="flex flex-col w-full min-h-1/3 border border-dungeon-yellow">
-            <HealthBar player_health={player_health} />
+            <HealthBar player_health={player.health} />
             <div className="flex flex-row grow gap-4 p-4 items-center md:justify-center justify-start bg-dungeon-dark-500 border border-dungeon-yellow overflow-x-auto overflow-y-hidden">
-                {hand.map((c, index) => {
-                    return <DraggableCard key={c.id} card={c} index={index} />
+                {player.card_state.hand.map((card) => {
+                    return <PlayerCard key={card.id} card={player_actions.getCard(card.id)} fresh={true} index={card.id} />
                 })}
             </div>
         </div>
-    )
-}
+    );
+};
 
-export function DraggableCard({ card, index }) {
+export function PlayerCard({ card, fresh, index }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: index
     });
@@ -30,15 +30,16 @@ export function DraggableCard({ card, index }) {
     }
 
     return (
-        <div ref={setNodeRef} style={style} 
-            className={`${isDragging ? "bg-dungeon-orange-glow" : "bg-dungeon-dark-900"} text-white border border-dungeon-yellow p-4 w-40 h-40 shrink-0 text-center font-bold ${font_size} rounded-xl ${card.isFresh ? "animate-card-draw" : ""}`}
+        <div ref={setNodeRef} 
+            className={`${isDragging ? "bg-dungeon-orange-glow" : "bg-dungeon-dark-900"} text-white border border-dungeon-yellow p-4 w-40 h-40 shrink-0 text-center font-bold ${font_size} rounded-xl ${fresh ? "animate-card-draw" : ""}`}
             style={{
+            ...style,
             /* 1. Tell it exactly where your visual Deck Pile lives on the viewport screen */
             '--slide-from-x': '150px',
             '--slide-from-y': '-200px', // Slide down from top-right corner deck pile location
             
             /* 2. Stagger each card draw sequence by 100 milliseconds per index step */
-            animationDelay: `${index * 100}ms`,
+            animationDelay: `${(index + 1) * 100}ms`,
             
             /* Keep card invisible until its individual delay timer starts running */
             animationFillMode: 'both' 
@@ -49,16 +50,16 @@ export function DraggableCard({ card, index }) {
     );
 }
 
-function HealthBar({ player_health }) {
+function HealthBar({ player_health: health }) {
     return (
         <div className="space-y-1.5 relative">
             <div className="w-full h-8">
-                {player_health > 0 && (
-                    <div className={`flex flex-row h-full bg-dungeon-red-900 transition-all ${player_health < 100 && "rounded-r-xl"} duration-500 ease-out`}
-                        style={{ width: `${player_health}%`}}>
+                {health > 0 && (
+                    <div className={`flex flex-row h-full bg-dungeon-red-900 transition-all ${health < 100 && "rounded-r-xl"} duration-500 ease-out`}
+                        style={{ width: `${health}%`}}>
                     </div>
                 )}
-                <p className="text-white absolute right-1/2 translate-x-1/2 top-1/2 -translate-y-1/2 italic">Health: {player_health}</p>
+                <p className="text-white absolute right-1/2 translate-x-1/2 top-1/2 -translate-y-1/2 italic">Health: {health}</p>
             </div>
         </div>
     )

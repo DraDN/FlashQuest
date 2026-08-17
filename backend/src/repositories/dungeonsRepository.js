@@ -37,6 +37,10 @@ module.exports = {
 		return insertDungeonDeckStmt.run(dungeon_id, deck_id);
 	},
 
+	unlinkDecksFromDungeon(dungeon_id) {
+		return deleteDungeonsDecksStmt.run(dungeon_id);
+	},
+
 	updateDungeonName(dungeon_id, new_name) {
 		return updateDungeonNameStmt.run(new_name, dungeon_id);
 	},
