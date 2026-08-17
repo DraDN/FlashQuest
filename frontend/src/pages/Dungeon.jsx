@@ -119,7 +119,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
         );
     } else if (player_actions.isLoading() || xp_actions.isLoading()) {
         return (
-            <IntermittentMessage title="Loading" subtitle="Please wait a moment." />
+            <IntermittentMessage title="Loading" subtitle="Please wait..." />
         );
     } else if (!player_actions.hasCards()) {
         return (

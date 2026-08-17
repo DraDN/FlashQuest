@@ -78,7 +78,7 @@ export default function Dungeons({ onDungeonSelect }) {
         );
     } else if (!dungeons) {
         return (
-            <IntermittentMessage title="Loading" subtitle="Please wait" />
+            <IntermittentMessage title="Loading" subtitle="Please wait..." />
         );
     } else if (dungeons.length === 0) {
         return (

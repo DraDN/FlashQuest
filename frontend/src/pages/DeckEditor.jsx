@@ -72,7 +72,7 @@ export default function DeckEditor({ deck, onNavigate }) {
         )
     } else if (!cards) {
         return (
-            <IntermittentMessage title="Loading" subtitle="Please wait" />
+            <IntermittentMessage title="Loading" subtitle="Please wait..." />
         )
     } else if (cards.length === 0) {
         return (
