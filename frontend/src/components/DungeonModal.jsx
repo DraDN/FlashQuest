@@ -9,17 +9,18 @@ const MAX_CHARACTERS = 50;
 export default function DungeonModal({ onClose, onSave, mode, id, initial_name }) {
     const [dungeonName, setDungeonName] = useState(mode === 'edit' ? initial_name : '');
     const [decks, setDecks] = useState(undefined);
-    const [selectedDecksID, setSelectedDecksID] = useState(undefined);
+    const [selectedDecksID, setSelectedDecksID] = useState([]);
     const { user } = useUser();
     const [ isDeckError, setIsDeckError ] = useState(false);
 
     useEffect(() => {
         getDecks().then(res => {
-            if (res.ok) {
-                setDecks(res.data);
-            } else {
+            if (!res.ok) {
                 setIsDeckError(true);
+                return;
             }
+
+            setDecks(res.data);
         });
     });
 

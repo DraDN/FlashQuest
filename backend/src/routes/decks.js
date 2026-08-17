@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const validationHandler = require('../middleware/validationHandler');
 
 const authHandler = require('../middleware/authHandler');
@@ -33,10 +33,14 @@ router.post('/', [
 
 // TODO: VALIDATE ID FOR EVERY ID RELATED ENDPOINT
 router.post('/:id/rename', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number'),
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
-        .isLength({ max: decksService.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long'),
+        .isLength({ max: decksService.DECK_MAX_CHARACTERS }).withMessage('\'name\' too long')
 ], validationHandler, async (req, res, next) => {
     const { id } = req.params;
     const { name } = req.body;
@@ -63,7 +67,12 @@ router.post('/level-up', async (req, res, next) => {
     }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number')
+], async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -74,7 +83,12 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
-router.get('/:id/cards', async (req, res, next) => {
+router.get('/:id/cards', [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isNumeric().withMessage('\'id\' must be a number')
+], async (req, res, next) => {
     const { id } = req.params;
 
     try {
