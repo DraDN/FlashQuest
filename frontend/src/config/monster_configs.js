@@ -28,7 +28,7 @@ const MONSTER_TEMPLATES = [
     { id: "chaohara", name: "Chaohara", health: 40, attack: 26, xp: 30, difficulty: 8, allowed_tiers: ["Hard", "Elite"] },
     { id: "stragris", name: "Stragris", health: 35, attack: 23, xp: 28, difficulty: 7, allowed_tiers: ["Hard", "Elite"] },
     { id: "qaelriar", name: "Qaelriar", health: 25, attack: 22, xp: 24, difficulty: 7, allowed_tiers: ["Normal", "Hard", "Elite"] },
-    { id: "vresnu", name: "Vresnu", health: 75, attack: 55, xp: 50, difficulty: 10, allowed_tiers: ["Boss"] },
+    { id: "vrusenu", name: "Vrusenu", health: 75, attack: 55, xp: 50, difficulty: 0, allowed_tiers: ["Boss"] },
     { id: "baby_dragon", name: "Baby Dragon", health: 50, attack: 35, xp: 50, difficulty: 10, allowed_tiers: ["Boss"] },
     { id: "dragon", name: "Dragon", health: 75, attack: 55, xp: 50, difficulty: 10, allowed_tiers: ["Boss"] },
 ];
