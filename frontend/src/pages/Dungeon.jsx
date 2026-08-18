@@ -154,7 +154,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                         <EarlyFleeModal
                             onClose={async () => await handleExit(DUNGEON_CONFIG.EARLY_FLEE_FEE)}
                             onContinue={() => setIsEarlyFleeModalOpen(false)}
-                            fee={EARLY_FLEE_FEE}
+                            fee={DUNGEON_CONFIG.EARLY_FLEE_FEE}
                         />
                     )}
                     {isDeathModalOpen && (
