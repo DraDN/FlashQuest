@@ -4,18 +4,19 @@ import * as MONSTER_CONFIGS from "../config/monster_configs";
 const get_floor_mult = (floor_index) => 
     Math.pow(MONSTER_CONFIGS.MONSTER_SCALE_FACTOR, floor_index);
 
-const calculate_random_stat = (base_stat, floor_mult) =>
-    Math.round(base_stat * floor_mult + Math.random() * MONSTER_CONFIGS.RANDOM_DEVIATION);
+const calculate_random_stat = (base_stat, floor_mult, tier_mult) =>
+    Math.round((base_stat * floor_mult + (Math.random() * MONSTER_CONFIGS.RANDOM_DEVIATION)) * tier_mult);
 
 
-const get_room_configs = (room_pregression_index) => {
-    const [ min_round, max_round ] = floor.round_range;
-    FLOOR_CONFIG.filter(floor => min_round <= room_pregression_index && max_round >= room_pregression_index);
-}
+const get_room_configs = (room_pregression_index) =>
+    MONSTER_CONFIGS.FLOOR_CONFIG.filter(floor => {
+        const [ min_round, max_round ] = floor.round_range;
+        return min_round <= room_pregression_index && max_round >= room_pregression_index;
+    });
 
 
 const get_monster_tier = (tier_id) => 
-    TIER_TEMPLATES.find(tier => tier.id === tier_id);
+    MONSTER_CONFIGS.TIER_TEMPLATES.find(tier => tier.id === tier_id);
 
 const get_monster_tier_from_monster = (monster, tier_list) => {
     const allowed_tiers = tier_list.filter(tier => monster.allowed_tiers.includes(tier));
@@ -50,9 +51,9 @@ const generate_monster = (difficulty_range, tier_list, round) => {
     const tier = get_monster_tier_from_monster(monster_template, tier_list);
     const asset = MONSTER_CONFIGS.get_monster_asset(monster_template);
 
-    const max_health = calculate_random_stat(monster_template.health, floor_mult);
-    const attack = calculate_random_stat(monster_template.attack, floor_mult);
-    const xp = calculate_random_stat(monster_template.xp, floor_mult);
+    const max_health = calculate_random_stat(monster_template.health, floor_mult, tier.health_mult);
+    const attack = calculate_random_stat(monster_template.attack, floor_mult, tier.attack_mult);
+    const xp = calculate_random_stat(monster_template.xp, floor_mult, tier.xp_mult);
 
     return {
         tier: tier.id,
