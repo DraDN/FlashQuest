@@ -1,28 +1,58 @@
 import { get_room_progression_index, get_floor_index } from "./dungeon_utils";
-import { MONSTER_ASSETS, MAX_NO_MONSTERS, MONSTER_SCALE_FACTOR, RANDOM_DEVIATION, get_monster_tier, get_floor_config } from "../config/monster_configs";
+import * as MONSTER_CONFIGS from "../config/monster_configs";
 
-const get_floor_mult = (floor_index) => {
-    return Math.pow(MONSTER_SCALE_FACTOR, floor_index);
+const get_floor_mult = (floor_index) => 
+    Math.pow(MONSTER_CONFIGS.MONSTER_SCALE_FACTOR, floor_index);
+
+const calculate_random_stat = (base_stat, floor_mult) =>
+    Math.round(base_stat * floor_mult + Math.random() * MONSTER_CONFIGS.RANDOM_DEVIATION);
+
+
+const get_room_configs = (room_pregression_index) => {
+    const [ min_round, max_round ] = floor.round_range;
+    FLOOR_CONFIG.filter(floor => min_round <= room_pregression_index && max_round >= room_pregression_index);
 }
 
-const get_random_monster_asset = () => {
-    return MONSTER_ASSETS[Math.floor(Math.random() * MONSTER_ASSETS.length)];
+
+const get_monster_tier = (tier_id) => 
+    TIER_TEMPLATES.find(tier => tier.id === tier_id);
+
+const get_monster_tier_from_monster = (monster, tier_list) => {
+    const allowed_tiers = tier_list.filter(tier => monster.allowed_tiers.includes(tier));
+    const random_index = Math.floor(Math.random() * allowed_tiers.length);
+    const tier_id = allowed_tiers.at(random_index);
+
+    return get_monster_tier(tier_id);
 }
 
-const calculate_random_stat = (base_stat, floor_mult) => {
-    return Math.round(base_stat * floor_mult + Math.random() * RANDOM_DEVIATION);
+const get_monster_template = (difficulty_range, tier_list) => {
+    const [ min_difficulty, max_difficulty ] = difficulty_range;
+    const filtered_templates = MONSTER_CONFIGS.MONSTER_TEMPLATES.filter(template => (
+        template.difficulty >= min_difficulty &&
+        template.difficulty <= max_difficulty &&
+        template.allowed_tiers.some(tier => tier_list.includes(tier))
+    ));
+
+    if (filtered_templates.length === 0) {
+        return null;
+    }
+
+    const random_index = Math.floor(Math.random() * filtered_templates.length)
+    return filtered_templates.at(random_index);
 }
 
-const generate_monster = (tier_id, round) => {
+
+const generate_monster = (difficulty_range, tier_list, round) => {
     const floor_index = get_floor_index(round);
     const floor_mult = get_floor_mult(floor_index);
 
-    const tier = get_monster_tier(tier_id);
-    const asset = get_random_monster_asset();
+    const monster_template = get_monster_template(difficulty_range, tier_list);
+    const tier = get_monster_tier_from_monster(monster_template, tier_list);
+    const asset = MONSTER_CONFIGS.get_monster_asset(monster_template);
 
-    const max_health = calculate_random_stat(tier.base_health, floor_mult);
-    const attack = calculate_random_stat(tier.base_attack, floor_mult);
-    const xp = calculate_random_stat(tier.base_xp, floor_mult);
+    const max_health = calculate_random_stat(monster_template.health, floor_mult);
+    const attack = calculate_random_stat(monster_template.attack, floor_mult);
+    const xp = calculate_random_stat(monster_template.xp, floor_mult);
 
     return {
         tier: tier.id,
@@ -38,18 +68,17 @@ const generate_monster = (tier_id, round) => {
 const generate_monsters = (round) => {
     const room_pregression_index = get_room_progression_index(round);
 
-    const configs = get_floor_config(room_pregression_index);
+    const configs = get_room_configs(room_pregression_index);
 
     const monsters = [];
-    for (let i = 0; i < configs.length; i++) {
-        const config = configs[i];
-        if (monsters.length >= MAX_NO_MONSTERS) { break; }
+    for (let i = 0; i < configs.length && monsters.length < MONSTER_CONFIGS.MAX_NO_MONSTERS; i++) {
+        const config = configs.at(i);
 
         let no_monsters = Math.round(Math.random() * (config.max_monsters - config.min_monsters) + config.min_monsters);
-        no_monsters = Math.min(no_monsters, MAX_NO_MONSTERS - monsters.length);
+        no_monsters = Math.min(no_monsters, MONSTER_CONFIGS.MAX_NO_MONSTERS - monsters.length);
 
         for (let i = 0; i < no_monsters; i++) {
-            monsters.push(generate_monster(config.tier_id, round));
+            monsters.push(generate_monster(config.difficulty_range, config.tier_list, round));
         }   
     }
     
