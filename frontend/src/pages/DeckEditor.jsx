@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { getCards, createCard, editCard, deleteCard } from "../services/api";
 import CardModal from "../components/CardModal";
@@ -66,17 +66,19 @@ export default function DeckEditor({ deck, onNavigate }) {
         });
     }, [deck.id]);
 
+    let interMsg = null;
+
     if (isCardError) {
-        return (
-            <IntermittentMessage title="Error" subtitle="Could not load cards" />
-        )
+        interMsg = { title: "Error", subtitle: "Could not load cards" };
     } else if (!cards) {
+        interMsg = { title: "Loading", subtitle: "Please wait..." };
+    }
+
+    if (interMsg) {
         return (
-            <IntermittentMessage title="Loading" subtitle="Please wait..." />
-        )
-    } else if (cards.length === 0) {
-        return (
-            <IntermittentMessage title="Deck is empty" subtitle="Please add some cards" />
+            <div className="w-full min-h-screen">
+                <IntermittentMessage title={interMsg.title} subtitle={interMsg.subtitle} back={() => onNavigate({name: 'home'})} />
+            </div>
         )
     }
 
@@ -104,6 +106,9 @@ export default function DeckEditor({ deck, onNavigate }) {
                                 </div>
                         </div>
                     ))}
+                    {cards.length === 0 && (
+                        <IntermittentMessage title="Deck is empty" subtitle="Please add some cards" />
+                    )}
                 </div>
 
                 {modalConfig.isOpen && (
