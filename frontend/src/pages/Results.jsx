@@ -13,7 +13,7 @@ export default function Results({ onNavigate, results }) {
                             <p>Total: {results.answer_stats.correct + results.answer_stats.incorrect}</p>
                         </div>
                     </div>
-                    <div className="flex flex-col text-white bg-dungeon-dark-500 border border-dungeon-yellow rounded-lg p-4">
+                    <div className="flex flex-col md:max-h-full max-h-1/2 text-white bg-dungeon-dark-500 border border-dungeon-yellow rounded-lg p-4">
                         <h1 className="text-2xl font-pixel-header text-dungeon-yellow">XP earned</h1>
                         <div className="flex flex-col text-2xl space-y-1 max-h-1/4 overflow-y-auto">
                             {results.decks.map((deck) => (
