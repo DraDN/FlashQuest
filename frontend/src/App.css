@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: pixelFontNormal;
-  src: url('src/assets/fonts/Munro.ttf') format('truetype');
+  src: url('@assets/fonts/Munro.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -10,7 +10,7 @@
 
 @font-face {
   font-family: pixelFontHeader;
-  src: url('src/assets/fonts/Alkhemikal.ttf') format('truetype');
+  src: url('@assets/fonts/Alkhemikal.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -18,7 +18,7 @@
 
 @font-face {
   font-family: pixelFontTitle;
-  src: url('src/assets/fonts/GothicPixels.ttf') format('truetype');
+  src: url('@assets/fonts/GothicPixels.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -36,7 +36,7 @@
  }
 
 .dungeon-bg {
-  background-image: url('src/assets/images/dungeon_bg.png');
+  background-image: url('@assets/images/dungeon_bg.png');
   background-size: cover;
   background-position: center;
 }
