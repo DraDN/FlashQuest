@@ -72,18 +72,18 @@ export default function Dungeons({ onDungeonSelect }) {
         setDungeons(dungeons.filter(d => d.id !== id));
     }
 
+    let interMsg = null;
+
     if (isDungeonError) {
-        return (
-            <IntermittentMessage title="Error" subtitle="Could not load dungeons" />
-        );
+        interMsg = { title: "Error", subtitle: "Could not load dungeons" };
     } else if (!dungeons) {
-        return (
-            <IntermittentMessage title="Loading" subtitle="Please wait..." />
-        );
+        interMsg = { title: "Loading", subtitle: "Please wait..." };
     } else if (dungeons.length === 0) {
-        return (
-            <IntermittentMessage title="No dungeons found" subtitle="Create one to get started" />
-        );
+        interMsg = { title: "No dungeons found", subtitle: "Create one to get started" };
+    }
+
+    if (interMsg) {
+        return <IntermittentMessage title={interMsg.title} subtitle={interMsg.subtitle} />
     }
 
     return (
