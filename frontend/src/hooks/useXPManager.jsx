@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getDungeonDecks, levelUpDecks, levelUpAccount } from "../services/api";
-import { calculateLevelXP } from "../utils/xp_utils";
+import { calculateLevelUpXP } from "../utils/xp_utils";
 
 export function useXPManager({ dungeon_id }) {
     const [ decks, setDecks ] = useState(undefined);
@@ -48,13 +48,12 @@ export function useXPManager({ dungeon_id }) {
         const leveled_decks = decks.map((d) => {
             let level_gained = 0;
 
-            let xp_needed_for_next_level = calculateLevelXP(d.level + level_gained + 1);
+            let xp_needed_for_next_level = calculateLevelUpXP(d.level + level_gained);
             const xp_gained = Math.round(d.xp_gained * percentage);
-            const total_xp = d.xp + xp_gained;
 
-            while (total_xp >= xp_needed_for_next_level) {
+            while (xp_gained >= xp_needed_for_next_level) {
                 level_gained++;
-                xp_needed_for_next_level = (d.level + level_gained) * 100;
+                xp_needed_for_next_level += calculateLevelUpXP(d.level + level_gained);
             }
 
             total_levels_gained += level_gained;

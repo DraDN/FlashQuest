@@ -31,6 +31,9 @@
   border-width: 18px;
   border-style: solid;
 } */
+ .crisp-edges {
+  image-rendering: crisp-edges;
+ }
 
 .dungeon-bg {
   background-image: url('src/assets/images/dungeon_bg.png');

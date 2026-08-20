@@ -135,6 +135,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
         <DndContext sensors={sensors_conf} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="w-full flex flex-col bg-dungeon-dark-900 min-h-screen relative">
                 <button className="text-dungeon-red-900 border border-dungeon-red-900 hover:text-dungeon-dark-900 hover:bg-dungeon-red-900 px-2 py-1 rounded-lg absolute top-4 left-4" onClick={() => {setIsEarlyFleeModalOpen(true)}}>{`Flee`}</button>
+                <span className="text-zinc-400 italic text-xl text-left absolute top-4 right-4"> Round: {round} </span>
                 <div className="flex flex-col w-full h-full">
                     <MonsterUI monsters={monsters} />
                     
@@ -158,7 +159,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                         <EarlyFleeModal
                             onClose={async () => await handleExit(DUNGEON_CONFIG.EARLY_FLEE_FEE)}
                             onContinue={() => setIsEarlyFleeModalOpen(false)}
-                            fee={EARLY_FLEE_FEE}
+                            fee={DUNGEON_CONFIG.EARLY_FLEE_FEE}
                         />
                     )}
                     {isDeathModalOpen && (

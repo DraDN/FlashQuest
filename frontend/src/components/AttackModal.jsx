@@ -28,6 +28,7 @@ export default function AttackModal({ onClose, onSave, card }) {
                             onChange={(e) => setAnswer(e.target.value)}
                             className="w-full bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors"
                             required
+                            autoFocus
                         />
                         
                         <div className="flex justify-end gap-3 pt-2 *:px-4 *:py-2 *:rounded-lg *:font-semibold *:text-sm *:transition-colors">

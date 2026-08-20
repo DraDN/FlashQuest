@@ -3,6 +3,7 @@ import { getDungeonCards, getDungeonDecks, getAccountLevel } from "../services/a
 import { shuffle_array } from "../utils/shuffle";
 
 import * as PLAYER_CONFIG from "../config/player_configs";
+import { calculate_stat } from "../utils/player_utils";
 
 export function usePlayer({ dungeon_id }) {
     const [ cards, setCards ] = useState(undefined);
@@ -50,13 +51,10 @@ export function usePlayer({ dungeon_id }) {
                 return;
             }
 
-            setAttackBasedOnLevel(res.data.level);
+            setAttack(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_ATTACK, res.data.level));
+            setHealth(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_HEALTH, res.data.level));
         })
     }, [dungeon_id]);
-
-    const setAttackBasedOnLevel = (level) => {
-        setAttack(Math.round(PLAYER_CONFIG.BASE_PLAYER_ATTACK * Math.pow(PLAYER_CONFIG.ATTACK_SCALE_FACTOR, level)));
-    }
 
     const refillHand = useCallback((previousState) => {
         let current_draw = [...previousState.draw];
@@ -201,7 +199,6 @@ export function usePlayer({ dungeon_id }) {
         },
 
         player_actions: {
-            setAttackBasedOnLevel,
             playCard,
             hit,
             updateStats,
