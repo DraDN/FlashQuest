@@ -113,17 +113,21 @@ export default function Dungeon({ dungeon, onNavigate }) {
         onNavigate({name: 'results', related_object: results});
     }
 
+    let interMsg = null;
+
     if (player_actions.hasError() || xp_actions.hasError()) {
-        return (
-            <IntermittentMessage title="Error" subtitle="Something went wrong. Please try again." />
-        );
+        interMsg = { title: "Error", subtitle: "Something went wrong. Please try again." };
     } else if (player_actions.isLoading() || xp_actions.isLoading()) {
-        return (
-            <IntermittentMessage title="Loading" subtitle="Please wait..." />
-        );
+        interMsg = { title: "Loading", subtitle: "Please wait..." };
     } else if (!player_actions.hasCards()) {
+        interMsg = { title: "No cards in decks!", subtitle: "Please add some cards to your decks and come back." };
+    }
+
+    if (interMsg) {
         return (
-            <IntermittentMessage title="No cards in decks!" subtitle="Please add some cards to your decks and come back." />
+            <div className="w-full min-h-screen">
+                <IntermittentMessage title={interMsg.title} subtitle={interMsg.subtitle} back={() => onNavigate({name: 'home'})} />
+            </div>
         );
     }
 

@@ -70,18 +70,18 @@ export default function Decks({ onDeckSelect }) {
         }
     }
 
+    let interMsg = null;
+
     if (isDeckError) {
-        return (
-            <IntermittentMessage title="Error" subtitle="Could not load decks" />
-        );
+        interMsg = { title: "Error", subtitle: "Could not load decks" };
     } else if (!decks) {
-        return (
-            <IntermittentMessage title="Loading" subtitle="Please wait..." />
-        );
+        interMsg = { title: "Loading", subtitle: "Please wait..." };
     } else if (decks.length === 0) {
-        return (
-            <IntermittentMessage title="No decks found" subtitle="Click the button above to create a new deck" />
-        );
+        interMsg = { title: "No decks found", subtitle: "Click the button above to create a new deck" };
+    }
+
+    if (interMsg) {
+        return <IntermittentMessage title={interMsg.title} subtitle={interMsg.subtitle} />
     }
 
     return (
