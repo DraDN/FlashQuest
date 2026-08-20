@@ -1,9 +1,6 @@
 import { get_room_progression_index, get_floor_index } from "./dungeon_utils";
 import * as MONSTER_CONFIGS from "../config/monster_configs";
 
-const get_floor_mult = (floor_index) => 
-    Math.pow(MONSTER_CONFIGS.MONSTER_SCALE_FACTOR, floor_index);
-
 const calculate_random_stat = (base_stat, floor_mult, tier_mult) =>
     Math.round((base_stat * floor_mult + (Math.random() * MONSTER_CONFIGS.RANDOM_DEVIATION)) * tier_mult);
 
@@ -45,7 +42,7 @@ const get_monster_template = (difficulty_range, tier_list) => {
 
 const generate_monster = (difficulty_range, tier_list, round) => {
     const floor_index = get_floor_index(round);
-    const floor_mult = get_floor_mult(floor_index);
+    const floor_mult = MONSTER_CONFIGS.get_floor_mult(floor_index);
 
     const monster_template = get_monster_template(difficulty_range, tier_list);
     const tier = get_monster_tier_from_monster(monster_template, tier_list);
