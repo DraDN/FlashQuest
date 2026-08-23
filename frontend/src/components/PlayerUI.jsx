@@ -1,12 +1,12 @@
 import { useDraggable } from '@dnd-kit/core';
 
-export function PlayerUI({ player, player_actions }) {
+export function PlayerUI({ player, hand, get_card }) {
     return (
         <div className="flex flex-col w-full min-h-1/3 border border-dungeon-yellow">
             <HealthBar player_health={player.health} />
             <div className="flex flex-row grow gap-4 p-4 items-center md:justify-center justify-start bg-dungeon-dark-500 border border-dungeon-yellow overflow-x-auto overflow-y-hidden">
-                {player.card_state.hand.map((card) => {
-                    return <PlayerCard key={card.id} card={player_actions.getCard(card.id)} fresh={true} index={card.id} />
+                {hand.map((card) => {
+                    return <PlayerCard key={card.id} card={get_card(card.id)} fresh={true} index={card.id} />
                 })}
             </div>
         </div>

@@ -6,6 +6,7 @@ import useSensorsConfig from "../config/sensors";
 
 import { PlayerUI, PlayerCard } from "../components/PlayerUI";
 import { usePlayer } from "../hooks/usePlayer";
+import useCardManager from "../hooks/useCardManager";
 
 import { MonsterUI } from "../components/MonsterUI";
 import { useMonster } from "../hooks/useMonster";
@@ -27,6 +28,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const [ round, setRound ] = useState(1);
 
     const { player, player_actions } = usePlayer({ dungeon_id: dungeon.id });
+    const { card_state, card_actions } = useCardManager(dungeon.id);
     const { monsters, monster_actions } = useMonster({ round: round });
 
     const { xp_actions } = useXPManager({ dungeon_id: dungeon.id });
@@ -45,7 +47,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     const handleDragStart = (event) => {
-        player_actions.setSelected(event.active.id);
+        card_actions.setSelected(event.active.id);
     }
 
     const handleDragEnd = (event) => {
@@ -55,21 +57,21 @@ export default function Dungeon({ dungeon, onNavigate }) {
             monster_actions.setSelected(over.id);
             setIsAttackModalOpen(true);
         } else {
-            player_actions.setSelected(null);
+            card_actions.setSelected(null);
             monster_actions.setSelected(null);
         }
     }
 
     const handleSubmitAttack = (answer) => {
-        const card_answer = player_actions.getSelectedAnswer();
+        const card_answer = card_actions.getSelectedAnswer();
         const is_correct = answer.toLowerCase() === card_answer || answer.toLowerCase() === "test";
 
         if (answer && is_correct) {
             monster_actions.hitSelected(player.attack);
 
-            player_actions.playCard();
+            card_actions.playCard();
 
-            xp_actions.rewardXPToDeck(player_actions.getSelected().deck_id, monster_actions.getSelected().xp_reward);
+            xp_actions.rewardXPToDeck(card_actions.getSelected().deck_id, monster_actions.getSelected().xp_reward);
         } else {
             player_actions.hit(monster_actions.getSelected().attack);
         }
@@ -94,7 +96,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }, [monsters.length]);
 
     const handleCloseAttackModal = () => {
-        player_actions.setSelected(null);
+        card_actions.setSelected(null);
         monster_actions.setSelected(null);
         setIsAttackModalOpen(false);
     }
@@ -115,11 +117,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
     let interMsg = null;
 
-    if (player_actions.hasError() || xp_actions.hasError()) {
+    if (player_actions.hasError() || card_actions.hasError() || xp_actions.hasError()) {
         interMsg = { title: "Error", subtitle: "Something went wrong. Please try again." };
-    } else if (player_actions.isLoading() || xp_actions.isLoading()) {
+    } else if (card_actions.isLoading() || xp_actions.isLoading()) {
         interMsg = { title: "Loading", subtitle: "Please wait..." };
-    } else if (!player_actions.hasCards()) {
+    } else if (!card_actions.hasCards()) {
         interMsg = { title: "No cards in decks!", subtitle: "Please add some cards to your decks and come back." };
     }
 
@@ -139,13 +141,13 @@ export default function Dungeon({ dungeon, onNavigate }) {
                 <div className="flex flex-col w-full h-full">
                     <MonsterUI monsters={monsters} />
                     
-                    <PlayerUI player={player} player_actions={player_actions} />
+                    <PlayerUI player={player} hand={card_state.hand} get_card={card_actions.getCard} />
 
                     {isAttackModalOpen && (
                         <AttackModal
                             onClose={handleCloseAttackModal}
                             onSave={handleSubmitAttack}
-                            card={player_actions.getCard(player_actions.getSelected())}
+                            card={card_actions.getSelected()}
                         />
                     )}
                     {isRoundEndModalOpen && (
@@ -168,8 +170,8 @@ export default function Dungeon({ dungeon, onNavigate }) {
                         />
                     )}
                     <DragOverlay dropAnimation={null}>
-                        {player_actions.getSelected() !== null ? (
-                            <PlayerCard card={player_actions.getCard(player_actions.getSelected())} fresh={false} />
+                        {card_actions.getSelectedID() !== null ? (
+                            <PlayerCard card={card_actions.getSelected()} fresh={false} />
                         ) : null}
                     </DragOverlay>
                 </div>
