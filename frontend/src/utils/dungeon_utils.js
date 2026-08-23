@@ -16,7 +16,8 @@ const get_coin_reward = (round) => {
 
     const deviation = Math.random() * DUNGEON_CONFIGS.RANDOM_COIN_DEVIATION_MULTIPLIER;
 
-    return Math.round(config * (1 + deviation));
+    const reward = Math.round(config * (1 + deviation));
+    return reward;
 }
 
 export { get_room_progression_index, get_floor_index, get_coin_reward }

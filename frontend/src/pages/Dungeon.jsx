@@ -26,9 +26,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
     const [ round, setRound ] = useState(1);
 
-    const { player, player_actions } = usePlayer({ dungeon_id: dungeon.id });
+    const { player, player_actions } = usePlayer();
+
     const { card_state, card_actions } = useCardManager(dungeon.id);
-    const { monsters, monster_actions } = useMonster({ round: round });
+
+    const { monsters, monster_actions } = useMonster(round);
 
     const [ isAttackModalOpen, setIsAttackModalOpen ] = useState(false);
     const [ isRoundEndModalOpen, setIsRoundEndModalOpen ] = useState(false);
@@ -41,6 +43,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const nextRoom = () => {
         setRound(round + 1);
         monster_actions.generateRound(round + 1);
+        player_actions.resetGained();
     }
 
     const handleDragStart = (event) => {
@@ -77,22 +80,28 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     useEffect(() => {
-        if (player_actions.isDead()) {
-            setTimeout(() => {
-                setIsDeathModalOpen(true);
-            }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
-        }
-    }, [player.health]);
+        if (monsters.length !== 0) { return; }
+
+        const coins_earned = get_coin_reward(round)
+        player_actions.rewardCoins(coins_earned);
+
+        const timer = setTimeout(() => {
+            setIsRoundEndModalOpen(true);
+        }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
+
+        return () => clearTimeout(timer);
+    }, [monsters.length]);
 
     useEffect(() => {
-        if (monsters.length === 0) {
-            setTimeout(() => {
-                setIsRoundEndModalOpen(true);
-            }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
+        if (!player_actions.isDead()) { return; }
 
-            player_actions.rewardCoins(get_coin_reward(round));
-        }
-    }, [monsters.length]);
+        const timer = setTimeout(() => {
+            setIsDeathModalOpen(true);
+        }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
+
+        return () => clearTimeout(timer);
+    }, [player.health]);
+
 
     const handleCloseAttackModal = () => {
         card_actions.setSelected(null);
@@ -106,10 +115,10 @@ export default function Dungeon({ dungeon, onNavigate }) {
             return;
         }
 
-        const gained = player_actions.getGained(keep_percentage);
+        const stats = player_actions.getTotal(keep_percentage);
         const save_res = player_actions.saveCoins(keep_percentage);
         const results = {
-            gained: gained,
+            stats: stats,
             answer_stats: player.answer_stats
         }
         onNavigate({name: 'results', related_object: results});
@@ -155,6 +164,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                             onClose={async () => await handleExit(1)}
                             onNext={() => {nextRoom(); setIsRoundEndModalOpen(false);}}
                             round={round}
+                            gained={player.gained}
                         />
                     )}
                     {isEarlyFleeModalOpen && (

@@ -13,53 +13,73 @@ function usePlayer() {
     const [ attack, setAttack ] = useState(PLAYER_CONFIG.BASE_PLAYER_ATTACK);
 
     const [ xp, setXp ] = useState(0);
-    const [ level, setLevel ] = useState(0);
+    const [ level, setLevel ] = useState(1);
 
     const [ coins, setCoins ] = useState(0);
 
     const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
-    const [ last_gain_state, setLastGainState ] = useState({ xp: 0, level: 0, coins: 0 });
+    const [ gained, setGained ] = useState({ xp: 0, level: 0, coins: 0 });
 
+
+    const update_stats = useCallback((new_level) => {
+        const new_max_health = calculate_stat(PLAYER_CONFIG.BASE_PLAYER_HEALTH, new_level);
+        const new_health = health + (new_max_health - max_health);
+
+        setMaxHealth(new_max_health);
+        setHealth(new_health);
+        setAttack(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_ATTACK, new_level));
+    });
 
     const rewardXP = useCallback((gained_xp) => {
         const new_xp = xp + gained_xp;
-        const gained_level = level + (new_xp >= calculateTotalLevelXP(level + 1) ? 1 : 0);
+        const gained_level = (new_xp >= calculateTotalLevelXP(level + 1)) ? 1 : 0;
 
         setXp(new_xp);
-        setLevel(prev_level => prev_level + gained_level);
-    });
+        setLevel(prev_level => {
+            if (gained_level === 0) {
+                return prev_level;
+            }
+
+            update_stats(prev_level + 1);
+            return prev_level + 1;
+        });
+
+        setGained(prev_gains => ({
+            ...prev_gains,
+            xp: prev_gains.xp + gained_xp,
+            level: prev_gains.level + gained_level,
+        }));
+    }, [update_stats, level, xp]);
 
     const rewardCoins = useCallback((gained_coins) => {
         setCoins(prev_coins => prev_coins + gained_coins);
+        setGained(prev_gains => ({
+            ...prev_gains,
+            coins: prev_gains.coins + gained_coins,
+        }));
     });
 
+    const resetGained = useCallback(() => {
+        setGained({ xp: 0, level: 0, coins: 0 });
+    });
 
-    const getGained = useCallback((keep_percentage) => {
-        const gained = {
-            xp: xp - last_gain_state.xp,
-            level: level - last_gain_state.level,
-            coins: coins - Math.round(last_gain_state.coins * keep_percentage)
+    const getTotal = useCallback((keep_percentage) => {
+        return {
+            xp: xp,
+            level: level,
+            coins: coins
         };
-
-        setLastGainState({ xp, level, coins });
-
-        return gained;
-    }, [xp, level, coins, last_gain_state]);
+    }, [xp, level, coins]);
 
     const saveCoins = useCallback((keep_percentage) => {
         return addAccountCoins(Math.round(coins * keep_percentage));
     }, [coins]);
 
 
-    useEffect(() => {
-        setMaxHealth(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_HEALTH, level));
-        setAttack(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_ATTACK, level));
-    }, [level]);
-
-
-
     const hit = useCallback((damage) => {
-        setHealth(prevHealth => prevHealth - damage);
+        setHealth(prevHealth => {
+            return prevHealth - damage;
+        });
     });
 
     const updateStats = useCallback((correct) => {
@@ -86,13 +106,15 @@ function usePlayer() {
             health,
             max_health,
             attack,
-            answer_stats
+            answer_stats,
+            gained
         },
 
         player_actions: {
             rewardXP,
             rewardCoins,
-            getGained,
+            resetGained,
+            getTotal,
             saveCoins,
             hit,
             updateStats,
