@@ -37,9 +37,9 @@ db.exec(`
         FOREIGN KEY (deck_id) REFERENCES decks (id) ON DELETE CASCADE
     );
 
-    CREATE TABLE IF NOT EXISTS user_levels (
+    CREATE TABLE IF NOT EXISTS user_coins (
         user_id TEXT NOT NULL PRIMARY KEY,
-        level INTEGER NOT NULL
+        coins INTEGER NOT NULL
     )
 `);
 

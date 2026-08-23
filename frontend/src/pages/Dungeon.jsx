@@ -19,6 +19,7 @@ import DeathModal from "../components/DeathModal";
 import IntermittentMessage from "../components/IntermittentMessage";
 
 import * as DUNGEON_CONFIG from "../config/dungeon_configs";
+import { get_coin_reward } from "../utils/dungeon_utils";
 
 export default function Dungeon({ dungeon, onNavigate }) {
     const { user } = useUser();
@@ -67,7 +68,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
             card_actions.playCard();
 
-            player_actions.reward(monster_actions.getSelected().xp_reward);
+            player_actions.rewardXP(monster_actions.getSelected().xp_reward);
         } else {
             player_actions.hit(monster_actions.getSelected().attack);
         }
@@ -76,19 +77,21 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     useEffect(() => {
-        setTimeout(() => {
-            if (player_actions.isDead()) {
+        if (player_actions.isDead()) {
+            setTimeout(() => {
                 setIsDeathModalOpen(true);
-            }
-        }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
+            }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
+        }
     }, [player.health]);
 
     useEffect(() => {
-        setTimeout(() => {
-            if (monsters.length === 0) {
+        if (monsters.length === 0) {
+            setTimeout(() => {
                 setIsRoundEndModalOpen(true);
-            }
-        }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
+            }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
+
+            player_actions.rewardCoins(get_coin_reward(round));
+        }
     }, [monsters.length]);
 
     const handleCloseAttackModal = () => {
@@ -97,14 +100,16 @@ export default function Dungeon({ dungeon, onNavigate }) {
         setIsAttackModalOpen(false);
     }
 
-    const handleExit = async (xp_percentage) => {
-        if (xp_percentage === 0) {
+    const handleExit = async (keep_percentage) => {
+        if (keep_percentage === 0) {
             onNavigate({name: 'home'});
             return;
         }
 
+        const gained = player_actions.getGained(keep_percentage);
+        const save_res = player_actions.saveCoins(keep_percentage);
         const results = {
-            gained: player.gained,
+            gained: gained,
             answer_stats: player.answer_stats
         }
         onNavigate({name: 'results', related_object: results});

@@ -15,10 +15,11 @@ export default function Results({ onNavigate, results }) {
                     </div>
                     <div className="flex flex-col md:max-h-full max-h-1/2 text-white bg-dungeon-dark-500 border border-dungeon-yellow rounded-lg p-4">
                         <h1 className="text-2xl font-pixel-header text-dungeon-yellow">Earned</h1>
-                        <span className="text-2xl font-semibold text-dungeon-orange-glow">{results.gained.xp} XP</span>                       
+                        <span className="text-2xl font-semibold text-dungeon-yellow-glow">{results.gained.xp} XP</span>                       
                         {results.gained.level > 0 && (
                             <span className="text-2xl font-semibold text-dungeon-orange-glow">{results.gained.level} Levels</span>
                         )}
+                        <span className="text-2xl font-semibold text-dungeon-yellow-glow">{results.gained.coins} Coins</span>
                     </div>
                 </div>
                 <button
