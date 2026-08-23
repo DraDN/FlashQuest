@@ -62,16 +62,6 @@ export const renameDeck = async (id, name) =>
         body: JSON.stringify({ name })
     }).then(responseHandler);
 
-export const levelUpDecks = async (decks) => {
-    return fetch(`/api/decks/level-up`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ decks })
-    }).then(responseHandler);
-}
-
 export const deleteDeck = async (id) =>
     fetch(`/api/decks/${id}`, {
         method: 'DELETE'

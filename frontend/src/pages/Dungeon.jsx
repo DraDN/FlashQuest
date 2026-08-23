@@ -5,13 +5,11 @@ import { useUser } from "@clerk/clerk-react";
 import useSensorsConfig from "../config/sensors";
 
 import { PlayerUI, PlayerCard } from "../components/PlayerUI";
-import { usePlayer } from "../hooks/usePlayer";
+import usePlayer from "../hooks/usePlayer";
 import useCardManager from "../hooks/useCardManager";
 
 import { MonsterUI } from "../components/MonsterUI";
 import { useMonster } from "../hooks/useMonster";
-
-import { useXPManager } from "../hooks/useXPManager";
 
 import AttackModal from "../components/AttackModal";
 import RoundEndModal from "../components/RoundEndModal";
@@ -30,8 +28,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const { player, player_actions } = usePlayer({ dungeon_id: dungeon.id });
     const { card_state, card_actions } = useCardManager(dungeon.id);
     const { monsters, monster_actions } = useMonster({ round: round });
-
-    const { xp_actions } = useXPManager({ dungeon_id: dungeon.id });
 
     const [ isAttackModalOpen, setIsAttackModalOpen ] = useState(false);
     const [ isRoundEndModalOpen, setIsRoundEndModalOpen ] = useState(false);
@@ -71,7 +67,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
             card_actions.playCard();
 
-            xp_actions.rewardXPToDeck(card_actions.getSelected().deck_id, monster_actions.getSelected().xp_reward);
+            player_actions.reward(monster_actions.getSelected().xp_reward);
         } else {
             player_actions.hit(monster_actions.getSelected().attack);
         }
@@ -107,9 +103,8 @@ export default function Dungeon({ dungeon, onNavigate }) {
             return;
         }
 
-        const new_decks = await xp_actions.save(xp_percentage);
         const results = {
-            decks: new_decks,
+            gained: player.gained,
             answer_stats: player.answer_stats
         }
         onNavigate({name: 'results', related_object: results});
@@ -117,9 +112,9 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
     let interMsg = null;
 
-    if (player_actions.hasError() || card_actions.hasError() || xp_actions.hasError()) {
+    if (card_actions.hasError()) {
         interMsg = { title: "Error", subtitle: "Something went wrong. Please try again." };
-    } else if (card_actions.isLoading() || xp_actions.isLoading()) {
+    } else if (card_actions.isLoading()) {
         interMsg = { title: "Loading", subtitle: "Please wait..." };
     } else if (!card_actions.hasCards()) {
         interMsg = { title: "No cards in decks!", subtitle: "Please add some cards to your decks and come back." };

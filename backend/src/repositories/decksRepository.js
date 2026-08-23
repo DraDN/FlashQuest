@@ -8,7 +8,6 @@ const checkDeckExistsStmt = db.prepare('SELECT 1 FROM decks WHERE id = ?');
 const getOwnerOfDeckStmt = db.prepare('SELECT user_id FROM decks WHERE id = ?');
 const insertDeckStmt = db.prepare('INSERT INTO decks (user_id, name) VALUES (?, ?)');
 const updateDeckNameStmt = db.prepare('UPDATE decks SET name = ? WHERE id = ?');
-const updateAddDeckLevelStmt = db.prepare('UPDATE decks SET xp = xp + ?, level = level + ? WHERE id = ?');
 const deleteDeckStmt = db.prepare('DELETE FROM decks WHERE id = ?');
 
 const getDecksOfDungeonStmt = db.prepare('SELECT * FROM decks WHERE id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)');
@@ -37,16 +36,6 @@ module.exports = {
 	updateDeckName(id, new_name) {
 		return updateDeckNameStmt.run(new_name, id);
 	},
-
-	addDecksLevelXP: db.transaction((decks_level_infos, user_id) => {
-		for (const deck_level_info of decks_level_infos) {
-			const owner = getOwnerOfDeckStmt.get(deck_level_info.id).user_id;
-
-			enforceOwnership(owner, user_id, `Deck ${deck_level_info.id}`);
-
-			updateAddDeckLevelStmt.run(Math.round(deck_level_info.xp_gained), Math.round(deck_level_info.level_gained), deck_level_info.id);
-		}
-	}),
 
 	deleteDeck(id) {
 		return deleteDeckStmt.run(id);

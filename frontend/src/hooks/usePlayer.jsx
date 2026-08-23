@@ -1,33 +1,35 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getAccountLevel } from "../services/api";
 
 import * as PLAYER_CONFIG from "../config/player_configs";
 import { calculate_stat } from "../utils/player_utils";
+import { calculateTotalLevelXP } from "../utils/xp_utils";
 
-export function usePlayer({ dungeon_id }) {
+function usePlayer() {
     const [ health, setHealth ] = useState(PLAYER_CONFIG.BASE_PLAYER_HEALTH);
     const [ max_health, setMaxHealth ] = useState(PLAYER_CONFIG.BASE_PLAYER_HEALTH);
+
     const [ attack, setAttack ] = useState(PLAYER_CONFIG.BASE_PLAYER_ATTACK);
 
-    const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
+    const [ xp, setXp ] = useState(0);
+    const [ level, setLevel ] = useState(0);
 
-    const [ isError, setIsError ] = useState(false);
+    const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
+    const [ gained, setGained ] = useState({ xp: 0, level: 0 });
+
+
+    const reward = useCallback((gained_xp) => {
+        const new_xp = xp + gained_xp;
+        const new_level = level + (new_xp >= calculateTotalLevelXP(level + 1) ? 1 : 0);
+
+        setXp(new_xp);
+        setLevel(new_level);
+        setGained({ xp: new_xp, level: new_level });
+    });
 
     useEffect(() => {
-        getAccountLevel().then(res => {
-            if (!res.ok) {
-                setIsError(true);
-                return;
-            }
-
-            setAttack(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_ATTACK, res.data.level));
-
-            const new_max_health = calculate_stat(PLAYER_CONFIG.BASE_PLAYER_HEALTH, res.data.level);
-            setHealth(new_max_health);
-            setMaxHealth(new_max_health);
-        })
-    }, [dungeon_id]);
-
+        setMaxHealth(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_HEALTH, level));
+        setAttack(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_ATTACK, level));
+    }, [level]);
 
     const hit = useCallback((damage) => {
         setHealth(prevHealth => prevHealth - damage);
@@ -51,20 +53,22 @@ export function usePlayer({ dungeon_id }) {
         return (health <= 0);
     }, [health]);
 
-    const hasError = useCallback(() => {
-        return isError;
-    }, [isError]);
-
     return {
         player: {
-            health, max_health, attack, answer_stats
+            health,
+            max_health,
+            attack,
+            answer_stats,
+            gained
         },
 
         player_actions: {
+            reward,
             hit,
             updateStats,
             isDead,
-            hasError
         }
     };
 }
+
+export default usePlayer;
