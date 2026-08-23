@@ -6,6 +6,7 @@ import { calculate_stat } from "../utils/player_utils";
 
 export function usePlayer({ dungeon_id }) {
     const [ health, setHealth ] = useState(PLAYER_CONFIG.BASE_PLAYER_HEALTH);
+    const [ max_health, setMaxHealth ] = useState(PLAYER_CONFIG.BASE_PLAYER_HEALTH);
     const [ attack, setAttack ] = useState(PLAYER_CONFIG.BASE_PLAYER_ATTACK);
 
     const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
@@ -20,7 +21,10 @@ export function usePlayer({ dungeon_id }) {
             }
 
             setAttack(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_ATTACK, res.data.level));
-            setHealth(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_HEALTH, res.data.level));
+
+            const new_max_health = calculate_stat(PLAYER_CONFIG.BASE_PLAYER_HEALTH, res.data.level);
+            setHealth(new_max_health);
+            setMaxHealth(new_max_health);
         })
     }, [dungeon_id]);
 
@@ -53,7 +57,7 @@ export function usePlayer({ dungeon_id }) {
 
     return {
         player: {
-            health, attack, answer_stats
+            health, max_health, attack, answer_stats
         },
 
         player_actions: {
