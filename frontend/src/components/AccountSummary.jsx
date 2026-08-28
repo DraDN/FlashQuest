@@ -1,29 +1,29 @@
 import { useState, useEffect } from "react";
 import { useUser, UserAvatar } from "@clerk/clerk-react";
 
-import { getAccountCoins, checkAccountInit } from "../services/api";
+import { getAccountLevel, checkAccountInit } from "../services/api";
 
 export default function AccountSummary() {
     const { user } = useUser();
-    const [ coins, setCoins ] = useState(0);
+    const [ level, setLevel ] = useState(() => {
+        const res = checkAccountInit(); // TODO: maybe add greet for new users
+        if (!res.ok) {
+            return -1;
+        }
+
+        return 0;
+    });
 
     useEffect(() => {
-        checkAccountInit().then(res => {
+        // TODO: add error handling
+        getAccountLevel().then(res => {
             if (!res.ok) {
-                setCoins(-1);
-                return;
+                setLevel(-99999);
             }
 
-            // TODO: add error handling
-            getAccountCoins().then(res => {
-                if (!res.ok) {
-                    setCoins(-99999);
-                }
-
-                setCoins(res.data.coins);
-            })
+            setLevel(res.data.level);
         })
-    }, [user?.id]);
+    });
 
     return (
         <>
@@ -33,7 +33,7 @@ export default function AccountSummary() {
                 </div>
                 <div className="inline-flex gap-6 items-end">
                     <h1 className="text-5xl">{user.username}</h1>
-                    <h3 className="text-2xl text-dungeon-yellow font-medium">Coins: {coins}</h3>
+                    <h3 className="text-2xl text-dungeon-yellow font-medium">Level: {level}</h3>
                 </div>
             </div>
         </>

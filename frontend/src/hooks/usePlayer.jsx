@@ -1,85 +1,133 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-
-import { addAccountCoins } from "../services/api";
+import { getDungeonCards, getDungeonDecks, getAccountLevel } from "../services/api";
+import { shuffle_array } from "../utils/shuffle";
 
 import * as PLAYER_CONFIG from "../config/player_configs";
 import { calculate_stat } from "../utils/player_utils";
-import { calculateTotalLevelXP } from "../utils/xp_utils";
 
-function usePlayer() {
+export function usePlayer({ dungeon_id }) {
+    const [ cards, setCards ] = useState(undefined);
+
+    const [ selected_card, setSelectedCard ] = useState(null);
+    const selected_card_ref = useRef(null);
+    const [ card_state, setCardState ] = useState({
+        draw: [],
+        hand: [],
+        discard: [],
+    });
+
     const [ health, setHealth ] = useState(PLAYER_CONFIG.BASE_PLAYER_HEALTH);
-    const [ max_health, setMaxHealth ] = useState(PLAYER_CONFIG.BASE_PLAYER_HEALTH);
-
     const [ attack, setAttack ] = useState(PLAYER_CONFIG.BASE_PLAYER_ATTACK);
 
-    const [ xp, setXp ] = useState(0);
-    const [ level, setLevel ] = useState(1);
-
-    const [ coins, setCoins ] = useState(0);
-
     const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
-    const [ gained, setGained ] = useState({ xp: 0, level: 0, coins: 0 });
 
+    const [ isError, setIsError ] = useState(false);
 
-    const update_stats = useCallback((new_level) => {
-        const new_max_health = calculate_stat(PLAYER_CONFIG.BASE_PLAYER_HEALTH, new_level);
-        const new_health = health + (new_max_health - max_health);
-
-        setMaxHealth(new_max_health);
-        setHealth(new_health);
-        setAttack(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_ATTACK, new_level));
-    });
-
-    const rewardXP = useCallback((gained_xp) => {
-        const new_xp = xp + gained_xp;
-        const gained_level = (new_xp >= calculateTotalLevelXP(level + 1)) ? 1 : 0;
-
-        setXp(new_xp);
-        setLevel(prev_level => {
-            if (gained_level === 0) {
-                return prev_level;
+    useEffect(() => {
+        getDungeonCards(dungeon_id)
+        .then(res => {
+            if (!res.ok) {
+                setIsError(true);
+                return;
             }
 
-            update_stats(prev_level + 1);
-            return prev_level + 1;
+            const new_cards = res.data;
+            setCards(new_cards);
+
+            setCardState(() => {
+                const filled_hand = refillHand({
+                    draw: shuffle_array(Array.from(Array(new_cards.length).keys()).map(i => ({ id: i }))),
+                    hand: [],
+                    discard: [],
+                });
+
+                return filled_hand;
+            });
         });
 
-        setGained(prev_gains => ({
-            ...prev_gains,
-            xp: prev_gains.xp + gained_xp,
-            level: prev_gains.level + gained_level,
-        }));
-    }, [update_stats, level, xp]);
+        getAccountLevel().then(res => {
+            if (!res.ok) {
+                setIsError(true);
+                return;
+            }
 
-    const rewardCoins = useCallback((gained_coins) => {
-        setCoins(prev_coins => prev_coins + gained_coins);
-        setGained(prev_gains => ({
-            ...prev_gains,
-            coins: prev_gains.coins + gained_coins,
-        }));
-    });
+            setAttack(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_ATTACK, res.data.level));
+            setHealth(calculate_stat(PLAYER_CONFIG.BASE_PLAYER_HEALTH, res.data.level));
+        })
+    }, [dungeon_id]);
 
-    const resetGained = useCallback(() => {
-        setGained({ xp: 0, level: 0, coins: 0 });
-    });
+    const refillHand = useCallback((previousState) => {
+        let current_draw = [...previousState.draw];
+        let current_discard = [...previousState.discard];
+        let new_hand = [...previousState.hand]
 
-    const getTotal = useCallback((keep_percentage) => {
-        return {
-            xp: xp,
-            level: level,
-            coins: coins
+        const size = current_draw.length + current_discard.length + new_hand.length;
+        const limit = Math.min(size, PLAYER_CONFIG.MAX_HAND_SIZE);
+        while (new_hand.length < limit) {
+            if (current_draw.length === 0) {
+                current_draw = shuffle_array(current_discard);
+                current_discard = [];
+            }
+
+            const card_to_add = current_draw.shift();
+            new_hand.push(card_to_add);
+        }
+
+        const new_state = {
+            draw: current_draw,
+            hand: new_hand,
+            discard: current_discard,
         };
-    }, [xp, level, coins]);
 
-    const saveCoins = useCallback((keep_percentage) => {
-        return addAccountCoins(Math.round(coins * keep_percentage));
-    }, [coins]);
+        return new_state;
+    });
 
+    const playCard = useCallback(() => {
+        setCardState((previousState) => {
+            const new_discard = [...previousState.discard, { id: selected_card } ];
+
+            if (previousState.hand.length === 0) {
+                return refillHand({
+                    draw: previousState.draw,
+                    hand: [],
+                    discard: new_discard
+                });
+            }
+
+            return {
+                ...previousState,
+                discard: new_discard
+            }
+        });
+
+        setSelectedCard(null);
+        selected_card_ref.current = null;
+    }, [refillHand, card_state, selected_card, selected_card_ref]);
+
+    const remove_card_from_hand = (card_id) => {
+        // TODO: add check for card id boundary
+        setCardState((previousState) => {
+            const new_hand = previousState.hand.filter((card) => card.id !== card_id);
+            return {
+                ...previousState,
+                hand: new_hand
+            }
+        })
+    }
+
+    const add_card_to_hand = (card_id) => {
+        // TODO: add check for card id boundary
+        setCardState((previousState) => {
+            const new_hand = [...previousState.hand, { id: card_id }];
+            return {
+                ...previousState,
+                hand: new_hand
+            }
+        })
+    }
 
     const hit = useCallback((damage) => {
-        setHealth(prevHealth => {
-            return prevHealth - damage;
-        });
+        setHealth(prevHealth => prevHealth - damage);
     });
 
     const updateStats = useCallback((correct) => {
@@ -96,31 +144,73 @@ function usePlayer() {
         });
     });
 
+    const getCard = useCallback((card_id) => {
+        // TODO: add check for card id boundary
+        return cards?.at(card_id);
+    }, [cards]);
+
+    const setSelected = useCallback((card_id) => {
+        // TODO: add check for card id boundary
+        // if we already have a card selected, put it back
+        if (selected_card_ref.current !== null && card_id !== selected_card_ref.current) {
+            add_card_to_hand(selected_card_ref.current);
+        }
+
+        // if we select a new card, move it from hand to "selected"
+        if (card_id !== null) {
+            remove_card_from_hand(card_id);
+        }
+
+        setSelectedCard(card_id);
+        selected_card_ref.current = card_id;
+    }, [selected_card_ref.current, add_card_to_hand, remove_card_from_hand]);
+
+    const getSelectedID = useCallback(() => {
+        return selected_card;
+    }, [selected_card]);
+
+    const getSelected = useCallback(() => {
+        return getCard(selected_card);
+    }, [selected_card]);
+
+    const getSelectedAnswer = useCallback(() => {
+        return getCard(selected_card).answer.trim().toLowerCase();
+    }, [selected_card, getCard]);
+
     const isDead = useCallback(() => {
         return (health <= 0);
     }, [health]);
 
+    const hasCards = useCallback(() => {
+        return (cards && cards.length > 0);
+    }, [cards]);
+
+    const isLoading = useCallback(() => {
+        return (cards === undefined);
+    }, [cards]);
+
+    const hasError = useCallback(() => {
+        return isError;
+    }, [isError]);
 
     return {
         player: {
-            health,
-            max_health,
-            attack,
-            answer_stats,
-            gained
+            card_state, health, attack, answer_stats
         },
 
         player_actions: {
-            rewardXP,
-            rewardCoins,
-            resetGained,
-            getTotal,
-            saveCoins,
+            playCard,
             hit,
             updateStats,
+            getCard,
+            setSelected,
+            getSelectedID,
+            getSelected,
+            getSelectedAnswer,
             isDead,
+            hasCards,
+            isLoading,
+            hasError
         }
     };
 }
-
-export default usePlayer;

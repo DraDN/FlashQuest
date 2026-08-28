@@ -18,25 +18,25 @@ const responseHandler = async (res) => {
 export const checkAccountInit = async () => 
     fetch(`/api/account/check-init`).then(responseHandler);
 
-export const getAccountCoins = async () => 
-    fetch(`/api/account/coins`).then(responseHandler);
+export const getAccountLevel = async () => 
+    fetch(`/api/account/level`).then(responseHandler);
 
-export const setAccountCoins = async (coins) =>
-    fetch(`/api/account/coins`, {
+export const setAccountLevel = async (level) =>
+    fetch(`/api/account/level`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ coins })
+        body: JSON.stringify({ level })
     }).then(responseHandler);
 
-export const addAccountCoins = async (added_coins) =>
-    fetch(`/api/account/earn`, {
+export const levelUpAccount = async (added_levels) =>
+    fetch(`/api/account/level-up`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ added_coins })
+        body: JSON.stringify({ added_levels })
     }).then(responseHandler);
 
 // === DECKS API ===
@@ -61,6 +61,16 @@ export const renameDeck = async (id, name) =>
         },
         body: JSON.stringify({ name })
     }).then(responseHandler);
+
+export const levelUpDecks = async (decks) => {
+    return fetch(`/api/decks/level-up`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ decks })
+    }).then(responseHandler);
+}
 
 export const deleteDeck = async (id) =>
     fetch(`/api/decks/${id}`, {

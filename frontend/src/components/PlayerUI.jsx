@@ -1,12 +1,12 @@
 import { useDraggable } from '@dnd-kit/core';
 
-export function PlayerUI({ player, hand, get_card }) {
+export function PlayerUI({ player, player_actions }) {
     return (
         <div className="flex flex-col w-full min-h-1/3 border border-dungeon-yellow">
-            <HealthBar health={player.health} max_health={player.max_health} />
+            <HealthBar player_health={player.health} />
             <div className="flex flex-row grow gap-4 p-4 items-center md:justify-center justify-start bg-dungeon-dark-500 border border-dungeon-yellow overflow-x-auto overflow-y-hidden">
-                {hand.map((card) => {
-                    return <PlayerCard key={card.id} card={get_card(card.id)} fresh={true} index={card.id} />
+                {player.card_state.hand.map((card) => {
+                    return <PlayerCard key={card.id} card={player_actions.getCard(card.id)} fresh={true} index={card.id} />
                 })}
             </div>
         </div>
@@ -50,13 +50,13 @@ export function PlayerCard({ card, fresh, index }) {
     );
 }
 
-function HealthBar({ health, max_health }) {
+function HealthBar({ player_health: health }) {
     return (
         <div className="space-y-1.5 relative">
             <div className="w-full h-8">
                 {health > 0 && (
-                    <div className={`flex flex-row h-full bg-dungeon-red-900 transition-all ${health < max_health && "rounded-r-xl"} duration-500 ease-out`}
-                        style={{ width: `${health / max_health * 100}%`}}>
+                    <div className={`flex flex-row h-full bg-dungeon-red-900 transition-all ${health < 100 && "rounded-r-xl"} duration-500 ease-out`}
+                        style={{ width: `${health}%`}}>
                     </div>
                 )}
                 <p className="text-white absolute right-1/2 translate-x-1/2 top-1/2 -translate-y-1/2 italic">Health: {health}</p>

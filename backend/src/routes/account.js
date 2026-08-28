@@ -19,40 +19,40 @@ router.get('/check-init', async (req, res, next) => {
     }  
 });
 
-router.get('/coins', async (req, res, next) => {
+router.get('/level', async (req, res, next) => {
     try {
-        const coins = await accountService.getAccountCoins(req.user_id);
+        const level = await accountService.getAccountLevel(req.user_id);
 
-        return res.status(200).json(coins);
+        return res.status(200).json(level);
     } catch (error) {
         next(error);
     }
 });
 
-router.post('/coins', async (req, res, next) => {
-    const { coins } = req.body;
+router.post('/level', async (req, res, next) => {
+    const { level } = req.body;
 
     try {
-        const updated_coins = await accountService.setAccountCoins(req.user_id, coins);
+        const updated_level = await accountService.setAccountLevel(req.user_id, level);
 
-        return res.status(200).json(updated_coins);
+        return res.status(200).json(updated_level);
     } catch (error) {
         next(error);
     }
 });
 
-router.post('/earn', [
-    body('added_coins')
-        .notEmpty().withMessage('\'added_coins\' is required')
-        .isInt({ min: 0 }).withMessage('\'added_coins\' must be a positive integer')
+router.post('/level-up', [
+    body('added_levels')
+        .notEmpty().withMessage('\'added_levels\' is required')
+        .isInt({ min: 0 }).withMessage('\'added_levels\' must be a positive integer')
         .toInt()
 ], validationHandler, async (req, res, next) => {
-    const { added_coins } = req.body;
+    const { added_levels } = req.body;
 
     try {
-        const updated_coins = await accountService.addAccountCoins(req.user_id, added_coins);
+        const updated_level = await accountService.addAccountLevels(req.user_id, added_levels);
 
-        return res.status(200).json(updated_coins);
+        return res.status(200).json(updated_level);
     } catch (error) {
         next(error);
     }
