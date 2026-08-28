@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { generate_monsters } from "../utils/monster_utils";
 import { MAX_NO_MONSTERS } from "../config/monster_configs";
 
-export function useMonster({ round }) {
+export function useMonster(round) {
     const [ monsters, setMonsters ] = useState(() => generate_monsters(round));
 
     const [ selected_monster, setSelectedMonster ] = useState(null);
@@ -34,7 +34,7 @@ export function useMonster({ round }) {
 
         setMonsters(new_monsters);
 
-        setTimeout(() => {
+        const timer = setTimeout(() => {
             setMonsters(prevMonsters => {
                 const alive_monsters = prevMonsters.filter(mon => mon.health > 0);
                 const updated_monsters = alive_monsters.map(mon => ({...mon, is_hit: false }));
@@ -42,6 +42,8 @@ export function useMonster({ round }) {
                 return updated_monsters;
             });
         }, 800);
+
+        return () => clearTimeout(timer);
     }, [monsters, selected_monster]);
 
     return {

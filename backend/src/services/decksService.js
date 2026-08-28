@@ -30,10 +30,6 @@ module.exports = {
 		return decksRepo.getDeck(id);
 	},
 
-	async addDecksLevelXP(decks_level_info, user_id) {
-		return decksRepo.addDecksLevelXP(decks_level_info, user_id);
-	},
-
 	async deleteDeck(id, user_id) {
 		const delete_transaction = db.transaction(() => {
 			const owner = decksRepo.getOwnerOfDeck(id);

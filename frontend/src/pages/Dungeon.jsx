@@ -5,12 +5,11 @@ import { useUser } from "@clerk/clerk-react";
 import useSensorsConfig from "../config/sensors";
 
 import { PlayerUI, PlayerCard } from "../components/PlayerUI";
-import { usePlayer } from "../hooks/usePlayer";
+import usePlayer from "../hooks/usePlayer";
+import useCardManager from "../hooks/useCardManager";
 
 import { MonsterUI } from "../components/MonsterUI";
 import { useMonster } from "../hooks/useMonster";
-
-import { useXPManager } from "../hooks/useXPManager";
 
 import AttackModal from "../components/AttackModal";
 import RoundEndModal from "../components/RoundEndModal";
@@ -20,16 +19,18 @@ import DeathModal from "../components/DeathModal";
 import IntermittentMessage from "../components/IntermittentMessage";
 
 import * as DUNGEON_CONFIG from "../config/dungeon_configs";
+import { get_coin_reward } from "../utils/dungeon_utils";
 
 export default function Dungeon({ dungeon, onNavigate }) {
     const { user } = useUser();
 
     const [ round, setRound ] = useState(1);
 
-    const { player, player_actions } = usePlayer({ dungeon_id: dungeon.id });
-    const { monsters, monster_actions } = useMonster({ round: round });
+    const { player, player_actions } = usePlayer();
 
-    const { xp_actions } = useXPManager({ dungeon_id: dungeon.id });
+    const { card_state, card_actions } = useCardManager(dungeon.id);
+
+    const { monsters, monster_actions } = useMonster(round);
 
     const [ isAttackModalOpen, setIsAttackModalOpen ] = useState(false);
     const [ isRoundEndModalOpen, setIsRoundEndModalOpen ] = useState(false);
@@ -42,10 +43,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const nextRoom = () => {
         setRound(round + 1);
         monster_actions.generateRound(round + 1);
+        player_actions.resetGained();
     }
 
     const handleDragStart = (event) => {
-        player_actions.setSelected(event.active.id);
+        card_actions.setSelected(event.active.id);
     }
 
     const handleDragEnd = (event) => {
@@ -55,21 +57,21 @@ export default function Dungeon({ dungeon, onNavigate }) {
             monster_actions.setSelected(over.id);
             setIsAttackModalOpen(true);
         } else {
-            player_actions.setSelected(null);
+            card_actions.setSelected(null);
             monster_actions.setSelected(null);
         }
     }
 
     const handleSubmitAttack = (answer) => {
-        const card_answer = player_actions.getSelectedAnswer();
+        const card_answer = card_actions.getSelectedAnswer();
         const is_correct = answer.toLowerCase() === card_answer || answer.toLowerCase() === "test";
 
         if (answer && is_correct) {
             monster_actions.hitSelected(player.attack);
 
-            player_actions.playCard();
+            card_actions.playCard();
 
-            xp_actions.rewardXPToDeck(player_actions.getSelected().deck_id, monster_actions.getSelected().xp_reward);
+            player_actions.rewardXP(monster_actions.getSelected().xp_reward);
         } else {
             player_actions.hit(monster_actions.getSelected().attack);
         }
@@ -78,36 +80,45 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     useEffect(() => {
-        setTimeout(() => {
-            if (player_actions.isDead()) {
-                setIsDeathModalOpen(true);
-            }
-        }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
-    }, [player.health]);
+        if (monsters.length !== 0) { return; }
 
-    useEffect(() => {
-        setTimeout(() => {
-            if (monsters.length === 0) {
-                setIsRoundEndModalOpen(true);
-            }
+        const coins_earned = get_coin_reward(round)
+        player_actions.rewardCoins(coins_earned);
+
+        const timer = setTimeout(() => {
+            setIsRoundEndModalOpen(true);
         }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
+
+        return () => clearTimeout(timer);
     }, [monsters.length]);
 
+    useEffect(() => {
+        if (!player_actions.isDead()) { return; }
+
+        const timer = setTimeout(() => {
+            setIsDeathModalOpen(true);
+        }, DUNGEON_CONFIG.MODAL_POPUP_DELAY);
+
+        return () => clearTimeout(timer);
+    }, [player.health]);
+
+
     const handleCloseAttackModal = () => {
-        player_actions.setSelected(null);
+        card_actions.setSelected(null);
         monster_actions.setSelected(null);
         setIsAttackModalOpen(false);
     }
 
-    const handleExit = async (xp_percentage) => {
-        if (xp_percentage === 0) {
+    const handleExit = async (keep_percentage) => {
+        if (keep_percentage === 0) {
             onNavigate({name: 'home'});
             return;
         }
 
-        const new_decks = await xp_actions.save(xp_percentage);
+        const stats = player_actions.getTotal(keep_percentage);
+        const save_res = player_actions.saveCoins(keep_percentage);
         const results = {
-            decks: new_decks,
+            stats: stats,
             answer_stats: player.answer_stats
         }
         onNavigate({name: 'results', related_object: results});
@@ -115,11 +126,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
     let interMsg = null;
 
-    if (player_actions.hasError() || xp_actions.hasError()) {
+    if (card_actions.hasError()) {
         interMsg = { title: "Error", subtitle: "Something went wrong. Please try again." };
-    } else if (player_actions.isLoading() || xp_actions.isLoading()) {
+    } else if (card_actions.isLoading()) {
         interMsg = { title: "Loading", subtitle: "Please wait..." };
-    } else if (!player_actions.hasCards()) {
+    } else if (!card_actions.hasCards()) {
         interMsg = { title: "No cards in decks!", subtitle: "Please add some cards to your decks and come back." };
     }
 
@@ -139,13 +150,13 @@ export default function Dungeon({ dungeon, onNavigate }) {
                 <div className="flex flex-col w-full h-full">
                     <MonsterUI monsters={monsters} />
                     
-                    <PlayerUI player={player} player_actions={player_actions} />
+                    <PlayerUI player={player} hand={card_state.hand} get_card={card_actions.getCard} />
 
                     {isAttackModalOpen && (
                         <AttackModal
                             onClose={handleCloseAttackModal}
                             onSave={handleSubmitAttack}
-                            card={player_actions.getCard(player_actions.getSelected())}
+                            card={card_actions.getSelected()}
                         />
                     )}
                     {isRoundEndModalOpen && (
@@ -153,6 +164,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                             onClose={async () => await handleExit(1)}
                             onNext={() => {nextRoom(); setIsRoundEndModalOpen(false);}}
                             round={round}
+                            gained={player.gained}
                         />
                     )}
                     {isEarlyFleeModalOpen && (
@@ -168,8 +180,8 @@ export default function Dungeon({ dungeon, onNavigate }) {
                         />
                     )}
                     <DragOverlay dropAnimation={null}>
-                        {player_actions.getSelected() !== null ? (
-                            <PlayerCard card={player_actions.getCard(player_actions.getSelected())} fresh={false} />
+                        {card_actions.getSelectedID() !== null ? (
+                            <PlayerCard card={card_actions.getSelected()} fresh={false} />
                         ) : null}
                     </DragOverlay>
                 </div>

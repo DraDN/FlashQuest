@@ -14,17 +14,14 @@ export default function Results({ onNavigate, results }) {
                         </div>
                     </div>
                     <div className="flex flex-col md:max-h-full max-h-1/2 text-white bg-dungeon-dark-500 border border-dungeon-yellow rounded-lg p-4">
-                        <h1 className="text-2xl font-pixel-header text-dungeon-yellow">XP earned</h1>
-                        <div className="flex flex-col text-2xl space-y-1 overflow-y-auto">
-                            {results.decks.map((deck) => (
-                                <span key={deck.id}>
-                                    {deck.name} <span className="font-semibold text-dungeon-yellow-glow">+{deck.xp_gained}XP</span>
-                                    {deck.level_gained > 0 && (
-                                        <span className="font-bold text-dungeon-orange-glow"> +{deck.level_gained} levels!</span>
-                                    )}
-                                </span>
-                            ))}
-                        </div>
+                        <h1 className="text-2xl font-pixel-header text-dungeon-yellow">Total Earned</h1>
+
+                        <span className="text-2xl font-semibold text-dungeon-yellow-glow">{results.stats.xp} XP</span>                       
+                        {results.stats.level > 0 && (
+                            <span className="text-2xl font-semibold text-dungeon-orange-glow">{results.stats.level} Levels</span>
+                        )}
+
+                        <span className="mt-4 italic text-2xl font-bold text-dungeon-yellow-glow">+{results.stats.coins} Coins</span>
                     </div>
                 </div>
                 <button

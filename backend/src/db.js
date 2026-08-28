@@ -12,8 +12,6 @@ db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id TEXT NOT NULL,
         name TEXT NOT NULL,
-        xp INTEGER DEFAULT 0,
-        level INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     
@@ -39,9 +37,9 @@ db.exec(`
         FOREIGN KEY (deck_id) REFERENCES decks (id) ON DELETE CASCADE
     );
 
-    CREATE TABLE IF NOT EXISTS user_levels (
+    CREATE TABLE IF NOT EXISTS user_coins (
         user_id TEXT NOT NULL PRIMARY KEY,
-        level INTEGER NOT NULL
+        coins INTEGER NOT NULL
     )
 `);
 
