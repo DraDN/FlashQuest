@@ -11,7 +11,9 @@ const getCardsOfDungeonStmt = db.prepare('SELECT * FROM cards WHERE deck_id IN (
 
 module.exports = {
 	getCard(id) {
-		return getCardByIDStmt.get(id);
+		const card = getCardByIDStmt.get(id);
+		card.options = JSON.parse(card.options);
+		return card;
 	},
 
 	getOwnerOfCard(id) {
@@ -31,10 +33,14 @@ module.exports = {
 	},
 
 	getCardsOfDeck(deck_id) {
-		return getCardsOfDeckStmt.all(deck_id).forEach(card => card.options = JSON.parse(card.options));
+		const cards = getCardsOfDeckStmt.all(deck_id);
+		cards.forEach(card => card.options = JSON.parse(card.options));
+		return cards;
 	},
 
 	getCardsOfDungeon(dungeon_id) {
-		return getCardsOfDungeonStmt.all(dungeon_id).forEach(card => card.options = JSON.parse(card.options));
+		const cards = getCardsOfDeckStmt.all(deck_id);
+		cards.forEach(card => card.options = JSON.parse(card.options));
+		return cards;
 	}
 };
