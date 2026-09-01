@@ -16,7 +16,7 @@ module.exports = {
 
 			enforceOwnership(owner, user_id, 'Deck');
 
-			const add_result = cardsRepo.insertCard(deck_id, question, options, answer);
+			const add_result = cardsRepo.insertCard(deck_id, question, answer, options);
 			return cardsRepo.getCard(add_result.lastInsertRowid);
 		});
 

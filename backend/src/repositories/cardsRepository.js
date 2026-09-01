@@ -25,7 +25,7 @@ module.exports = {
 	},
 
 	updateCard(id, question, answer, options) {
-		return updateCardStmt.run(question, answer, id, JSON.stringify(options));
+		return updateCardStmt.run(question, answer, JSON.stringify(options), id);
 	},
 
 	deleteCard(id) {
@@ -39,7 +39,7 @@ module.exports = {
 	},
 
 	getCardsOfDungeon(dungeon_id) {
-		const cards = getCardsOfDeckStmt.all(deck_id);
+		const cards = getCardsOfDeckStmt.all(dungeon_id);
 		cards.forEach(card => card.options = JSON.parse(card.options));
 		return cards;
 	}
