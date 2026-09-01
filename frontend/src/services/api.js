@@ -72,22 +72,22 @@ export const deleteDeck = async (id) =>
 export const getCards = async (deck_id) => 
     fetch(`/api/decks/${deck_id}/cards`).then(responseHandler);
 
-export const createCard = async (deck_id, question, answer) => 
+export const createCard = async (deck_id, question, answer, options) => 
     fetch(`/api/cards`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ deck_id, question, answer })
+        body: JSON.stringify({ deck_id, question, answer, options })
     }).then(responseHandler);
 
-export const editCard = async (card_id, question, answer) =>
+export const editCard = async (card_id, question, answer, options) =>
     fetch(`/api/cards/${card_id}/edit`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ question, answer })
+        body: JSON.stringify({ question, answer, options })
     }).then(responseHandler);
 
 export const deleteCard = async (id) =>
