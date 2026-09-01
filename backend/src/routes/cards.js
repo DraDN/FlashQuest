@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { body, param } = require('express-validator');
+const { body, param, check } = require('express-validator');
 const validationHandler = require('../middleware/validationHandler');
 
 const authHandler = require('../middleware/authHandler');
@@ -17,12 +17,21 @@ router.post('/', [
     body('answer')
         .trim()
         .notEmpty().withMessage('\'answer\' is required')
-        .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('\'answer\' too long')
+        .isInt({ min: 0, max: cardsService.CARD_MAX_OPTIONS }).withMessage('\'answer\' must be an integer between 0 and ' + cardsService.CARD_MAX_OPTIONS),
+    body('options')
+        .trim()
+        .notEmpty().withMessage('\'options\' is required')
+        .isArray().withMessage('\'options\' must be an array')
+        .isLength({ max: cardsService.CARD_MAX_OPTIONS }).withMessage('\'options\' too long'),
+    check(`options.*`)
+        .trim()
+        .notEmpty().withMessage('Passed \'options\' empty')
+        .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('Passed \'options\' too long')
 ], validationHandler, async (req, res, next) => {
-    const { deck_id, question, answer } = req.body;
+    const { deck_id, question, answer, options } = req.body;
 
     try {
-        const card = await cardsService.addCard(deck_id, question, answer, req.user_id);
+        const card = await cardsService.addCard(deck_id, question, answer, options, req.user_id);
 
         return res.status(200).json(card);
     } catch (error) {
@@ -42,13 +51,22 @@ router.post('/:id/edit', [
     body('answer')
         .trim()
         .notEmpty().withMessage('\'answer\' is required')
-        .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('\'answer\' too long')
+        .isInt({ min: 0, max: cardsService.CARD_MAX_OPTIONS }).withMessage('\'answer\' must be an integer between 0 and ' + cardsService.CARD_MAX_OPTIONS),
+    body('options')
+        .trim()
+        .notEmpty().withMessage('\'options\' is required')
+        .isArray().withMessage('\'options\' must be an array')
+        .isLength({ max: cardsService.CARD_MAX_OPTIONS }).withMessage('\'options\' too long'),
+    check(`options.*`)
+        .trim()
+        .notEmpty().withMessage('Passed \'options\' empty')
+        .isLength({ max: cardsService.CARD_MAX_CHARACTERS }).withMessage('Passed \'options\' too long')
 ], validationHandler, async (req, res, next) => {
     const { id } = req.params;
-    const { question, answer } = req.body;
+    const { question, answer, options } = req.body;
 
     try {
-        const card = await cardsService.editCard(id, question, answer, req.user_id);
+        const card = await cardsService.editCard(id, question, answer, options, req.user_id);
 
         return res.status(200).json(card);
     } catch (error) {

@@ -8,27 +8,28 @@ const decksRepo = require('../repositories/decksRepository');
 
 module.exports = {
 	CARD_MAX_CHARACTERS: 100,
+	CARD_MAX_OPTIONS: 4,
 
-	addCard(deck_id, question, answer, user_id) {
+	addCard(deck_id, question, answer, options, user_id) {
 		const add_transaction = db.transaction(() => {
 			const owner = decksRepo.getOwnerOfDeck(deck_id);
 
 			enforceOwnership(owner, user_id, 'Deck');
 
-			const add_result = cardsRepo.insertCard(deck_id, question, answer);
+			const add_result = cardsRepo.insertCard(deck_id, question, options, answer);
 			return cardsRepo.getCard(add_result.lastInsertRowid);
 		});
 
 		return add_transaction();
 	},
 
-	editCard(id, question, answer, user_id) {
+	editCard(id, question, answer, options, user_id) {
 		const edit_transaction = db.transaction(() => {
 			const owner = cardsRepo.getOwnerOfCard(id);
 
 			enforceOwnership(owner, user_id, 'Card');
 
-			const edit_result = cardsRepo.updateCard(id, question, answer);
+			const edit_result = cardsRepo.updateCard(id, question, answer, options);
 			return cardsRepo.getCard(id);
 		})
 
