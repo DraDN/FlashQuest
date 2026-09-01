@@ -39,8 +39,8 @@ export default function AttackModal({ onClose, onSave, card }) {
                                 <button 
                                     key={index}
                                     type="button"
-                                    className={`w-full text-xl ${answer === card.options.at(index) ? 'bg-dungeon-green-700' : 'bg-zinc-950'} border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors`}
-                                    onClick={() => { setAnswer(card.options.at(index)); }}>
+                                    className={`w-full text-xl ${answer === option ? 'bg-dungeon-green-700' : 'bg-zinc-950'} border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors`}
+                                    onClick={() => { setAnswer(option); }}>
                                     {option}
                                 </button>
                             ))}
