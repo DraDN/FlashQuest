@@ -21,8 +21,7 @@ router.post('/', [
     body('options')
         .trim()
         .notEmpty().withMessage('\'options\' is required')
-        .isArray().withMessage('\'options\' must be an array')
-        .isLength({ max: cardsService.CARD_MAX_OPTIONS }).withMessage('\'options\' too long'),
+        .isArray({ max: cardsService.CARD_MAX_OPTIONS }).withMessage('\'options\' must be an array of max size ' + cardsService.CARD_MAX_OPTIONS),
     check(`options.*`)
         .trim()
         .notEmpty().withMessage('Passed \'options\' empty')
@@ -55,8 +54,7 @@ router.post('/:id/edit', [
     body('options')
         .trim()
         .notEmpty().withMessage('\'options\' is required')
-        .isArray().withMessage('\'options\' must be an array')
-        .isLength({ max: cardsService.CARD_MAX_OPTIONS }).withMessage('\'options\' too long'),
+        .isArray({ max: cardsService.CARD_MAX_OPTIONS }).withMessage('\'options\' must be an array of max size ' + cardsService.CARD_MAX_OPTIONS),
     check(`options.*`)
         .trim()
         .notEmpty().withMessage('Passed \'options\' empty')
