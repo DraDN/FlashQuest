@@ -18,7 +18,7 @@ router.get('/:id/decks', [
     param('id')
         .trim()
         .notEmpty().withMessage('\'id\' is required')
-        .isNumeric().withMessage('\'id\' must be a number')
+        .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0')
 ], async (req, res, next) => {
     const { id } = req.params;
 
@@ -35,7 +35,7 @@ router.get('/:id/cards', [
     param('id')
         .trim()
         .notEmpty().withMessage('\'id\' is required')
-        .isNumeric().withMessage('\'id\' must be a number')
+        .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0')
 ], async (req, res, next) => {
     const { id } = req.params;
 
@@ -70,7 +70,7 @@ router.post('/:id/edit', [
     param('id')
         .trim()
         .notEmpty().withMessage('\'id\' is required')
-        .isNumeric().withMessage('\'id\' must be a number'),
+        .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0'),
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
@@ -91,7 +91,7 @@ router.delete('/:id', [
     param('id')
         .trim()
         .notEmpty().withMessage('\'id\' is required')
-        .isNumeric().withMessage('\'id\' must be a number')
+        .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0')
 ], async (req, res, next) => {
     const { id } = req.params;
 

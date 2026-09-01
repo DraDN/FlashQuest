@@ -43,7 +43,7 @@ router.post('/:id/edit', [
     param('id')
         .trim()
         .notEmpty().withMessage('\'id\' is required')
-        .isNumeric().withMessage('\'id\' must be a number'),
+        .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0'),
     body('question')
         .trim()
         .notEmpty().withMessage('\'question\' is required')
@@ -78,7 +78,7 @@ router.delete('/:id', [
     param('id')
         .trim()
         .notEmpty().withMessage('\'id\' is required')
-        .isNumeric().withMessage('\'id\' must be a number')
+        .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0')
 ], validationHandler, async (req, res, next) => {
     const { id } = req.params;
 
