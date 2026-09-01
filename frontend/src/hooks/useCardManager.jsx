@@ -145,8 +145,10 @@ function useCardManager(dungeon_id) {
     }, [selected_card]);
 
     const getSelectedAnswer = useCallback(() => {
-        return getCard(selected_card).answer.trim().toLowerCase();
-    }, [selected_card, getCard]);
+        const card = getSelected();
+        const answer = card.options.at(card.answer)
+        return answer.trim().toLowerCase();
+    }, [getSelected]);
 
     // === STATE ===
 

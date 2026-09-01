@@ -23,13 +23,28 @@ export default function AttackModal({ onClose, onSave, card }) {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <label className="block text-md font-medium text-zinc-400 mb-2"> Answer to attack the monster! </label>
-                        <input
-                            type="text"
-                            onChange={(e) => setAnswer(e.target.value)}
-                            className="w-full bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors"
-                            required
-                            autoFocus
-                        />
+
+                        {card.options.length === 1 && (
+                            <input
+                                type="text"
+                                onChange={(e) => setAnswer(e.target.value)}
+                                className="w-full text-xl bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors"
+                                required
+                                autoFocus
+                            />
+                        )}
+
+                        <div className="flex flex-col items-center justify-center gap-2">
+                            {card.options.length > 1 && card.options.map((option, index) => (
+                                <button 
+                                    key={index}
+                                    type="button"
+                                    className={`w-full text-xl ${answer === card.options.at(index) ? 'bg-dungeon-green-700' : 'bg-zinc-950'} border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors`}
+                                    onClick={() => { setAnswer(card.options.at(index)); }}>
+                                    {option}
+                                </button>
+                            ))}
+                        </div>
                         
                         <div className="flex justify-end gap-3 pt-2 *:px-4 *:py-2 *:rounded-lg *:font-semibold *:text-sm *:transition-colors">
                             <button 

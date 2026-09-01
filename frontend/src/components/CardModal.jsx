@@ -14,8 +14,6 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
         return CARD_TYPE_INPUT;
     });
 
-    console.log(cardType);
-
     const handleSave = (e) => {
         e.preventDefault();
         if (!card.question.trim() || card.answer < 0 || card.answer >= card.options.length || card.options.length === 0) return;
@@ -59,31 +57,6 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
                             <option value={CARD_TYPE_INPUT}>Input Field</option>
                             <option value={CARD_TYPE_MULT_CHOICE}>Multiple Choice</option>
                         </select>
-{/* 
-                        {cardType === CARD_TYPE_INPUT && (
-                            <>
-                                <label className="block text-md font-medium text-zinc-400 mb-2"> Answer </label>
-                                <input
-                                    type="text"
-                                    value={card.options.at(card.answer)}
-                                    maxLength={MAX_CHARACTERS}
-                                    onChange={(e) => {
-                                        const new_options = [...card.options];
-                                        new_options[card.answer] = e.target.value;
-                                        setCard({ ...card, options: new_options });
-                                    }}
-                                    className="w-full bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors"
-                                    required
-                                />
-                                <div className={`text-xs text-right mt-1 font-mono ${
-                                    card.answer.length >= MAX_CHARACTERS
-                                    ? "text-red-500 font-bold"
-                                    : "text-zinc-500"
-                                }`}>
-                                    {card.options.at(card.answer).length}/{MAX_CHARACTERS}
-                                </div>
-                            </>
-                        )} */}
 
                         {cardType === CARD_TYPE_INPUT && (
                             <label className="block text-md font-medium text-zinc-400 mb-2"> Answer </label>
@@ -103,6 +76,7 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
                                         type="text"
                                         value={option}
                                         maxLength={MAX_CHARACTERS}
+                                        rows={1}
                                         onChange={(e) => {
                                             const new_options = [...card.options];
                                             new_options[index] = e.target.value;
@@ -131,7 +105,7 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
                                     )}
                                 </label>
                                 <div className={`text-xs text-right mt-1 font-mono ${
-                                    card.answer.length >= MAX_CHARACTERS
+                                    card.options.at(index).length >= MAX_CHARACTERS
                                     ? "text-red-500 font-bold"
                                     : "text-zinc-500"
                                 }`}>
@@ -144,7 +118,7 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
                         {cardType === CARD_TYPE_MULT_CHOICE && card.options.length < MAX_OPTIONS && (
                             <button
                                 type="button"
-                                className="w-full bg-zinc-950 rounded-lg px-4 py-2 text-dungeon-green-200 border-dungeon-green-200 border-2 text-md font-bold"
+                                className="w-full bg-zinc-950 rounded-lg px-4 py-2 text-dungeon-green-200 border-dungeon-green-200 border-2 text-md font-bold hover:bg-dungeon-yellow-glow hover:text-dungeon-dark-900 hover:border-dungeon-yellow transition-colors"
                                 onClick={() => setCard({ ...card, options: [...card.options, '']})}>
                                     + 
                             </button>
