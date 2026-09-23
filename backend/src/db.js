@@ -19,7 +19,7 @@ db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         deck_id INTEGER NOT NULL,
         question TEXT NOT NULL,
-        answer INTEGER NOT NULL,
+        answers INTEGER NOT NULL,
         options TEXT NOT NULL,
         FOREIGN KEY (deck_id) REFERENCES decks (id) ON DELETE CASCADE
     );

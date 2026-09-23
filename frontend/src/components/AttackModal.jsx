@@ -2,7 +2,7 @@ import { useState } from "react";
 import Modal from "./Modal";
 
 export default function AttackModal({ onClose, onSave, card }) {
-    const [ answer, setAnswer ] = useState('');
+    const [ answer, setAnswer ] = useState(card.options.length === 1 ? '' : []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -39,8 +39,14 @@ export default function AttackModal({ onClose, onSave, card }) {
                                 <button 
                                     key={index}
                                     type="button"
-                                    className={`w-full text-xl ${answer === option ? 'bg-dungeon-green-700' : 'bg-zinc-950'} border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors`}
-                                    onClick={() => { setAnswer(option); }}>
+                                    className={`w-full text-xl ${answer.includes(index) ? 'bg-dungeon-green-700' : 'bg-zinc-950'} border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors`}
+                                    onClick={() => {
+                                        if (answer.includes(index)) {
+                                            setAnswer(answer.filter(ans => ans !== index));
+                                        } else {
+                                            setAnswer([...answer, index]);
+                                        }
+                                    }}>
                                     {option}
                                 </button>
                             ))}
@@ -50,7 +56,7 @@ export default function AttackModal({ onClose, onSave, card }) {
                             <button 
                                 type="button"
                                 className="bg-zing-800 hover:bg-zinc-700 text-zinc-300"
-                                onClick={() => { setAnswer(''); onClose(); }}>
+                                onClick={() => { setAnswer(null); onClose(); }}>
                                 
                                 Cancel
                             </button>

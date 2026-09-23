@@ -8,7 +8,7 @@ const CARD_TYPE_INPUT = 1;
 const CARD_TYPE_MULT_CHOICE = 2;
 
 export default function CardModal({ onClose, onSave, mode, id, initial_value }) {
-    const [card, setCard] = useState(mode === 'edit' ? initial_value : { question: '', answer: 0, options: [''] });
+    const [ card, setCard ] = useState(mode === 'edit' ? initial_value : { question: '', answers: [0], options: [''] });
     const [ cardType, setCardType ] = useState(() => {
         if (card.options.length > 1) return CARD_TYPE_MULT_CHOICE;
         return CARD_TYPE_INPUT;
@@ -16,15 +16,20 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
 
     const handleSave = (e) => {
         e.preventDefault();
-        if (!card.question.trim() || card.answer < 0 || card.answer >= card.options.length || card.options.length === 0) return;
-
-        if (cardType === CARD_TYPE_INPUT) {
-            card.options = [card.options.at(card.answer)];
-            card.answer = 0;
+        if (card.answers.length === 0) {
+            alert("Please select at least one answer. \nYou can do this by clicking on the green checkbox next to the answer.");
+            return;
         }
 
-        onSave(id, card.question, card.answer, card.options);
-        setCard({ question: '', answer: 0, options: [''] });
+        if (!card.question.trim() || card.answers.length === 0 || card.answers.legnth >= card.options.length || card.options.length === 0) return;
+
+        if (cardType === CARD_TYPE_INPUT) {
+            card.options = [card.options.at(card.answers.at(0) -1)];
+            card.answers = [card.answers.at(0)];
+        }
+
+        onSave(id, card.question, card.answers, card.options);
+        setCard({ question: '', answers: [0], options: [''] });
         onClose();
     }
 
@@ -66,11 +71,11 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
                         )}
 
                         {card.options.map((option, index) => {
-                            if (cardType === CARD_TYPE_INPUT && index !== card.answer) return null;
+                            if (cardType === CARD_TYPE_INPUT && !card.answers.includes(index)) return null;
 
                             return (
-                            <>
-                                <label key={index} className="inline-flex items-center justify-between text-zinc-400 mb-2 w-full">
+                            <div key={index}>
+                                <label className="inline-flex items-center justify-between text-zinc-400 mb-2 w-full">
                                     {cardType === CARD_TYPE_MULT_CHOICE && `${index + 1} - `}
                                     <input
                                         type="text"
@@ -87,20 +92,32 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
                                     />
                                     {cardType === CARD_TYPE_MULT_CHOICE && (
                                         <>
-                                            <input
-                                                type="checkbox"
-                                                checked={index === card.answer}
-                                                onChange={() => setCard({ ...card, answer: index })}
-                                                className="ml-2"
-                                            />
-                                            {index !== card.answer && (
-                                                <button
-                                                    type="button"
-                                                    className="ml-2 text-xl border rounded-xl text-center text-dungeon-red-900 border-dungeon-red-900 px-3 py-1 transition-colors hover:bg-dungeon-red-900 hover:text-dungeon-dark-900"
-                                                    onClick={() => setCard({ ...card, options: card.options.filter((_, i) => i !== index)})}>
-                                                    x
-                                                </button>
-                                            )}
+                                            <label className="flex items-center relative">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={card.answers.includes(index)}
+                                                    onChange={() => {
+                                                        if (card.answers.includes(index)) {
+                                                            setCard({ ...card, answers: card.answers.filter((answer) => answer !== index) });
+                                                        } else {
+                                                            setCard({ ...card, answers: [...card.answers, index] });
+                                                        }
+                                                    }}
+                                                    className="peer cursor-pointer appearance-none w-8 h-8 ml-2 border-2 rounded-xl border-dungeon-green-200 checked:border-dungeon-green-700 checked:bg-dungeon-green-200 hover:border-dungeon-yellow-glow transition-colors"
+                                                />
+                                                <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ml-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                </span>
+                                            </label>
+
+                                            <button
+                                                type="button"
+                                                className="ml-2 cursor-pointer text-xl border rounded-xl text-center text-dungeon-red-900 border-dungeon-red-900 px-1 py-1 transition-colors hover:bg-dungeon-red-900 hover:text-dungeon-dark-900"
+                                                onClick={() => setCard({ ...card, options: card.options.filter((_, i) => i !== index)})}>
+                                                <span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                                </span>
+                                            </button>
                                         </>
                                     )}
                                 </label>
@@ -111,7 +128,7 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
                                 }`}>
                                     {option.length}/{MAX_CHARACTERS}
                                 </div>
-                            </>
+                            </div>
                             );
                         })}
 
@@ -128,7 +145,7 @@ export default function CardModal({ onClose, onSave, mode, id, initial_value }) 
                             <button 
                                 type="button"
                                 className="bg-zing-800 hover:bg-zinc-700 text-zinc-300"
-                                onClick={() => { setCard({ question: '', answer: 0, options: [''] }); onClose(); }}>
+                                onClick={() => { setCard({ question: '', answers: 1, options: [''] }); onClose(); }}>
                                 Cancel
                             </button>
                             <button 

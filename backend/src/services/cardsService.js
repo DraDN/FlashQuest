@@ -10,26 +10,26 @@ module.exports = {
 	CARD_MAX_CHARACTERS: 100,
 	CARD_MAX_OPTIONS: 4,
 
-	addCard(deck_id, question, answer, options, user_id) {
+	addCard(deck_id, question, answers, options, user_id) {
 		const add_transaction = db.transaction(() => {
 			const owner = decksRepo.getOwnerOfDeck(deck_id);
 
 			enforceOwnership(owner, user_id, 'Deck');
 
-			const add_result = cardsRepo.insertCard(deck_id, question, answer, options);
+			const add_result = cardsRepo.insertCard(deck_id, question, answers, options);
 			return cardsRepo.getCard(add_result.lastInsertRowid);
 		});
 
 		return add_transaction();
 	},
 
-	editCard(id, question, answer, options, user_id) {
+	editCard(id, question, answers, options, user_id) {
 		const edit_transaction = db.transaction(() => {
 			const owner = cardsRepo.getOwnerOfCard(id);
 
 			enforceOwnership(owner, user_id, 'Card');
 
-			const edit_result = cardsRepo.updateCard(id, question, answer, options);
+			const edit_result = cardsRepo.updateCard(id, question, answers, options);
 			return cardsRepo.getCard(id);
 		})
 
