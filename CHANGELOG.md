@@ -9,9 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0-alpha] - "Rhino" - 2026-09-23
+
+### Added
+
+- 25 new, unique monsters
+- New Multiple-Choice card type, with new attack modal and possibility of more than one correct answer
+- Accounts now hold Coins as main metric, instead of levels. Coins are given by defeating rooms inside dungeons.
+
+## Changed
+
+- More complex floor and monster configuration
+- Refined gameplay inside dungeons by prioritizing the rougelite genre association
+- Superior code organization: file structures, hooks etc.
+- Database changes to accomodate new card type: 'options' is a JSON array of strings that represent possible answers, while the 'answers' is a number where each digit is a reference index to 'options' *(works for < 10 options, as in our case)* 
+- Loading subscreens now properly display when loading / when errors happen
+
+## Fix
+
+- Fonts are proprly linked now 
+- XP calculations are now correct
+
 ## [0.2.0-alpha] - "Armadillo" - 2026-08-16
 
 ### Security
+
 - Proper CORS configuration
 - Rate limiter
 - Helmet headers
