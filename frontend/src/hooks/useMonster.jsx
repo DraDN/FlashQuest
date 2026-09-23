@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { generate_monsters } from "../utils/monster_utils";
-import { MAX_NO_MONSTERS } from "../config/monster_configs";
 
 export function useMonster(round) {
     const [ monsters, setMonsters ] = useState(() => generate_monsters(round));
@@ -11,10 +10,10 @@ export function useMonster(round) {
         setMonsters(() => generate_monsters(round));
     }
 
-    const setSelected = useCallback((monster_index) => {
-        if (monster_index < 0 || monster_index >= MAX_NO_MONSTERS) { return; }
+    const setSelected = useCallback((monster_id) => {
+        if (monsters.findIndex(mon => mon.id === monster_id) < 0) { return; }
 
-        setSelectedMonster(monster_index);
+        setSelectedMonster(monster_id);
     });
 
     const getSelectedID = useCallback(() => {
@@ -22,21 +21,23 @@ export function useMonster(round) {
     }, [selected_monster]);
 
     const getSelected = useCallback(() => {
-        return monsters.at(selected_monster);
+        return monsters.find(mon => mon.id === selected_monster);
     }, [monsters, selected_monster]);
 
     const hitSelected = useCallback((attack) => {
         if (selected_monster === null) { return; }
 
         const new_monsters = [...monsters];
-        new_monsters.at(selected_monster).health -= attack;
-        new_monsters.at(selected_monster).is_hit = true;
+        const selected_index = new_monsters.findIndex(mon => mon.id === selected_monster);
+        new_monsters.at(selected_index).health -= attack;
+        new_monsters.at(selected_index).is_hit = true;
 
         setMonsters(new_monsters);
 
         const timer = setTimeout(() => {
             setMonsters(prevMonsters => {
-                const alive_monsters = prevMonsters.filter(mon => mon.health > 0);
+                const previous_monsters = [...prevMonsters];
+                const alive_monsters = previous_monsters.filter(mon => mon.health > 0);
                 const updated_monsters = alive_monsters.map(mon => ({...mon, is_hit: false }));
 
                 return updated_monsters;

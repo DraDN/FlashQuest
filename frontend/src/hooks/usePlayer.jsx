@@ -107,7 +107,9 @@ function usePlayer() {
             max_health,
             attack,
             answer_stats,
-            gained
+            gained,
+            xp,
+            level
         },
 
         player_actions: {

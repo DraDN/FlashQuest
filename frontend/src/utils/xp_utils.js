@@ -1,10 +1,10 @@
 const calculateLevelUpXP = (start_level) => {
-    return (start_level + 1) * 100;
+    return start_level * 100;
 }
 
 const calculateTotalLevelXP = (level) => {
-    // arithmetic series sum, changed to account for a_n = (n-1)*b aka. ( n = level + 1 )
-    return (level * (level + 1) * 100) / 2;
+    // arithmetic series sum
+    return (level * (level - 1) * 100) / 2;
 }
 
 const calculateNextLevelProgression = (xp, level) => {

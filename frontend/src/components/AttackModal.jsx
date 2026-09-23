@@ -1,11 +1,28 @@
 import { useState } from "react";
 import Modal from "./Modal";
+import { shuffle_array } from "../utils/shuffle";
 
 export default function AttackModal({ onClose, onSave, card }) {
-    const [ answer, setAnswer ] = useState('');
+    const [ answer, setAnswer ] = useState(card.options.length === 1 ? '' : []);
+
+    const [ shuffled_options, setShuffledOptions ] = useState(() => {
+        if (card.options.length > 1) {
+            const options = card.options.map((option, index) => {
+                return { text: option, id: index };
+            });
+            return shuffle_array(options);
+        }
+
+        return [];
+    })
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (answer.length === 0) {
+            alert("Please select at least one answer.");
+            return;
+        }
+
         onSave(answer);
         setAnswer('');
         onClose();
@@ -23,24 +40,46 @@ export default function AttackModal({ onClose, onSave, card }) {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <label className="block text-md font-medium text-zinc-400 mb-2"> Answer to attack the monster! </label>
-                        <input
-                            type="text"
-                            onChange={(e) => setAnswer(e.target.value)}
-                            className="w-full bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors"
-                            required
-                            autoFocus
-                        />
+
+                        {card.options.length === 1 && (
+                            <input
+                                type="text"
+                                onChange={(e) => setAnswer(e.target.value)}
+                                className="w-full text-xl bg-zinc-950 border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors"
+                                required
+                                autoFocus
+                            />
+                        )}
+
+                        <div className="flex flex-col items-center justify-center gap-2">
+                            {card.options.length > 1 && shuffled_options.map((option) => (
+                                <button 
+                                    key={option.id}
+                                    type="button"
+                                    className={`w-full text-xl ${answer.includes(option.id) ? 'bg-dungeon-green-700' : 'bg-zinc-950'} border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors`}
+                                    onClick={() => {
+                                        if (answer.includes(option.id)) {
+                                            setAnswer(answer.filter(ans => ans !== option.id));
+                                        } else {
+                                            setAnswer([...answer, option.id]);
+                                        }
+                                    }}>
+                                    {option.text}
+                                </button>
+                            ))}
+                        </div>
                         
                         <div className="flex justify-end gap-3 pt-2 *:px-4 *:py-2 *:rounded-lg *:font-semibold *:text-sm *:transition-colors">
                             <button 
                                 type="button"
                                 className="bg-zing-800 hover:bg-zinc-700 text-zinc-300"
-                                onClick={() => { setAnswer(''); onClose(); }}>
+                                onClick={() => { setAnswer(null); onClose(); }}>
                                 
                                 Cancel
                             </button>
                             <button 
                                 type="submit"
+                                disabled={answer.length === 0}
                                 className="bg-dungeon-green-700 hover:bg-dungeon-yellow text-white hover:text-dungeon-dark-900">
                                 Answer
                             </button>

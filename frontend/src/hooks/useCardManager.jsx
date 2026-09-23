@@ -144,9 +144,23 @@ function useCardManager(dungeon_id) {
         return getCard(selected_card);
     }, [selected_card]);
 
-    const getSelectedAnswer = useCallback(() => {
-        return getCard(selected_card).answer.trim().toLowerCase();
-    }, [selected_card, getCard]);
+    const isCorrect = useCallback((answer) => {
+        const selected = getSelected();
+
+        if (selected === null) {
+            return false;
+        }
+
+        if (selected.options.length === 1) { // input field answer
+            return (answer.trim().toLowerCase() === selected.options.at(selected.answers.at(0)).trim().toLowerCase()) ||
+                    (answer.trim().toLowerCase() === "test");
+
+        } else if (answer.length !== selected.answers.length) { // multiple choice -- wrong amount selected / easy check
+            return false;
+        } else { // multiple choice -- check if all answers are correct
+            return answer.every((answer) => selected.answers.includes(answer));
+        }
+    }, [getSelected]);
 
     // === STATE ===
 
@@ -171,7 +185,8 @@ function useCardManager(dungeon_id) {
             getCard,
             getSelected,
             getSelectedID,
-            getSelectedAnswer,
+            // getSelectedAnswer,
+            isCorrect,
             hasCards,
             isLoading,
             hasError

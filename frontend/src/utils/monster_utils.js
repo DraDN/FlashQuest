@@ -76,7 +76,12 @@ const generate_monsters = (round) => {
         no_monsters = Math.min(no_monsters, MONSTER_CONFIGS.MAX_NO_MONSTERS - monsters.length);
 
         for (let i = 0; i < no_monsters; i++) {
-            monsters.push(generate_monster(config.difficulty_range, config.tier_list, round));
+            const new_monster = {
+                ...generate_monster(config.difficulty_range, config.tier_list, round),
+                id: monsters.length
+            };
+
+            monsters.push(new_monster);
         }   
     }
     

@@ -17,8 +17,8 @@ export default function Results({ onNavigate, results }) {
                         <h1 className="text-2xl font-pixel-header text-dungeon-yellow">Total Earned</h1>
 
                         <span className="text-2xl font-semibold text-dungeon-yellow-glow">{results.stats.xp} XP</span>                       
-                        {results.stats.level > 0 && (
-                            <span className="text-2xl font-semibold text-dungeon-orange-glow">{results.stats.level} Levels</span>
+                        {results.stats.level > 1 && (
+                            <span className="text-2xl font-semibold text-dungeon-orange-glow">{results.stats.level-1} Levels</span>
                         )}
 
                         <span className="mt-4 italic text-2xl font-bold text-dungeon-yellow-glow">+{results.stats.coins} Coins</span>
