@@ -77,11 +77,23 @@ export default function Decks({ onDeckSelect }) {
     } else if (!decks) {
         interMsg = { title: "Loading", subtitle: "Please wait..." };
     } else if (decks.length === 0) {
-        interMsg = { title: "No decks found", subtitle: "Click the button above to create a new deck" };
+        interMsg = { title: "No decks found", subtitle: "Click the button above to create a new deck", child: (
+            <>
+                <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-4xl font-pixel-header' onClick={() => openCreateModal()}>- New deck -</button>
+                {modalConfig.isOpen && (
+                    <DeckModal
+                        mode={modalConfig.mode}
+                        id={modalConfig.deck_id}
+                        initial_value={modalConfig.initial_value}
+                        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+                        onSave={handleSaveDeck} />
+                )}
+            </>
+        ) };
     }
 
     if (interMsg) {
-        return <IntermittentMessage title={interMsg.title} subtitle={interMsg.subtitle} />
+        return <IntermittentMessage title={interMsg.title} subtitle={interMsg.subtitle} child={interMsg.child} />
     }
 
     return (
