@@ -79,33 +79,45 @@ export default function Dungeons({ onDungeonSelect }) {
     } else if (!dungeons) {
         interMsg = { title: "Loading", subtitle: "Please wait..." };
     } else if (dungeons.length === 0) {
-        interMsg = { title: "No dungeons found", subtitle: "Create one to get started" };
+        interMsg = { title: "No dungeons found", subtitle: "Create one to get started", child : (
+            <>
+                <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-4xl font-pixel-header' onClick={() => openCreateModal()}>- New Dungeon -</button>
+                {modalConfig.isOpen && (
+                    <DungeonModal 
+                        mode={modalConfig.mode}
+                        id={modalConfig.id}
+                        initial_name={modalConfig.initial_name}
+                        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+                        onSave={handleDungeonSave} />
+                )}
+            </>
+        )};
     }
 
     if (interMsg) {
-        return <IntermittentMessage title={interMsg.title} subtitle={interMsg.subtitle} />
+        return <IntermittentMessage title={interMsg.title} subtitle={interMsg.subtitle} child={interMsg.child} />
     }
 
     return (
         <>
             <div className='text-white flex flex-col flex-1 w-full'>
                 <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-4xl font-pixel-header' onClick={() => openCreateModal()}>- New Dungeon -</button>
-                        {modalConfig.isOpen && (
-                            <DungeonModal 
-                                mode={modalConfig.mode}
-                                id={modalConfig.id}
-                                initial_name={modalConfig.initial_name}
-                                onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
-                                onSave={handleDungeonSave} />
-                        )}
+                {modalConfig.isOpen && (
+                    <DungeonModal 
+                        mode={modalConfig.mode}
+                        id={modalConfig.id}
+                        initial_name={modalConfig.initial_name}
+                        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+                        onSave={handleDungeonSave} />
+                )}
 
-                        <div className="grid md:grid-cols-2 overflow-y-auto custom-scroll">
-                                {dungeons.map((dungeon) => (
-                                    <div key={dungeon.id}>
-                                        <DungeonCard dungeon={dungeon} onDelete={handleDungeonDeletion} onEdit={openEditModal} onPlay={onDungeonSelect} />
-                                    </div>
-                                ))}
-                        </div>
+                <div className="grid md:grid-cols-2 overflow-y-auto custom-scroll">
+                        {dungeons.map((dungeon) => (
+                            <div key={dungeon.id}>
+                                <DungeonCard dungeon={dungeon} onDelete={handleDungeonDeletion} onEdit={openEditModal} onPlay={onDungeonSelect} />
+                            </div>
+                        ))}
+                </div>
             </div>
         </>
     );
