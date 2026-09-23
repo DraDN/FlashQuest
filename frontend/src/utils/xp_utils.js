@@ -1,5 +1,5 @@
 const calculateLevelUpXP = (start_level) => {
-    return (start_level + 1) * 100;
+    return start_level * 100;
 }
 
 const calculateTotalLevelXP = (level) => {
