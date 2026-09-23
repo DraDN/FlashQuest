@@ -36,7 +36,7 @@ router.post('/:id/rename', [
     param('id')
         .trim()
         .notEmpty().withMessage('\'id\' is required')
-        .isNumeric().withMessage('\'id\' must be a number'),
+        .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0'),
     body('name')
         .trim()
         .notEmpty().withMessage('\'name\' is required')
@@ -54,24 +54,11 @@ router.post('/:id/rename', [
     }
 });
 
-// TODO limit possible deck number
-// TOOO FIX if this fails, account level still gets updated!!!
-router.post('/level-up', async (req, res, next) => {
-    const { decks } = req.body;
-
-    try {
-        await decksService.addDecksLevelXP(decks || [], req.user_id);
-        return res.status(204).send();
-    } catch (error) {
-        next(error);
-    }
-})
-
 router.delete('/:id', [
     param('id')
         .trim()
         .notEmpty().withMessage('\'id\' is required')
-        .isNumeric().withMessage('\'id\' must be a number')
+        .isInt().withMessage('\'id\' must be an integer greater than 0')
 ], async (req, res, next) => {
     const { id } = req.params;
 
@@ -87,7 +74,7 @@ router.get('/:id/cards', [
     param('id')
         .trim()
         .notEmpty().withMessage('\'id\' is required')
-        .isNumeric().withMessage('\'id\' must be a number')
+        .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0')
 ], async (req, res, next) => {
     const { id } = req.params;
 

@@ -70,9 +70,11 @@ answering correctly, or be defeated by wrong answers that cost you HP.
 
 **Key Features:**
 - Create and manage flashcard decks on any topic
+- Flashcards support either text input or multiple choice
 - Enter dungeons and battle enemies with your knowledge
 - Easy drag and drop gameplay that works on both desktop and mobile
-- Earn XP and level up your decks as you study
+- Earn XP and level up your character as you battle inside the dungeon
+- Earn permanent coins by clearing each room
 - Have fun while studying!
 <!-- - Spaced repetition scheduling ensures you review cards at the right time -->
 
@@ -142,12 +144,15 @@ The best way to experience FlashQuest is to [try the live version](https://flash
 ### Basic Flow
 
 1. **Create a deck** — add a deck for any topic you want to study
-2. **Add flashcards** — fill it with question and answer pairs
+2. **Add flashcards** — fill it with questions and answers
 3. **Create a dungeon** — select one or more decks to pool into a dungeon
 4. **Battle** — drag cards from your hand and drop them onto enemies. 
    A modal will ask you the question — answer correctly to deal damage, 
    wrong answers cost you HP
-5. **Level up** — correct answers earn XP for each deck used in the dungeon
+5. **Get stronger** — defeating monsters gives you XP, which will help you level up. With each level, you gain extra health and deal more damage!
+6. **Earn coins** — after clearing each room of enemies, you find coins, which you get to keep even outside the dungeon!
+7. **Repeat** — either add more cards, or learn the ones you have, enter again into a dungeon and battle as far as you can! You'll start fresh all again, but now the knowledge you've accumulated will help you defeat monsters easier, in true rougelike fashion!
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -157,7 +162,7 @@ The best way to experience FlashQuest is to [try the live version](https://flash
 ## Roadmap
 
 - [x] Security overhaul
-- [ ] Enemy system rewrite + more enemeies
+- [x] Enemy system rewrite + more enemeies
 - [ ] Spaced Repetition function
 - [ ] CSV import / export of decks
 - [ ] Leaderboards

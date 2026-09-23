@@ -18,25 +18,25 @@ const responseHandler = async (res) => {
 export const checkAccountInit = async () => 
     fetch(`/api/account/check-init`).then(responseHandler);
 
-export const getAccountLevel = async () => 
-    fetch(`/api/account/level`).then(responseHandler);
+export const getAccountCoins = async () => 
+    fetch(`/api/account/coins`).then(responseHandler);
 
-export const setAccountLevel = async (level) =>
-    fetch(`/api/account/level`, {
+export const setAccountCoins = async (coins) =>
+    fetch(`/api/account/coins`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ level })
+        body: JSON.stringify({ coins })
     }).then(responseHandler);
 
-export const levelUpAccount = async (added_levels) =>
-    fetch(`/api/account/level-up`, {
+export const addAccountCoins = async (added_coins) =>
+    fetch(`/api/account/earn`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ added_levels })
+        body: JSON.stringify({ added_coins })
     }).then(responseHandler);
 
 // === DECKS API ===
@@ -62,16 +62,6 @@ export const renameDeck = async (id, name) =>
         body: JSON.stringify({ name })
     }).then(responseHandler);
 
-export const levelUpDecks = async (decks) => {
-    return fetch(`/api/decks/level-up`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ decks })
-    }).then(responseHandler);
-}
-
 export const deleteDeck = async (id) =>
     fetch(`/api/decks/${id}`, {
         method: 'DELETE'
@@ -82,22 +72,22 @@ export const deleteDeck = async (id) =>
 export const getCards = async (deck_id) => 
     fetch(`/api/decks/${deck_id}/cards`).then(responseHandler);
 
-export const createCard = async (deck_id, question, answer) => 
+export const createCard = async (deck_id, question, answers, options) => 
     fetch(`/api/cards`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ deck_id, question, answer })
+        body: JSON.stringify({ deck_id, question, answers, options })
     }).then(responseHandler);
 
-export const editCard = async (card_id, question, answer) =>
+export const editCard = async (card_id, question, answers, options) =>
     fetch(`/api/cards/${card_id}/edit`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ question, answer })
+        body: JSON.stringify({ question, answers, options })
     }).then(responseHandler);
 
 export const deleteCard = async (id) =>
