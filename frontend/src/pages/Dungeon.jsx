@@ -63,8 +63,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     const handleSubmitAttack = (answer) => {
-        // const card_answer = card_actions.getSelectedAnswer();
-        // const is_correct = answer.toLowerCase() === card_answer || answer.toLowerCase() === "test";
         const is_correct = card_actions.isCorrect(answer);
 
         if (answer && is_correct) {
