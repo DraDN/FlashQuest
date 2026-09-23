@@ -4,17 +4,17 @@ export function MonsterUI({ monsters }) {
     return (
         <>
             <div className="flex flex-row grow gap-4 p-4 h-2/3 items-center justify-center flex-wrap overflow-y-auto overflow-x-hidden max-h-full dungeon-bg">
-                {monsters.map((mon, index) => (
-                    <MonsterCard key={index} monster={mon} index={index} />
+                {monsters.map(mon => (
+                    <MonsterCard key={mon.id} monster={mon} />
                 ))}
             </div>
         </>
     )
 }
 
-function MonsterCard({ monster, index }) {
+function MonsterCard({ monster }) {
     const { setNodeRef, isOver } = useDroppable({
-        id: index,
+        id: monster.id,
     })
 
     const name_colors = {
@@ -34,7 +34,7 @@ function MonsterCard({ monster, index }) {
     }
 
     return (
-        <div ref={setNodeRef}
+        <div ref={monster.health > 0 ? setNodeRef : null}
             className="p-4 text-center space-y-2 shrink-0 text-white bg-dungeon-dark-900/85 rounded-b-2xl rounded-t-full transition-transform">
             <div className={`${sizes[monster.tier]} ${isOver ? "bg-dungeon-red-900" : ""} ${(monster.is_hit && monster.is_hit == true) ? (`${monster.health <= 0 ? "animate-float-up pointer-events-none" : "animate-shake"} border-2 border-dungeon-red-900/50`) : "border-white"} text-center rounded-b-xl rounded-t-full`}>
                 <img src={`${monster.asset.image}`} className="w-full h-full object-contain crisp-edges" />
