@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 25 new, unique monsters
 - New Multiple-Choice card type, with new attack modal and possibility of more than one correct answer
 - Accounts now hold Coins as main metric, instead of levels. Coins are given by defeating rooms inside dungeons.
+- XP bar and level indicator inside the dungeon view
 
 ## Changed
 
