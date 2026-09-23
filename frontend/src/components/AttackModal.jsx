@@ -1,11 +1,28 @@
 import { useState } from "react";
 import Modal from "./Modal";
+import { shuffle_array } from "../utils/shuffle";
 
 export default function AttackModal({ onClose, onSave, card }) {
     const [ answer, setAnswer ] = useState(card.options.length === 1 ? '' : []);
 
+    const [ shuffled_options, setShuffledOptions ] = useState(() => {
+        if (card.options.length > 1) {
+            const options = card.options.map((option, index) => {
+                return { text: option, id: index };
+            });
+            return shuffle_array(options);
+        }
+
+        return [];
+    })
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (answer.length === 0) {
+            alert("Please select at least one answer.");
+            return;
+        }
+
         onSave(answer);
         setAnswer('');
         onClose();
@@ -35,19 +52,19 @@ export default function AttackModal({ onClose, onSave, card }) {
                         )}
 
                         <div className="flex flex-col items-center justify-center gap-2">
-                            {card.options.length > 1 && card.options.map((option, index) => (
+                            {card.options.length > 1 && shuffled_options.map((option) => (
                                 <button 
-                                    key={index}
+                                    key={option.id}
                                     type="button"
-                                    className={`w-full text-xl ${answer.includes(index) ? 'bg-dungeon-green-700' : 'bg-zinc-950'} border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors`}
+                                    className={`w-full text-xl ${answer.includes(option.id) ? 'bg-dungeon-green-700' : 'bg-zinc-950'} border rounded-lg px-4 py-2 text-white focus:outline-hidden focus:border-dungeon-yellow transition-colors`}
                                     onClick={() => {
-                                        if (answer.includes(index)) {
-                                            setAnswer(answer.filter(ans => ans !== index));
+                                        if (answer.includes(option.id)) {
+                                            setAnswer(answer.filter(ans => ans !== option.id));
                                         } else {
-                                            setAnswer([...answer, index]);
+                                            setAnswer([...answer, option.id]);
                                         }
                                     }}>
-                                    {option}
+                                    {option.text}
                                 </button>
                             ))}
                         </div>
@@ -62,6 +79,7 @@ export default function AttackModal({ onClose, onSave, card }) {
                             </button>
                             <button 
                                 type="submit"
+                                disabled={answer.length === 0}
                                 className="bg-dungeon-green-700 hover:bg-dungeon-yellow text-white hover:text-dungeon-dark-900">
                                 Answer
                             </button>
