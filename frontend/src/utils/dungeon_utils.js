@@ -9,9 +9,10 @@ const get_floor_index = (round) => {
 }
 
 const get_coin_reward = (round) => {
+    const room_progression_index = get_room_progression_index(round);
     const config = DUNGEON_CONFIGS.FLOOR_CONFIG.find(floor => {
         const [ min_round, max_round ] = floor.round_range;
-        return min_round <= round && max_round >= round;
+        return min_round <= room_progression_index && max_round >= room_progression_index;
     }).coin_reward;
 
     const deviation = Math.random() * DUNGEON_CONFIGS.RANDOM_COIN_DEVIATION_MULTIPLIER;
