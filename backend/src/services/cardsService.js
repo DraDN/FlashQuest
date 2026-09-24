@@ -1,5 +1,4 @@
 const db = require('../db');
-const { AppError, NotFoundError } = require('../utils/errors');
 
 const { enforceOwnership } = require('../utils/authUtils');
 
@@ -34,6 +33,19 @@ module.exports = {
 		})
 
 		return edit_transaction();
+	},
+
+	gradeCard(id, repetitions, easy_factor, interval, user_id) {
+		const grade_transaction = db.transaction(() => {
+			const owner = cardsRepo.getOwnerOfCard(id);
+
+			enforceOwnership(owner, user_id, 'Card');
+
+			const grade_result = cardsRepo.updateCardRepetitions(id, repetitions, easy_factor, interval);
+			return cardsRepo.getCard(id);
+		})
+
+		return grade_transaction();
 	},
 
 	deleteCard(id, user_id) {
