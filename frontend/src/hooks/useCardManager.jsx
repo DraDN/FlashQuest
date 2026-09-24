@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getDungeonCards } from "../services/api";
+import { getDungeonCards, gradeCard } from "../services/api";
 
 import * as PLAYER_CONFIG from "../config/player_configs";
 import { shuffle_array } from "../utils/shuffle";
+import { sr_algorithm } from "../utils/sr_algorithm";
 
 function useCardManager(dungeon_id) {
     const [ cards, setCards ] = useState(undefined);
@@ -162,6 +163,14 @@ function useCardManager(dungeon_id) {
         }
     }, [getSelected]);
 
+    // === SR ALGO ===
+
+    const gradeSelected = useCallback((grade) => {
+        const selected = getSelected();
+        const [repetitions, easy_factor, interval] = sr_a(grade, selected.repetitions, selected.easy_factor, selected.interval);
+        return gradeCard(selected.id, repetitions, easy_factor, interval);
+    })
+
     // === STATE ===
 
     const hasCards = useCallback(() => {
@@ -185,8 +194,8 @@ function useCardManager(dungeon_id) {
             getCard,
             getSelected,
             getSelectedID,
-            // getSelectedAnswer,
             isCorrect,
+            gradeSelected,
             hasCards,
             isLoading,
             hasError

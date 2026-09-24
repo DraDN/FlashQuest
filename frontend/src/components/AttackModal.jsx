@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import { shuffle_array } from "../utils/shuffle";
+import { GRADES } from "../utils/sr_algorithm";
 
 export default function AttackModal({ onClose, onSave, card, isCorrect }) {
     const [ answer, setAnswer ] = useState(card.options.length === 1 ? '' : []);
@@ -130,12 +131,12 @@ export default function AttackModal({ onClose, onSave, card, isCorrect }) {
                                         "*:border-dungeon-red-900 *:hover:bg-dungeon-red-900"}`}>
                                     <button 
                                         type="submit"
-                                        onClick={() => setGrade(is_correct ? 4 : 0)}>
+                                        onClick={() => setGrade(is_correct ? GRADES.GOOD : GRADES.AGAIN)}>
                                         {is_correct ? "Good" : "Again"}
                                     </button>
                                     <button 
                                         type="submit"
-                                        onClick={() => setGrade(is_correct ? 5 : 2.5)}>
+                                        onClick={() => setGrade(is_correct ? GRADES.EASY : GRADES.HARD)}>
                                         {is_correct ? "Easy" : "Hard"}
                                     </button>
                                 </div>

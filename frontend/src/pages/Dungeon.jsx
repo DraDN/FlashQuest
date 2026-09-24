@@ -62,9 +62,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
         }
     }
 
-    const handleSubmitAttack = (is_correct, difficulty) => {
-        console.log(difficulty);
-        // const is_correct = card_actions.isCorrect(answer);
+    const handleSubmitAttack = (is_correct, grade) => {
+        console.log(grade);
+        card_actions.gradeSelected(grade);
+
+        player_actions.updateStats(is_correct);
 
         if (is_correct) {
             monster_actions.hitSelected(player.attack);
@@ -75,8 +77,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
         } else {
             player_actions.hit(monster_actions.getSelected().attack);
         }
-
-        player_actions.updateStats(is_correct);
     }
 
     useEffect(() => {

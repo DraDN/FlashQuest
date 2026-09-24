@@ -90,6 +90,15 @@ export const editCard = async (card_id, question, answers, options) =>
         body: JSON.stringify({ question, answers, options })
     }).then(responseHandler);
 
+export const gradeCard = async (card_id, repetitions, easy_factor, interval) =>
+    fetch(`/api/cards/${card_id}/grade`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ repetitions, easy_factor, interval })
+    }).then(responseHandler);
+
 export const deleteCard = async (id) =>
     fetch(`/api/cards/${id}`, {
         method: 'DELETE'
