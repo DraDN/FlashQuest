@@ -4,7 +4,7 @@ const getCardByIDStmt = db.prepare('SELECT * FROM cards WHERE id = ?');
 const getOwnderOfCardStmt = db.prepare('SELECT decks.user_id FROM decks INNER JOIN cards ON decks.id = cards.deck_id WHERE cards.id = ?');
 const insertCardIntoDeckStmt = db.prepare('INSERT INTO cards (deck_id, question, answers, options) VALUES (?, ?, ?, ?)');
 const updateQCardStmt = db.prepare('UPDATE cards SET question = ?, answers = ?, options = ? WHERE id = ?');
-const updateSRCardStmt = db.prepare('UPDATE cards SET repetitions = ?, easy_factor = ?, due_date = date(due_date, \'+? days\') WHERE id = ?');
+const updateSRCardStmt = db.prepare('UPDATE cards SET repetitions = ?, easy_factor = ?, due_date = datetime(due_date, ?) WHERE id = ?');
 const deleteCardStmt = db.prepare('DELETE FROM cards WHERE id = ?');
 
 const getCardsOfDeckStmt = db.prepare('SELECT * FROM cards WHERE deck_id = ?');
@@ -52,7 +52,7 @@ module.exports = {
 	},
 
 	updateSRCard(id, repetitions, easy_factor, interval) {
-		return updateSRCardStmt.run(repetitions, easy_factor, interval, id);
+		return updateSRCardStmt.run(repetitions, easy_factor, `+${interval} days`, id);
 	},
 
 	deleteCard(id) {

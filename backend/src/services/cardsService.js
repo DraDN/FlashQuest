@@ -41,8 +41,22 @@ module.exports = {
 
 			enforceOwnership(owner, user_id, 'Card');
 
-			const grade_result = cardsRepo.updateCardRepetitions(id, repetitions, easy_factor, interval);
+			const grade_result = cardsRepo.updateSRCard(id, repetitions, easy_factor, interval);
 			return cardsRepo.getCard(id);
+		})
+
+		return grade_transaction();
+	},
+
+	gradeCards(cards, user_id) {
+		const grade_transaction = db.transaction(() => {
+			for (const card of cards) {
+				const owner = cardsRepo.getOwnerOfCard(card.id);
+
+				enforceOwnership(owner, user_id, 'Card');
+
+				cardsRepo.updateSRCard(card.id, card.repetitions, card.easy_factor, card.interval);
+			}
 		})
 
 		return grade_transaction();

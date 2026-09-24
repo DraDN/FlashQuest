@@ -117,6 +117,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
         const stats = player_actions.getTotal(keep_percentage);
         const save_res = player_actions.saveCoins(keep_percentage);
+        const grade_res = card_actions.sendGrades();
         const results = {
             stats: stats,
             answer_stats: player.answer_stats

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getDungeonCards, gradeCard } from "../services/api";
+import { getDungeonCards, gradeCards } from "../services/api";
 
 import * as PLAYER_CONFIG from "../config/player_configs";
 import { shuffle_array } from "../utils/shuffle";
@@ -13,7 +13,7 @@ function useCardManager(dungeon_id) {
     const [ card_state, setCardState ] = useState({
         draw: [],
         hand: [],
-        discard: [],
+        discard: []
     });
 
     const [ isError, setIsError ] = useState(false);
@@ -167,9 +167,30 @@ function useCardManager(dungeon_id) {
 
     const gradeSelected = useCallback((grade) => {
         const selected = getSelected();
-        const [repetitions, easy_factor, interval] = sr_a(grade, selected.repetitions, selected.easy_factor, selected.interval);
-        return gradeCard(selected.id, repetitions, easy_factor, interval);
-    })
+        const [new_repetitions, new_easy_factor, new_interval] = sr_algorithm(grade, selected.repetitions, selected.easy_factor, selected.interval);
+
+        setCards((previousState) => {
+            const new_cards = [...previousState];
+            new_cards[selected_card] = { ...selected,
+                repetitions: new_repetitions,
+                easy_factor: new_easy_factor,
+                interval: new_interval };
+            return new_cards;
+        })
+    }, [getSelected, sr_algorithm]);
+
+    const sendGrades = useCallback(() => {
+        const only_grades = cards.map((card) => {
+            return {
+                id: card.id,
+                repetitions: card.repetitions,
+                easy_factor: card.easy_factor,
+                interval: card.interval
+            }
+        });
+
+        return gradeCards(only_grades);
+    }, [cards]);
 
     // === STATE ===
 
@@ -196,6 +217,7 @@ function useCardManager(dungeon_id) {
             getSelectedID,
             isCorrect,
             gradeSelected,
+            sendGrades,
             hasCards,
             isLoading,
             hasError

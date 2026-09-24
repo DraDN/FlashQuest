@@ -5,7 +5,7 @@ const GRADES = Object.freeze({
     AGAIN: 0
 });
 
-function sr_a(grade, repetitions, easy_factor, interval) {
+function sr_algorithm(grade, repetitions, easy_factor, interval) {
     if (grade >= GRADES.GOOD) {
         if (repetitions === 0) {
             interval = 0.5;
@@ -28,6 +28,6 @@ function sr_a(grade, repetitions, easy_factor, interval) {
 }
 
 export {
-    sr_a,
+    sr_algorithm,
     GRADES
 }
