@@ -62,10 +62,11 @@ export default function Dungeon({ dungeon, onNavigate }) {
         }
     }
 
-    const handleSubmitAttack = (answer) => {
-        const is_correct = card_actions.isCorrect(answer);
+    const handleSubmitAttack = (is_correct, difficulty) => {
+        console.log(difficulty);
+        // const is_correct = card_actions.isCorrect(answer);
 
-        if (answer && is_correct) {
+        if (is_correct) {
             monster_actions.hitSelected(player.attack);
 
             card_actions.playCard();
@@ -156,6 +157,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                             onClose={handleCloseAttackModal}
                             onSave={handleSubmitAttack}
                             card={card_actions.getSelected()}
+                            isCorrect={card_actions.isCorrect}
                         />
                     )}
                     {isRoundEndModalOpen && (
