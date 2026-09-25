@@ -71,12 +71,12 @@ export default function Dungeon({ dungeon, onNavigate }) {
         if (is_correct) {
             monster_actions.hitSelected(player.attack);
 
-            card_actions.playCard();
-
             player_actions.rewardXP(monster_actions.getSelected().xp_reward);
         } else {
             player_actions.hit(monster_actions.getSelected().attack);
         }
+
+        card_actions.playCard();
     }
 
     useEffect(() => {
