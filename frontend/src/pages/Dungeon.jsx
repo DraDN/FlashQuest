@@ -39,6 +39,20 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const [ isError, setIsError ] = useState(false);
 
     const sensors_conf = useSensorsConfig();
+
+    // Source - https://stackoverflow.com/a/68933242
+    // Posted by Drew Reese, modified by community. See post 'Timeline' for change history
+    // Retrieved 2026-09-25, License - CC BY-SA 4.0
+    useEffect(() => {
+        const unloadCallback = (event) => {
+            event.preventDefault();
+            event.returnValue = "";
+            return "";
+        };
+
+        window.addEventListener("beforeunload", unloadCallback);
+        return () => window.removeEventListener("beforeunload", unloadCallback);
+    }, []);
     
     const nextRoom = () => {
         setRound(round + 1);
