@@ -7,17 +7,17 @@ export function PlayerUI({ player, hand, get_card }) {
             <XPBar xp={player.xp} previous_level_xp={calculateTotalLevelXP(player.level)} needed_xp={calculateLevelUpXP(player.level)} level={player.level} />
             <HealthBar health={player.health} max_health={player.max_health} />
             <div className="flex flex-row grow gap-4 p-4 items-center md:justify-center justify-start bg-dungeon-dark-500 border border-dungeon-yellow overflow-x-auto overflow-y-hidden">
-                {hand.map((card) => {
-                    return <PlayerCard key={card.id} card={get_card(card.id)} fresh={true} index={card.id} />
+                {hand.map((card, index) => {
+                    return <PlayerCard key={card.id} card={get_card(card.id)} fresh={true} id={card.id} index={index} />
                 })}
             </div>
         </div>
     );
 };
 
-export function PlayerCard({ card, fresh, index }) {
+export function PlayerCard({ card, fresh, id, index }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-        id: index
+        id: id
     });
 
     const style = transform ? {

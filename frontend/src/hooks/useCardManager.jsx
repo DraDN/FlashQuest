@@ -11,9 +11,9 @@ function useCardManager(dungeon_id) {
     const [ selected_card, setSelectedCard ] = useState(null);
     const selected_card_ref = useRef(null);
     const [ card_state, setCardState ] = useState({
-        draw: [],
+        due_draw: [],
+        review_draw: [],
         hand: [],
-        discard: []
     });
 
     const [ isError, setIsError ] = useState(false);
@@ -30,10 +30,27 @@ function useCardManager(dungeon_id) {
             setCards(new_cards);
 
             setCardState(() => {
+                let due_cards = [];
+                let review_cards = [];
+                let id = 0;
+
+                new_cards.forEach(card => {
+                    const current_time = Date.now();
+                    const time_diff = current_time - Date.parse(card.due_date);
+
+                    const id_card = { ...card, id: id++ };
+
+                    if (time_diff <= 0) {
+                        review_cards.push({...id_card, due: false});
+                    } else {
+                        due_cards.push({...id_card, due: true});
+                    }
+                });
+
                 const filled_hand = refillHand({
-                    draw: shuffle_array(Array.from(Array(new_cards.length).keys()).map(i => ({ id: i }))),
+                    due_draw: shuffle_array(due_cards),
+                    review_draw: review_cards.sort((a, b) => (Date.parse(a.due_date) - Date.parse(b.due_date))),
                     hand: [],
-                    discard: [],
                 });
 
                 return filled_hand;
@@ -44,26 +61,28 @@ function useCardManager(dungeon_id) {
     // === HAND LOGIC ===
 
     const refillHand = useCallback((previousState) => {
-        let current_draw = [...previousState.draw];
-        let current_discard = [...previousState.discard];
+        let current_due_draw = [...previousState.due_draw];
+        let current_review_draw = [...previousState.review_draw];
         let new_hand = [...previousState.hand]
 
-        const size = current_draw.length + current_discard.length + new_hand.length;
+        const size = current_due_draw.length + current_review_draw.length + new_hand.length;
         const limit = Math.min(size, PLAYER_CONFIG.MAX_HAND_SIZE);
         while (new_hand.length < limit) {
-            if (current_draw.length === 0) {
-                current_draw = shuffle_array(current_discard);
-                current_discard = [];
+            let card_to_add;
+
+            if (current_due_draw.length === 0) {
+                card_to_add = current_review_draw.shift();
+            } else {
+                card_to_add = current_due_draw.shift();
             }
 
-            const card_to_add = current_draw.shift();
             new_hand.push(card_to_add);
         }
 
         const new_state = {
-            draw: current_draw,
-            hand: new_hand,
-            discard: current_discard,
+            due_draw: current_due_draw,
+            review_draw: current_review_draw,
+            hand: new_hand
         };
 
         return new_state;
@@ -71,19 +90,19 @@ function useCardManager(dungeon_id) {
 
     const playCard = useCallback(() => {
         setCardState((previousState) => {
-            const new_discard = [...previousState.discard, { id: selected_card } ];
+            const new_discard = [...previousState.review_draw, { id: selected_card } ];
 
             if (previousState.hand.length === 0) {
                 return refillHand({
-                    draw: previousState.draw,
-                    hand: [],
-                    discard: new_discard
+                    due_draw: previousState.due_draw,
+                    review_draw: new_discard,
+                    hand: []
                 });
             }
 
             return {
                 ...previousState,
-                discard: new_discard
+                review_draw: new_discard,
             }
         });
 
@@ -180,7 +199,13 @@ function useCardManager(dungeon_id) {
     }, [getSelected, sr_algorithm]);
 
     const sendGrades = useCallback(() => {
-        const only_grades = cards.map((card) => {
+        const only_graded = cards.filter((card) => card.interval !== undefined);
+
+        if (only_graded.length === 0) {
+            return;
+        }
+
+        const only_grades = only_graded.map((card) => {
             return {
                 id: card.id,
                 repetitions: card.repetitions,
