@@ -1,7 +1,7 @@
 const GRADES = Object.freeze({
-    EASY: 5,
-    GOOD: 4,
-    HARD: 2.5,
+    EASY: 3,
+    GOOD: 2,
+    HARD: 1,
     AGAIN: 0
 });
 

@@ -90,7 +90,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
             player_actions.hit(monster_actions.getSelected().attack);
         }
 
-        card_actions.playCard();
+        card_actions.playCard(grade);
     }
 
     useEffect(() => {

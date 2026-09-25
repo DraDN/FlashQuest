@@ -1,14 +1,16 @@
+const { createEmptyCard } = require('ts-fsrs');
 const db = require('../db');
 
-const getCardByIDStmt = db.prepare('SELECT * FROM cards WHERE id = ?');
+const getCardByIDStmt = db.prepare('SELECT id, deck_id, question, answers, options, due FROM cards WHERE id = ?');
+const getCardSRDataStmt = db.prepare('SELECT sr_data FROM cards WHERE id = ?');
 const getOwnderOfCardStmt = db.prepare('SELECT decks.user_id FROM decks INNER JOIN cards ON decks.id = cards.deck_id WHERE cards.id = ?');
-const insertCardIntoDeckStmt = db.prepare('INSERT INTO cards (deck_id, question, answers, options) VALUES (?, ?, ?, ?)');
+const insertCardIntoDeckStmt = db.prepare('INSERT INTO cards (deck_id, question, answers, options, sr_data) VALUES (?, ?, ?, ?, ?)');
 const updateQCardStmt = db.prepare('UPDATE cards SET question = ?, answers = ?, options = ? WHERE id = ?');
-const updateSRCardStmt = db.prepare('UPDATE cards SET repetitions = ?, easy_factor = ?, due_date = datetime(due_date, ?) WHERE id = ?');
+const updateSRCardStmt = db.prepare('UPDATE cards SET sr_data = ?, due = ? WHERE id = ?');
 const deleteCardStmt = db.prepare('DELETE FROM cards WHERE id = ?');
 
-const getCardsOfDeckStmt = db.prepare('SELECT * FROM cards WHERE deck_id = ?');
-const getCardsOfDungeonStmt = db.prepare('SELECT * FROM cards WHERE deck_id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)');
+const getCardsOfDeckStmt = db.prepare('SELECT id, deck_id, question, answers, options, due FROM cards WHERE deck_id = ?');
+const getCardsOfDungeonStmt = db.prepare('SELECT id, deck_id, question, answers, options, due FROM cards WHERE deck_id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)');
 
 function decompress_answers(comp_answers) {
 	let answers = [];
@@ -44,15 +46,27 @@ module.exports = {
 	},
 
 	insertCard(deck_id, question, answers, options) {
-		return insertCardIntoDeckStmt.run(deck_id, question, compress_answers(answers), JSON.stringify(options));
+		return insertCardIntoDeckStmt.run(deck_id, question, compress_answers(answers), JSON.stringify(options), JSON.stringify(createEmptyCard()));
 	},
 
 	updateQCard(id, question, answers, options) {
 		return updateQCardStmt.run(question, compress_answers(answers), JSON.stringify(options), id);
 	},
 
-	updateSRCard(id, repetitions, easy_factor, interval) {
-		return updateSRCardStmt.run(repetitions, easy_factor, `+${interval} days`, id);
+	// updateSRCard(id, repetitions, easy_factor, interval) {
+		// return updateSRCardStmt.run(repetitions, easy_factor, `+${interval} days`, id);
+	// },
+	getCardSRData(id) {
+		const data = getCardSRDataStmt.get(id);
+		return JSON.parse(data.sr_data);
+	},
+
+	updateSRCard(id, sr_data) {
+		const data = JSON.stringify(sr_data);
+		const due = sr_data.due.toISOString();
+		console.log(data);
+		console.log("at ", id);
+		return updateSRCardStmt.run(data, due, id);
 	},
 
 	deleteCard(id) {

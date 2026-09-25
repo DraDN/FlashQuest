@@ -1,4 +1,12 @@
+const { fsrs, Rating, generatorParameters } = require('ts-fsrs');
 const db = require('../db');
+
+const sr_parameters = generatorParameters({
+	request_retention: 0.85,
+	maximum_interval: 365
+});
+
+const sr_scheduler = fsrs(sr_parameters);
 
 const { enforceOwnership } = require('../utils/authUtils');
 
@@ -35,27 +43,42 @@ module.exports = {
 		return edit_transaction();
 	},
 
-	gradeCard(id, repetitions, easy_factor, interval, user_id) {
+	// gradeCard(id, repetitions, easy_factor, interval, user_id) {
+	// 	const grade_transaction = db.transaction(() => {
+	// 		const owner = cardsRepo.getOwnerOfCard(id);
+
+	// 		enforceOwnership(owner, user_id, 'Card');
+
+	// 		const grade_result = cardsRepo.updateSRCard(id, repetitions, easy_factor, interval);
+	// 		return cardsRepo.getCard(id);
+	// 	})
+
+	// 	return grade_transaction();
+	// },
+
+	gradeCards(grades, user_id) {
 		const grade_transaction = db.transaction(() => {
-			const owner = cardsRepo.getOwnerOfCard(id);
-
-			enforceOwnership(owner, user_id, 'Card');
-
-			const grade_result = cardsRepo.updateSRCard(id, repetitions, easy_factor, interval);
-			return cardsRepo.getCard(id);
-		})
-
-		return grade_transaction();
-	},
-
-	gradeCards(cards, user_id) {
-		const grade_transaction = db.transaction(() => {
-			for (const card of cards) {
-				const owner = cardsRepo.getOwnerOfCard(card.id);
+			for (const grade of grades) {
+				const owner = cardsRepo.getOwnerOfCard(grade.id);
 
 				enforceOwnership(owner, user_id, 'Card');
 
-				cardsRepo.updateSRCard(card.id, card.repetitions, card.easy_factor, card.interval);
+				const card_data = cardsRepo.getCardSRData(grade.id);
+
+				let translated_grade;
+				if (grade.grade === 0) {
+					translated_grade = Rating.Again;
+				} else if (grade.grade === 1) {
+					translated_grade = Rating.Hard;
+				} else if (grade.grade === 2) {
+					translated_grade = Rating.Good;
+				} else if (grade.grade === 3) {
+					translated_grade = Rating.Easy;
+				}
+
+				const sr_data = sr_scheduler.next(card_data, new Date(), translated_grade).card;
+
+				cardsRepo.updateSRCard(grade.id, sr_data);
 			}
 		})
 

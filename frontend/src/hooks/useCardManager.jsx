@@ -3,7 +3,7 @@ import { getDungeonCards, gradeCards } from "../services/api";
 
 import * as PLAYER_CONFIG from "../config/player_configs";
 import { shuffle_array } from "../utils/shuffle";
-import { sr_algorithm } from "../utils/sr_algorithm";
+import { GRADES } from "../utils/sr_algorithm";
 
 function useCardManager(dungeon_id) {
     const [ cards, setCards ] = useState(undefined);
@@ -15,6 +15,7 @@ function useCardManager(dungeon_id) {
         review_draw: [],
         hand: [],
     });
+    const [ grades, setGrades ] = useState([]);
 
     const [ isError, setIsError ] = useState(false);
 
@@ -36,9 +37,9 @@ function useCardManager(dungeon_id) {
 
                 new_cards.forEach(card => {
                     const current_time = Date.now();
-                    const time_diff = current_time - Date.parse(card.due_date);
+                    const time_diff = current_time - Date.parse(card.due);
 
-                    const id_card = { ...card, id: id++ };
+                    const id_card = { id: id++ };
 
                     if (time_diff <= 0) {
                         review_cards.push({...id_card, due: false});
@@ -49,7 +50,7 @@ function useCardManager(dungeon_id) {
 
                 const filled_hand = refillHand({
                     due_draw: shuffle_array(due_cards),
-                    review_draw: review_cards.sort((a, b) => (Date.parse(a.due_date) - Date.parse(b.due_date))),
+                    review_draw: review_cards.sort((a, b) => (Date.parse(a.due) - Date.parse(b.due))),
                     hand: [],
                 });
 
@@ -88,21 +89,29 @@ function useCardManager(dungeon_id) {
         return new_state;
     });
 
-    const playCard = useCallback(() => {
+    const playCard = useCallback((grade) => {
         setCardState((previousState) => {
-            const new_discard = [...previousState.review_draw, { id: selected_card } ];
+            let new_review = [...previousState.review_draw];
+            let new_due = [...previousState.due_draw];
+
+            if (grade === GRADES.AGAIN) {
+                new_due.push({ id: selected_card, due: false });
+            } else {
+                new_review.push({ id: selected_card, due: false });
+            }
 
             if (previousState.hand.length === 0) {
                 return refillHand({
-                    due_draw: previousState.due_draw,
-                    review_draw: new_discard,
+                    due_draw: new_due,
+                    review_draw: new_review,
                     hand: []
                 });
             }
 
             return {
                 ...previousState,
-                review_draw: new_discard,
+                due_draw: new_due,
+                review_draw: new_review
             }
         });
 
@@ -184,38 +193,56 @@ function useCardManager(dungeon_id) {
 
     // === SR ALGO ===
 
+    // const gradeSelected = useCallback((grade) => {
+    //     const selected = getSelected();
+    //     const [new_repetitions, new_easy_factor, new_interval] = sr_algorithm(grade, selected.repetitions, selected.easy_factor, selected.interval);
+
+    //     setCards((previousState) => {
+    //         const new_cards = [...previousState];
+    //         new_cards[selected_card] = { ...selected,
+    //             repetitions: new_repetitions,
+    //             easy_factor: new_easy_factor,
+    //             interval: new_interval };
+    //         return new_cards;
+    //     })
+    // }, [getSelected, sr_algorithm]);
     const gradeSelected = useCallback((grade) => {
         const selected = getSelected();
-        const [new_repetitions, new_easy_factor, new_interval] = sr_algorithm(grade, selected.repetitions, selected.easy_factor, selected.interval);
-
-        setCards((previousState) => {
-            const new_cards = [...previousState];
-            new_cards[selected_card] = { ...selected,
-                repetitions: new_repetitions,
-                easy_factor: new_easy_factor,
-                interval: new_interval };
-            return new_cards;
-        })
-    }, [getSelected, sr_algorithm]);
-
-    const sendGrades = useCallback(() => {
-        const only_graded = cards.filter((card) => card.interval !== undefined);
-
-        if (only_graded.length === 0) {
-            return;
-        }
-
-        const only_grades = only_graded.map((card) => {
-            return {
-                id: card.id,
-                repetitions: card.repetitions,
-                easy_factor: card.easy_factor,
-                interval: card.interval
+        
+        setGrades((prevGrades) => {
+            const previous_grades = [...prevGrades]
+            if (!previous_grades.find(p_grade => p_grade.id === selected.id)) {
+                return [...previous_grades, {
+                    id: selected.id,
+                    grade: grade
+                }];
             }
         });
+    });
 
-        return gradeCards(only_grades);
-    }, [cards]);
+    // const sendGrades = useCallback(() => {
+    //     const only_graded = cards.filter((card) => card.interval !== undefined);
+
+    //     if (only_graded.length === 0) {
+    //         return;
+    //     }
+
+    //     const only_grades = only_graded.map((card) => {
+    //         return {
+    //             id: card.id,
+    //             repetitions: card.repetitions,
+    //             easy_factor: card.easy_factor,
+    //             interval: card.interval
+    //         }
+    //     });
+
+    //     return gradeCards(only_grades);
+    // }, [cards]);
+
+    const sendGrades = useCallback(() => {
+        console.log(grades);
+        return gradeCards(grades);
+    });
 
     // === STATE ===
 
