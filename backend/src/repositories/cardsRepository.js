@@ -53,9 +53,6 @@ module.exports = {
 		return updateQCardStmt.run(question, compress_answers(answers), JSON.stringify(options), id);
 	},
 
-	// updateSRCard(id, repetitions, easy_factor, interval) {
-		// return updateSRCardStmt.run(repetitions, easy_factor, `+${interval} days`, id);
-	// },
 	getCardSRData(id) {
 		const data = getCardSRDataStmt.get(id);
 		return JSON.parse(data.sr_data);

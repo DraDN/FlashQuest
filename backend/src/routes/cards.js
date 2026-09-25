@@ -72,30 +72,6 @@ router.post('/:id/edit', [
     }
 });
 
-// router.post('/:id/grade', [
-//     param('id')
-//         .trim()
-//         .notEmpty().withMessage('\'id\' is required')
-//         .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0'),
-//     param('repetitions')
-//         .isInt({ min: 0 }).withMessage('\'repetitions\' must be an integer greater than 0'),
-//     param('easy_factor')
-//         .isInt({ min: 1.2 }).withMessage('\'easy_factor\' must be an integer greater than 0'),
-//     param('interval')
-//         .isNumeric({ min: 0 }).withMessage('\'interval\' must be a number greater than 0')
-// ], validationHandler, async (req, res, next) => {
-//     const { id } = req.params;
-//     const { repetitions, easy_factor, interval } = req.body;
-
-//     try {
-//         const card = await cardsService.gradeCard(id, repetitions, easy_factor, interval, req.user_id);
-
-//         return res.status(200).json(card);
-//     } catch (error) {
-//         next(error);
-//     }
-// });
-
 router.post('/grade', [
     body('grades')
         .isArray({ min: 1 }).withMessage('\'grades\' must be an array of minimum size 1'),

@@ -193,19 +193,6 @@ function useCardManager(dungeon_id) {
 
     // === SR ALGO ===
 
-    // const gradeSelected = useCallback((grade) => {
-    //     const selected = getSelected();
-    //     const [new_repetitions, new_easy_factor, new_interval] = sr_algorithm(grade, selected.repetitions, selected.easy_factor, selected.interval);
-
-    //     setCards((previousState) => {
-    //         const new_cards = [...previousState];
-    //         new_cards[selected_card] = { ...selected,
-    //             repetitions: new_repetitions,
-    //             easy_factor: new_easy_factor,
-    //             interval: new_interval };
-    //         return new_cards;
-    //     })
-    // }, [getSelected, sr_algorithm]);
     const gradeSelected = useCallback((grade) => {
         const selected = getSelected();
         
@@ -219,25 +206,6 @@ function useCardManager(dungeon_id) {
             }
         });
     });
-
-    // const sendGrades = useCallback(() => {
-    //     const only_graded = cards.filter((card) => card.interval !== undefined);
-
-    //     if (only_graded.length === 0) {
-    //         return;
-    //     }
-
-    //     const only_grades = only_graded.map((card) => {
-    //         return {
-    //             id: card.id,
-    //             repetitions: card.repetitions,
-    //             easy_factor: card.easy_factor,
-    //             interval: card.interval
-    //         }
-    //     });
-
-    //     return gradeCards(only_grades);
-    // }, [cards]);
 
     const sendGrades = useCallback(() => {
         console.log(grades);

@@ -43,19 +43,6 @@ module.exports = {
 		return edit_transaction();
 	},
 
-	// gradeCard(id, repetitions, easy_factor, interval, user_id) {
-	// 	const grade_transaction = db.transaction(() => {
-	// 		const owner = cardsRepo.getOwnerOfCard(id);
-
-	// 		enforceOwnership(owner, user_id, 'Card');
-
-	// 		const grade_result = cardsRepo.updateSRCard(id, repetitions, easy_factor, interval);
-	// 		return cardsRepo.getCard(id);
-	// 	})
-
-	// 	return grade_transaction();
-	// },
-
 	gradeCards(grades, user_id) {
 		const grade_transaction = db.transaction(() => {
 			for (const grade of grades) {
