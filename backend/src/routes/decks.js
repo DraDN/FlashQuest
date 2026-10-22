@@ -59,7 +59,7 @@ router.delete('/:id', [
         .trim()
         .notEmpty().withMessage('\'id\' is required')
         .isInt().withMessage('\'id\' must be an integer greater than 0')
-], async (req, res, next) => {
+], validationHandler, async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -75,11 +75,21 @@ router.get('/:id/cards', [
         .trim()
         .notEmpty().withMessage('\'id\' is required')
         .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0')
-], async (req, res, next) => {
+], validationHandler, async (req, res, next) => {
     const { id } = req.params;
 
     try {
         const cards = await decksService.getDeckCards(id, req.user_id);
+
+        return res.status(200).json(cards);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get('/dues', async (req, res, next) => {
+    try {
+        const cards = await decksService.getNumberOfDueCardOfUser(req.user_id);
 
         return res.status(200).json(cards);
     } catch (error) {

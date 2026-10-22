@@ -67,6 +67,9 @@ export const deleteDeck = async (id) =>
         method: 'DELETE'
     }).then(responseHandler);
 
+export const getDues = async () => 
+    fetch(`/api/decks/dues`).then(responseHandler);
+
 // === CARDS API ===
 
 export const getCards = async (deck_id) => 

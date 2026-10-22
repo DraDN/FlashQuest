@@ -52,5 +52,13 @@ module.exports = {
 		})
 
 		return cards_transaction();
+	},
+
+	async getNumberOfDueCardOfUser(user_id) {
+		const transaction = db.transaction(() => {
+			return cardsRepo.getNumberOfDueCardOfUser(user_id);
+		})
+
+		return transaction();
 	}
 };

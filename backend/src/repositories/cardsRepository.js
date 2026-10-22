@@ -11,6 +11,8 @@ const deleteCardStmt = db.prepare('DELETE FROM cards WHERE id = ?');
 
 const getCardsOfDeckStmt = db.prepare('SELECT id, deck_id, question, answers, options, due FROM cards WHERE deck_id = ?');
 const getCardsOfDungeonStmt = db.prepare('SELECT id, deck_id, question, answers, options, due FROM cards WHERE deck_id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)');
+// const getDueCardsOfDecksStmt = db.prepare('SELECT COUNT(_) FROM cards WHERE due < ? and deck_id IN (SELECT deck_id FROM decks WHERE user_id = ?)');
+const getDueCardsOfDecksStmt = db.prepare("SELECT deck_id, COUNT(*) AS \"count\" FROM cards WHERE due < datetime('now') and deck_id IN (SELECT id FROM decks WHERE user_id = ?) GROUP BY deck_id");
 
 function decompress_answers(comp_answers) {
 	let answers = [];
@@ -80,11 +82,16 @@ module.exports = {
 	},
 
 	getCardsOfDungeon(dungeon_id) {
-		const cards = getCardsOfDeckStmt.all(dungeon_id);
+		const cards = getCardsOfDungeonStmt.all(dungeon_id);
 		cards.forEach(card => {
 			card.options = JSON.parse(card.options);
 			card.answers = decompress_answers(card.answers);
 		});
 		return cards;
+	},
+
+	getNumberOfDueCardOfUser(user_id) {
+		const db_ret = getDueCardsOfDecksStmt.all(user_id);
+		return db_ret;
 	}
 };
