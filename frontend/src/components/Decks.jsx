@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
 
-import { getDecks, createDeck, renameDeck, deleteDeck, getDues } from '../services/api';
+import { useUserData } from '../store/store';
+
+import { getDues } from '../services/api';
 
 import DeckModal from './DeckModal';
 import DeckCard from './DeckCard';
@@ -9,10 +10,15 @@ import DeckCard from './DeckCard';
 import IntermittentMessage from './IntermittentMessage';
 
 export default function Decks({ onDeckSelect }) {
-    const { user } = useUser();
-    const [ decks, setDecks ] = useState(undefined);
+    const decks = useUserData(state => state.decks);
+    const getCachedDecks = useUserData(state => state.getCachedDecks);
+    const addCachedDeck = useUserData(state => state.addCachedDeck);
+    const renameCachedDeck = useUserData(state => state.renameCachedDeck);
+    const deleteCachedDeck = useUserData(state => state.deleteCachedDeck);
+
+    const [ deckDues, setDeckDues ] = useState(null);
     const [ modalConfig, setModalConfig ] = useState({ isOpen:false, mode: "create", deck_id: null, initial_value: "" });
-    const [ isDeckError, setIsDeckError ] = useState(false);
+    const [ deckError, setDeckError ] = useState(null);
 
     const openCreateModal = () => {
         setModalConfig({ isOpen: true, mode: "create", deck_id: null, initial_value: "" });
@@ -23,43 +29,44 @@ export default function Decks({ onDeckSelect }) {
     }
 
     useEffect(() => {
-        getDecks().then(res => {
+        try {
+            getCachedDecks();
+        } catch (err) {
+            setDeckError(err.message);
+        }
+
+        getDues().then(res => {
             if (!res.ok) {
-                setIsDeckError(true);
+                setDeckError('Failed to fetch deck dues');
                 return;
             }
 
-            setDecks(res.data);
+            setDeckDues(res.data);
         });
-    }, [user.id]);
+    }, []);
 
     const handleDeckCreation = async (name) => {
-        const res = await createDeck(name);
-        if (!res.ok) {
-            return;
+        try {
+            await addCachedDeck(name);
+        } catch (err) {
+            setDeckError(err.message);
         }
-
-        const new_deck = res.data;
-        setDecks([...decks, new_deck]);
     }
 
     const handleDeckRename = async (id, name) => {
-        const res = await renameDeck(id, name);
-        if (!res.ok) {
-            return;
+        try {
+            await renameCachedDeck(id, name);
+        } catch (err) {
+            setDeckError(err.message);
         }
-
-        const renamed_deck = res.data;
-        setDecks(decks.map(d => d.id === id ? renamed_deck : d));
     }
 
     const handleDeckDeletion = async (id) => {
-        const res = await deleteDeck(id);
-        if (!res.ok) {
-            return;
+        try {
+            await deleteCachedDeck(id);
+        } catch (err) {
+            setDeckError(err.message);
         }
-
-        setDecks(decks.filter(d => d.id !== id));
     }
 
     const handleSaveDeck = async (id, name) => {
@@ -72,8 +79,8 @@ export default function Decks({ onDeckSelect }) {
 
     let interMsg = null;
 
-    if (isDeckError) {
-        interMsg = { title: "Error", subtitle: "Could not load decks" };
+    if (deckError) {
+        interMsg = { title: "Error", subtitle: deckError };
     } else if (!decks) {
         interMsg = { title: "Loading", subtitle: "Please wait..." };
     } else if (decks.length === 0) {
@@ -82,9 +89,9 @@ export default function Decks({ onDeckSelect }) {
                 <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-4xl font-pixel-header' onClick={() => openCreateModal()}>- New deck -</button>
                 {modalConfig.isOpen && (
                     <DeckModal
-                        mode={modalConfig.mode}
-                        id={modalConfig.deck_id}
-                        initial_value={modalConfig.initial_value}
+                        mode={"create"}
+                        id={null}
+                        initial_value={""}
                         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
                         onSave={handleSaveDeck} />
                 )}
@@ -102,7 +109,7 @@ export default function Decks({ onDeckSelect }) {
                 <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-4xl font-pixel-header' onClick={() => openCreateModal()}>- New deck -</button>
                 <div className='overflow-y-auto custom-scroll'>
                     {decks.map((deck) => (
-                        <DeckCard key={deck.id} deck={deck} onSelect={onDeckSelect} onRename={openRenameModal} onDelete={handleDeckDeletion} />
+                        <DeckCard key={deck.id} deck={deck} onSelect={onDeckSelect} onRename={openRenameModal} onDelete={handleDeckDeletion} dues={deckDues} />
                     ))}
                 </div>
                      

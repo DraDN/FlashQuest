@@ -1,28 +1,23 @@
 import { useState, useEffect } from "react";
 import { useUser, UserAvatar } from "@clerk/clerk-react";
 
-import { getAccountCoins, checkAccountInit } from "../services/api";
+import { useUserData } from "../store/store";
 
 export default function AccountSummary() {
     const { user } = useUser();
-    const [ coins, setCoins ] = useState(0);
+
+    const coins = useUserData(state => state.coins);
+    const getCoins = useUserData(state => state.getCoins);
+    const checkAccount = useUserData(state => state.checkAccount);
+
+    const [ accountError, setAccountError ] = useState(null);
 
     useEffect(() => {
-        checkAccountInit().then(res => {
-            if (!res.ok) {
-                setCoins(-1);
-                return;
-            }
-
-            // TODO: add error handling
-            getAccountCoins().then(res => {
-                if (!res.ok) {
-                    setCoins(-99999);
-                }
-
-                setCoins(res.data.coins);
-            })
-        })
+        try {
+            checkAccount().then(getCoins());
+        } catch (err) {
+            setAccountError(err.message);
+        }
     }, [user?.id]);
 
     return (
@@ -33,7 +28,11 @@ export default function AccountSummary() {
                 </div>
                 <div className="inline-flex gap-6 items-end">
                     <h1 className="text-5xl">{user.username}</h1>
-                    <h3 className="text-2xl text-dungeon-yellow font-medium">Coins: {coins}</h3>
+                    {accountError ? (
+                        <h2 className="text-2xl text-dungeon-red-500">{accountError}</h2>
+                    ) : (
+                        <h3 className="text-2xl text-dungeon-yellow font-medium">Coins: {coins}</h3>
+                    )}
                 </div>
             </div>
         </>

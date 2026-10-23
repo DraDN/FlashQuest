@@ -208,7 +208,10 @@ function useCardManager(dungeon_id) {
     });
 
     const sendGrades = useCallback(() => {
-        console.log(grades);
+        if (grades.length === 0) {
+            return;
+        }
+
         return gradeCards(grades);
     });
 

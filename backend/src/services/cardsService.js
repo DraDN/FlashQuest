@@ -36,7 +36,7 @@ module.exports = {
 
 			enforceOwnership(owner, user_id, 'Card');
 
-			const edit_result = cardsRepo.updateCard(id, question, answers, options);
+			const edit_result = cardsRepo.updateQCard(id, question, answers, options);
 			return cardsRepo.getCard(id);
 		})
 

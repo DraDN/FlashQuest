@@ -63,8 +63,6 @@ module.exports = {
 	updateSRCard(id, sr_data) {
 		const data = JSON.stringify(sr_data);
 		const due = sr_data.due.toISOString();
-		console.log(data);
-		console.log("at ", id);
 		return updateSRCardStmt.run(data, due, id);
 	},
 

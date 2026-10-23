@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUserData } from '../store/store'; 
 
 import DungeonModal from './DungeonModal';
 import DungeonCard from './DungeonCard';
 
-import { getDungeons, createDungeon, editDungeon, deleteDungeon } from '../services/api';
-
 import IntermittentMessage from './IntermittentMessage';
 
 export default function Dungeons({ onDungeonSelect }) {
-    const { user } = useUser();
-    const [ dungeons, setDungeons ] = useState(undefined);
+    const dungeons = useUserData(state => state.dungeons);
+    const getCachedDungeons = useUserData(state => state.getCachedDungeons);
+    const addCachedDungeon = useUserData(state => state.addCachedDungeon);
+    const editCachedDungeon = useUserData(state => state.editCachedDungeon);
+    const deleteCachedDungeon = useUserData(state => state.deleteCachedDungeon);
+
     const [ modalConfig, setModalConfig ] = useState({ isOpen:false, mode: "create", id: null, initial_name: "" });
-    const [ isDungeonError, setIsDungeonError ] = useState(false);
+    const [ dungeonError, setDungeonError ] = useState(null);
 
     const openCreateModal = () => {
         setModalConfig({ isOpen: true, mode: "create", id: null, initial_name: "" });
@@ -23,36 +25,27 @@ export default function Dungeons({ onDungeonSelect }) {
     }
 
     useEffect(() => {
-        getDungeons()
-        .then(res => {
-            if (!res.ok) {
-                setIsDungeonError(true);
-                return;
-            }
-
-            setDungeons(res.data);
-        });
-    }, [user.id]);
+        try {
+            getCachedDungeons()
+        } catch (err) {
+            setDungeonError(err.message);
+        }
+    }, []);
 
     const handleDungeonCreation = async (name, deck_ids) => {
-        const res = await createDungeon(name, deck_ids);
-        if (!res.ok) {
-            return;
+        try {
+            await addCachedDungeon(name, deck_ids);
+        } catch (err) {
+            setDungeonError(err.message);
         }
-
-        const new_dungeon = res.data;
-        setDungeons([...dungeons, new_dungeon]);
     }
 
     const handelDungeonEdit = async (id, name, deck_ids) => {
-        const res = await editDungeon(id, name, deck_ids);
-        if (!res.ok) {
-            // TODO: show error to user
-            return;
+        try {
+            await editCachedDungeon(id, name, deck_ids);
+        } catch (err) {
+            setDungeonError(err.message);
         }
-
-        const edited_dungeon = res.data;
-        setDungeons(dungeons.map(d => d.id === id ? edited_dungeon : d));
     }
 
     const handleDungeonSave = async (id, name, deck_ids) => {
@@ -64,18 +57,17 @@ export default function Dungeons({ onDungeonSelect }) {
     }
 
     const handleDungeonDeletion = async (id) => {
-        const res = await deleteDungeon(id);
-        if (!res.ok) {
-            return;
+        try {
+            await deleteCachedDungeon(id);
+        } catch (err) {
+            setDungeonError(err.message);
         }
-
-        setDungeons(dungeons.filter(d => d.id !== id));
     }
 
     let interMsg = null;
 
-    if (isDungeonError) {
-        interMsg = { title: "Error", subtitle: "Could not load dungeons" };
+    if (dungeonError) {
+        interMsg = { title: "Error", subtitle: dungeonError };
     } else if (!dungeons) {
         interMsg = { title: "Loading", subtitle: "Please wait..." };
     } else if (dungeons.length === 0) {

@@ -83,7 +83,7 @@ module.exports = {
 		return edit_transaction();
 	},
 
-	async deleteDungeon(id) {
+	async deleteDungeon(id, user_id) {
 		const delete_transaction = db.transaction(() => {
 			const owner = dungeonsRepo.getOwnerOfDungeon(id);
 

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { DndContext, DragOverlay } from '@dnd-kit/core';
-import { useUser } from "@clerk/clerk-react";
 
 import useSensorsConfig from "../config/sensors";
 
@@ -22,8 +21,6 @@ import * as DUNGEON_CONFIG from "../config/dungeon_configs";
 import { get_coin_reward } from "../utils/dungeon_utils";
 
 export default function Dungeon({ dungeon, onNavigate }) {
-    const { user } = useUser();
-
     const [ round, setRound ] = useState(1);
 
     const { player, player_actions } = usePlayer();
@@ -77,7 +74,6 @@ export default function Dungeon({ dungeon, onNavigate }) {
     }
 
     const handleSubmitAttack = (is_correct, grade) => {
-        console.log(grade);
         card_actions.gradeSelected(grade);
 
         player_actions.updateStats(is_correct);
