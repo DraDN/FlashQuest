@@ -33,7 +33,7 @@ export function PlayerCard({ card, fresh, id, index, due }) {
 
     return (
         <div ref={setNodeRef} 
-            className={`${isDragging ? "bg-dungeon-orange-glow" : "bg-dungeon-dark-900"} ${due ? "text-red-600" : "text-white"} border border-dungeon-yellow p-4 w-40 h-40 shrink-0 text-center font-bold ${font_size} rounded-xl ${fresh ? "animate-card-draw" : ""}`}
+            className={`${isDragging ? "bg-dungeon-orange-glow" : "bg-dungeon-dark-900"} border border-dungeon-yellow p-4 w-40 h-40 shrink-0 text-center font-bold ${font_size} rounded-xl ${fresh ? "animate-card-draw" : ""}`}
             style={{
             ...style,
             /* 1. Tell it exactly where your visual Deck Pile lives on the viewport screen */
