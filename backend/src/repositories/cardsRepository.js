@@ -1,13 +1,18 @@
+const { createEmptyCard } = require('ts-fsrs');
 const db = require('../db');
 
-const getCardByIDStmt = db.prepare('SELECT * FROM cards WHERE id = ?');
+const getCardByIDStmt = db.prepare('SELECT id, deck_id, question, answers, options, due FROM cards WHERE id = ?');
+const getCardSRDataStmt = db.prepare('SELECT sr_data FROM cards WHERE id = ?');
 const getOwnderOfCardStmt = db.prepare('SELECT decks.user_id FROM decks INNER JOIN cards ON decks.id = cards.deck_id WHERE cards.id = ?');
-const insertCardIntoDeckStmt = db.prepare('INSERT INTO cards (deck_id, question, answers, options) VALUES (?, ?, ?, ?)');
-const updateCardStmt = db.prepare('UPDATE cards SET question = ?, answers = ?, options = ? WHERE id = ?');
+const insertCardIntoDeckStmt = db.prepare('INSERT INTO cards (deck_id, question, answers, options, sr_data) VALUES (?, ?, ?, ?, ?)');
+const updateQCardStmt = db.prepare('UPDATE cards SET question = ?, answers = ?, options = ? WHERE id = ?');
+const updateSRCardStmt = db.prepare('UPDATE cards SET sr_data = ?, due = ? WHERE id = ?');
 const deleteCardStmt = db.prepare('DELETE FROM cards WHERE id = ?');
 
-const getCardsOfDeckStmt = db.prepare('SELECT * FROM cards WHERE deck_id = ?');
-const getCardsOfDungeonStmt = db.prepare('SELECT * FROM cards WHERE deck_id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)');
+const getCardsOfDeckStmt = db.prepare('SELECT id, deck_id, question, answers, options, due FROM cards WHERE deck_id = ?');
+const getCardsOfDungeonStmt = db.prepare('SELECT id, deck_id, question, answers, options, due FROM cards WHERE deck_id IN (SELECT deck_id FROM dungeon_decks WHERE dungeon_id = ?)');
+// const getDueCardsOfDecksStmt = db.prepare('SELECT COUNT(_) FROM cards WHERE due < ? and deck_id IN (SELECT deck_id FROM decks WHERE user_id = ?)');
+const getDueCardsOfDecksStmt = db.prepare("SELECT deck_id, COUNT(*) AS \"count\" FROM cards WHERE due < datetime('now') and deck_id IN (SELECT id FROM decks WHERE user_id = ?) GROUP BY deck_id");
 
 function decompress_answers(comp_answers) {
 	let answers = [];
@@ -43,11 +48,22 @@ module.exports = {
 	},
 
 	insertCard(deck_id, question, answers, options) {
-		return insertCardIntoDeckStmt.run(deck_id, question, compress_answers(answers), JSON.stringify(options));
+		return insertCardIntoDeckStmt.run(deck_id, question, compress_answers(answers), JSON.stringify(options), JSON.stringify(createEmptyCard()));
 	},
 
-	updateCard(id, question, answers, options) {
-		return updateCardStmt.run(question, compress_answers(answers), JSON.stringify(options), id);
+	updateQCard(id, question, answers, options) {
+		return updateQCardStmt.run(question, compress_answers(answers), JSON.stringify(options), id);
+	},
+
+	getCardSRData(id) {
+		const data = getCardSRDataStmt.get(id);
+		return JSON.parse(data.sr_data);
+	},
+
+	updateSRCard(id, sr_data) {
+		const data = JSON.stringify(sr_data);
+		const due = sr_data.due.toISOString();
+		return updateSRCardStmt.run(data, due, id);
 	},
 
 	deleteCard(id) {
@@ -64,11 +80,16 @@ module.exports = {
 	},
 
 	getCardsOfDungeon(dungeon_id) {
-		const cards = getCardsOfDeckStmt.all(dungeon_id);
+		const cards = getCardsOfDungeonStmt.all(dungeon_id);
 		cards.forEach(card => {
 			card.options = JSON.parse(card.options);
 			card.answers = decompress_answers(card.answers);
 		});
 		return cards;
+	},
+
+	getNumberOfDueCardOfUser(user_id) {
+		const db_ret = getDueCardsOfDecksStmt.all(user_id);
+		return db_ret;
 	}
 };

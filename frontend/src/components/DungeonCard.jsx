@@ -1,21 +1,19 @@
 import { useState, useEffect } from "react";
 
-import { getDungeonDecks } from "../services/api";
+import { useUserData } from "../store/store";
 
 export default function DungeonCard({ dungeon, onDelete, onEdit, onPlay }) {
-    const [ decks, setDecks ] = useState([]);
-    const [ isDeckError, setIsDeckError ] = useState(false);
+    const dungeonDecks = useUserData(state => state.dungeonDecks);
+    const getCachedDungeonDecks = useUserData(state => state.getCachedDungeonDecks);
+    const [ deckError, setDeckError ] = useState(null);
 
     useEffect(() => {
-        getDungeonDecks(dungeon.id)
-        .then(res => {
-            if (!res.ok) {
-                setIsDeckError(true);
-            }
-
-            setDecks(res.data);
-        });
-    }, [dungeon]);
+        try {
+            getCachedDungeonDecks(dungeon.id);
+        } catch (err) {
+            setDeckError(err.message);
+        }
+    }, [dungeon.id]);
 
     return (
         <>
@@ -31,7 +29,9 @@ export default function DungeonCard({ dungeon, onDelete, onEdit, onPlay }) {
                 <div className="px-5 pb-5 text-lg">
                     <span className="text-xl text-dungeon-green-200 font-medium mb-2">Containing decks:</span>
                     <ul>
-                        {isDeckError ? <li>Could not load decks</li> : decks.map(d => <li key={d.id}> - {d.name}</li>)}
+                        {(!dungeonDecks[dungeon.id] && !deckError) ? <li>Loading...</li> : (
+                            deckError ? <li>{deckError}</li> : dungeonDecks[dungeon.id].map(d => <li key={d.id}> - {d.name}</li>)
+                        )}
                     </ul>
                 </div>
             </div>

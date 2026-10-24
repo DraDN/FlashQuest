@@ -2,7 +2,7 @@ const db = require('../db');
 
 const userExistsStmt = db.prepare('SELECT 1 FROM user_coins WHERE user_id = ?');
 const insertUserRecordStmt = db.prepare('INSERT INTO user_coins (user_id, coins) VALUES (?, 0)');
-const getUserCoinsStmt = db.prepare('SELECT * FROM user_coins WHERE user_id = ?');
+const getUserCoinsStmt = db.prepare('SELECT coins FROM user_coins WHERE user_id = ?');
 const setUserCoinsStmt = db.prepare('UPDATE user_coins SET coins = ? WHERE user_id = ?');
 const addUserCoinsStmt = db.prepare('UPDATE user_coins SET coins = coins + ? WHERE user_id = ?');
 

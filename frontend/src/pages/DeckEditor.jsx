@@ -1,14 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 
-import { getCards, createCard, editCard, deleteCard } from "../services/api";
+import { useUserData } from "../store/store";
+
 import CardModal from "../components/CardModal";
 
 import IntermittentMessage from "../components/IntermittentMessage";
 
 export default function DeckEditor({ deck, onNavigate }) {
-    const [ cards, setCards ] = useState(undefined);
+    const deckCards = useUserData(state => state.deckCards);
+    const getCachedDeckCards = useUserData(state => state.getCachedDeckCards);
+    const addCachedDeckCard = useUserData(state => state.addCachedDeckCard);
+    const editCachedDeckCard = useUserData(state => state.editCachedDeckCard);
+    const deleteCachedDeckCard = useUserData(state => state.deleteCachedDeckCard);
+
     const [ modalConfig, setModalConfig ] = useState({ isOpen: false, mode: "create", card_id: null, initial_value: { question: "", answers: [], options: [] } });
-    const [ isCardError, setIsCardError ] = useState(false);
+    const [ cardError, setCardError ] = useState(null);
 
     const openCreateModal = () => {
         setModalConfig({ isOpen: true, mode: "create", card_id: null, initial_value: { question: "", answers: [], options: [] } });
@@ -19,32 +25,27 @@ export default function DeckEditor({ deck, onNavigate }) {
     }
 
     const handleCardCreation = async (question, answers, options) => {
-        const res = await createCard(deck.id, question, answers, options);
-        if (!res.ok) {
-            return;
+        try {
+            await addCachedDeckCard(deck.id, question, answers, options);
+        } catch (err) {
+            setCardError(err.message);
         }
-
-        const new_card = res.data;
-        setCards([...cards, new_card]);
     }
 
     const handleCardEdit = async (id, question, answers, options) => {
-        const res = await editCard(id, question, answers, options);
-        if (!res.ok) {
-            return;
+        try {
+            await editCachedDeckCard(deck.id, id, question, answers, options);
+        } catch (err) {
+            setCardError(err.message);
         }
-
-        const edited_card = res.data;
-        setCards(cards.map(c => c.id === id ? edited_card : c));
     }
 
     const handleCardDeletion = async (id) => {
-        const res = await deleteCard(id);
-        if (!res.ok) {
-            return;
+        try {
+            await deleteCachedDeckCard(deck.id, id);
+        } catch (err) {
+            setCardError(err.message);
         }
-
-        setCards(cards.filter(c => c.id !== id));
     }
 
     const handleSaveCard = async (id, question, answers, options) => {
@@ -56,21 +57,18 @@ export default function DeckEditor({ deck, onNavigate }) {
     }
 
     useEffect(() => {
-        getCards(deck.id).then(res => {
-            if (!res.ok) {
-                setIsCardError(true);
-                return
-            }
-
-            setCards(res.data);
-        });
+        try {
+            getCachedDeckCards(deck.id);
+        } catch (err) {
+            setCardError(err.message);
+        }
     }, [deck.id]);
 
     let interMsg = null;
 
-    if (isCardError) {
-        interMsg = { title: "Error", subtitle: "Could not load cards" };
-    } else if (!cards) {
+    if (cardError) {
+        interMsg = { title: "Error", subtitle: cardError };
+    } else if (!deckCards[deck.id]) {
         interMsg = { title: "Loading", subtitle: "Please wait..." };
     }
 
@@ -97,7 +95,7 @@ export default function DeckEditor({ deck, onNavigate }) {
                         <p>Answers</p>
                         <button className='text-dungeon-green-200 text-shadow-md text-shadow-dungeon-green-900 px-4 py-3 rounded-xl hover:bg-dungeon-yellow hover:text-dungeon-dark-900 transition-colors m-4 font-bold text-3xl font-pixel-header' onClick={() => openCreateModal()}>- New card -</button>
                     </div>
-                    {cards.map((card) => (
+                    {deckCards[deck.id].map((card) => (
                         <div key={card.id} className="grid grid-cols-4 text-xl items-center m-4 *:p-2 *:m-2 mb-2 border border-dungeon-yellow divide-x-2 divide-dungeon-yellow">
                                 <span>{card.options.length > 1 ? "Multiple Choice" : "Input Field"}</span>
                                 <span>{card.question}</span>
@@ -112,7 +110,7 @@ export default function DeckEditor({ deck, onNavigate }) {
                                 </div>
                         </div>
                     ))}
-                    {cards.length === 0 && (
+                    {deckCards[deck.id].length === 0 && (
                         <IntermittentMessage title="Deck is empty" subtitle="Please add some cards" />
                     )}
                 </div>

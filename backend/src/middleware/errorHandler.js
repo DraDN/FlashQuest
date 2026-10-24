@@ -10,6 +10,7 @@ const errorHandler = (err, req, res, next) => {
     }
 
     console.error(`Uncaught Exception: ${err}`);
+    console.error(`Stack Trace: ${err.stack}`);
     return res.status(500).json({ error: 'Something went wrong on our end' });
 }
 

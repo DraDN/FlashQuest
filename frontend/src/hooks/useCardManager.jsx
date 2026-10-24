@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getDungeonCards } from "../services/api";
+import { getDungeonCards, gradeCards } from "../services/api";
 
 import * as PLAYER_CONFIG from "../config/player_configs";
 import { shuffle_array } from "../utils/shuffle";
+import { GRADES } from "../utils/sr_algorithm";
 
 function useCardManager(dungeon_id) {
     const [ cards, setCards ] = useState(undefined);
@@ -10,10 +11,11 @@ function useCardManager(dungeon_id) {
     const [ selected_card, setSelectedCard ] = useState(null);
     const selected_card_ref = useRef(null);
     const [ card_state, setCardState ] = useState({
-        draw: [],
+        due_draw: [],
+        review_draw: [],
         hand: [],
-        discard: [],
     });
+    const [ grades, setGrades ] = useState([]);
 
     const [ isError, setIsError ] = useState(false);
 
@@ -29,10 +31,27 @@ function useCardManager(dungeon_id) {
             setCards(new_cards);
 
             setCardState(() => {
+                let due_cards = [];
+                let review_cards = [];
+                let id = 0;
+
+                new_cards.forEach(card => {
+                    const current_time = Date.now();
+                    const time_diff = current_time - Date.parse(card.due);
+
+                    const id_card = { id: id++ };
+
+                    if (time_diff <= 0) {
+                        review_cards.push({...id_card, due: false});
+                    } else {
+                        due_cards.push({...id_card, due: true});
+                    }
+                });
+
                 const filled_hand = refillHand({
-                    draw: shuffle_array(Array.from(Array(new_cards.length).keys()).map(i => ({ id: i }))),
+                    due_draw: shuffle_array(due_cards),
+                    review_draw: review_cards.sort((a, b) => (Date.parse(a.due) - Date.parse(b.due))),
                     hand: [],
-                    discard: [],
                 });
 
                 return filled_hand;
@@ -43,46 +62,56 @@ function useCardManager(dungeon_id) {
     // === HAND LOGIC ===
 
     const refillHand = useCallback((previousState) => {
-        let current_draw = [...previousState.draw];
-        let current_discard = [...previousState.discard];
+        let current_due_draw = [...previousState.due_draw];
+        let current_review_draw = [...previousState.review_draw];
         let new_hand = [...previousState.hand]
 
-        const size = current_draw.length + current_discard.length + new_hand.length;
+        const size = current_due_draw.length + current_review_draw.length + new_hand.length;
         const limit = Math.min(size, PLAYER_CONFIG.MAX_HAND_SIZE);
         while (new_hand.length < limit) {
-            if (current_draw.length === 0) {
-                current_draw = shuffle_array(current_discard);
-                current_discard = [];
+            let card_to_add;
+
+            if (current_due_draw.length === 0) {
+                card_to_add = current_review_draw.shift();
+            } else {
+                card_to_add = current_due_draw.shift();
             }
 
-            const card_to_add = current_draw.shift();
             new_hand.push(card_to_add);
         }
 
         const new_state = {
-            draw: current_draw,
-            hand: new_hand,
-            discard: current_discard,
+            due_draw: current_due_draw,
+            review_draw: current_review_draw,
+            hand: new_hand
         };
 
         return new_state;
     });
 
-    const playCard = useCallback(() => {
+    const playCard = useCallback((grade) => {
         setCardState((previousState) => {
-            const new_discard = [...previousState.discard, { id: selected_card } ];
+            let new_review = [...previousState.review_draw];
+            let new_due = [...previousState.due_draw];
+
+            if (grade === GRADES.AGAIN) {
+                new_due.push({ id: selected_card, due: false });
+            } else {
+                new_review.push({ id: selected_card, due: false });
+            }
 
             if (previousState.hand.length === 0) {
                 return refillHand({
-                    draw: previousState.draw,
-                    hand: [],
-                    discard: new_discard
+                    due_draw: new_due,
+                    review_draw: new_review,
+                    hand: []
                 });
             }
 
             return {
                 ...previousState,
-                discard: new_discard
+                due_draw: new_due,
+                review_draw: new_review
             }
         });
 
@@ -162,6 +191,30 @@ function useCardManager(dungeon_id) {
         }
     }, [getSelected]);
 
+    // === SR ALGO ===
+
+    const gradeSelected = useCallback((grade) => {
+        const selected = getSelected();
+        
+        setGrades((prevGrades) => {
+            const previous_grades = [...prevGrades]
+            if (!previous_grades.find(p_grade => p_grade.id === selected.id)) {
+                return [...previous_grades, {
+                    id: selected.id,
+                    grade: grade
+                }];
+            }
+        });
+    });
+
+    const sendGrades = useCallback(() => {
+        if (grades.length === 0) {
+            return;
+        }
+
+        return gradeCards(grades);
+    });
+
     // === STATE ===
 
     const hasCards = useCallback(() => {
@@ -185,8 +238,9 @@ function useCardManager(dungeon_id) {
             getCard,
             getSelected,
             getSelectedID,
-            // getSelectedAnswer,
             isCorrect,
+            gradeSelected,
+            sendGrades,
             hasCards,
             isLoading,
             hasError

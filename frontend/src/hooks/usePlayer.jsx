@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 
-import { addAccountCoins } from "../services/api";
+import { useUserData } from "../store/store";
 
 import * as PLAYER_CONFIG from "../config/player_configs";
 import { calculate_stat } from "../utils/player_utils";
@@ -16,6 +16,7 @@ function usePlayer() {
     const [ level, setLevel ] = useState(1);
 
     const [ coins, setCoins ] = useState(0);
+    const addAccountCoins = useUserData(state => state.addCoins);
 
     const [ answer_stats, setAnswerStats ] = useState({ correct: 0, incorrect: 0 });
     const [ gained, setGained ] = useState({ xp: 0, level: 0, coins: 0 });

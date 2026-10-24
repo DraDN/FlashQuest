@@ -23,7 +23,7 @@ module.exports = {
 			throw new NotFoundError('Account coins not found');
 		}
 
-		return coins;
+		return coins.coins;
 	},
 
 	async setAccountCoins(user_id, coins) {

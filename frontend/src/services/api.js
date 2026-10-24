@@ -67,6 +67,9 @@ export const deleteDeck = async (id) =>
         method: 'DELETE'
     }).then(responseHandler);
 
+export const getDues = async () => 
+    fetch(`/api/decks/dues`).then(responseHandler);
+
 // === CARDS API ===
 
 export const getCards = async (deck_id) => 
@@ -88,6 +91,15 @@ export const editCard = async (card_id, question, answers, options) =>
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ question, answers, options })
+    }).then(responseHandler);
+
+export const gradeCards = async (grades) => 
+    fetch(`/api/cards/grade`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ grades })
     }).then(responseHandler);
 
 export const deleteCard = async (id) =>

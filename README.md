@@ -76,7 +76,7 @@ answering correctly, or be defeated by wrong answers that cost you HP.
 - Earn XP and level up your character as you battle inside the dungeon
 - Earn permanent coins by clearing each room
 - Have fun while studying!
-<!-- - Spaced repetition scheduling ensures you review cards at the right time -->
+- Spaced repetition scheduling ensures you review cards at the right time (using the FSRS algorithm)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -163,7 +163,7 @@ The best way to experience FlashQuest is to [try the live version](https://flash
 
 - [x] Security overhaul
 - [x] Enemy system rewrite + more enemeies
-- [ ] Spaced Repetition function
+- [x] Spaced Repetition function
 - [ ] CSV import / export of decks
 - [ ] Leaderboards
 

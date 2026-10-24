@@ -7,17 +7,17 @@ export function PlayerUI({ player, hand, get_card }) {
             <XPBar xp={player.xp} previous_level_xp={calculateTotalLevelXP(player.level)} needed_xp={calculateLevelUpXP(player.level)} level={player.level} />
             <HealthBar health={player.health} max_health={player.max_health} />
             <div className="flex flex-row grow gap-4 p-4 items-center md:justify-center justify-start bg-dungeon-dark-500 border border-dungeon-yellow overflow-x-auto overflow-y-hidden">
-                {hand.map((card) => {
-                    return <PlayerCard key={card.id} card={get_card(card.id)} fresh={true} index={card.id} />
+                {hand.map((card, index) => {
+                    return <PlayerCard key={card.id} card={get_card(card.id)} fresh={true} id={card.id} index={index} due={card.due} />
                 })}
             </div>
         </div>
     );
 };
 
-export function PlayerCard({ card, fresh, index }) {
+export function PlayerCard({ card, fresh, id, index, due }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-        id: index
+        id: id
     });
 
     const style = transform ? {
@@ -33,7 +33,7 @@ export function PlayerCard({ card, fresh, index }) {
 
     return (
         <div ref={setNodeRef} 
-            className={`${isDragging ? "bg-dungeon-orange-glow" : "bg-dungeon-dark-900"} text-white border border-dungeon-yellow p-4 w-40 h-40 shrink-0 text-center font-bold ${font_size} rounded-xl ${fresh ? "animate-card-draw" : ""}`}
+            className={`${isDragging ? "bg-dungeon-orange-glow" : "bg-dungeon-dark-900"} border border-dungeon-yellow p-4 w-40 h-40 shrink-0 text-center font-bold ${font_size} rounded-xl ${fresh ? "animate-card-draw" : ""}`}
             style={{
             ...style,
             /* 1. Tell it exactly where your visual Deck Pile lives on the viewport screen */

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { DndContext, DragOverlay } from '@dnd-kit/core';
-import { useUser } from "@clerk/clerk-react";
 
 import useSensorsConfig from "../config/sensors";
 
@@ -22,8 +21,6 @@ import * as DUNGEON_CONFIG from "../config/dungeon_configs";
 import { get_coin_reward } from "../utils/dungeon_utils";
 
 export default function Dungeon({ dungeon, onNavigate }) {
-    const { user } = useUser();
-
     const [ round, setRound ] = useState(1);
 
     const { player, player_actions } = usePlayer();
@@ -39,6 +36,20 @@ export default function Dungeon({ dungeon, onNavigate }) {
     const [ isError, setIsError ] = useState(false);
 
     const sensors_conf = useSensorsConfig();
+
+    // Source - https://stackoverflow.com/a/68933242
+    // Posted by Drew Reese, modified by community. See post 'Timeline' for change history
+    // Retrieved 2026-09-25, License - CC BY-SA 4.0
+    useEffect(() => {
+        const unloadCallback = (event) => {
+            event.preventDefault();
+            event.returnValue = "";
+            return "";
+        };
+
+        window.addEventListener("beforeunload", unloadCallback);
+        return () => window.removeEventListener("beforeunload", unloadCallback);
+    }, []);
     
     const nextRoom = () => {
         setRound(round + 1);
@@ -62,20 +73,20 @@ export default function Dungeon({ dungeon, onNavigate }) {
         }
     }
 
-    const handleSubmitAttack = (answer) => {
-        const is_correct = card_actions.isCorrect(answer);
+    const handleSubmitAttack = (is_correct, grade) => {
+        card_actions.gradeSelected(grade);
 
-        if (answer && is_correct) {
+        player_actions.updateStats(is_correct);
+
+        if (is_correct) {
             monster_actions.hitSelected(player.attack);
-
-            card_actions.playCard();
 
             player_actions.rewardXP(monster_actions.getSelected().xp_reward);
         } else {
             player_actions.hit(monster_actions.getSelected().attack);
         }
 
-        player_actions.updateStats(is_correct);
+        card_actions.playCard(grade);
     }
 
     useEffect(() => {
@@ -116,6 +127,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
 
         const stats = player_actions.getTotal(keep_percentage);
         const save_res = player_actions.saveCoins(keep_percentage);
+        const grade_res = card_actions.sendGrades();
         const results = {
             stats: stats,
             answer_stats: player.answer_stats
@@ -156,6 +168,7 @@ export default function Dungeon({ dungeon, onNavigate }) {
                             onClose={handleCloseAttackModal}
                             onSave={handleSubmitAttack}
                             card={card_actions.getSelected()}
+                            isCorrect={card_actions.isCorrect}
                         />
                     )}
                     {isRoundEndModalOpen && (

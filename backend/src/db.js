@@ -21,6 +21,8 @@ db.exec(`
         question TEXT NOT NULL,
         answers INTEGER NOT NULL,
         options TEXT NOT NULL,
+        sr_data TEXT NOT NULL,
+        due TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (deck_id) REFERENCES decks (id) ON DELETE CASCADE
     );
 

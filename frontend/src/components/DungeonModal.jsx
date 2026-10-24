@@ -1,48 +1,50 @@
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/clerk-react";
 
-import { getDecks, getDungeonDecks } from '../services/api';
+import { useUserData } from "../store/store";
+
 import Modal from "./Modal";
 
 const MAX_CHARACTERS = 50;
 
 export default function DungeonModal({ onClose, onSave, mode, id, initial_name }) {
     const [dungeonName, setDungeonName] = useState(mode === 'edit' ? initial_name : '');
-    const [decks, setDecks] = useState(undefined);
-    const [selectedDecksID, setSelectedDecksID] = useState([]);
-    const { user } = useUser();
-    const [ isDeckError, setIsDeckError ] = useState(false);
+
+    const decks = useUserData(state => state.decks);
+    const getCachedDecks = useUserData(state => state.getCachedDecks);
+    const getCachedDungeonDecks = useUserData(state => state.getCachedDungeonDecks);
+
+    const [ selectedDecksID, setSelectedDecksID ] = useState([]);
+    const [ deckError, setDeckError ] = useState(null);
 
     useEffect(() => {
-        getDecks().then(res => {
-            if (!res.ok) {
-                setIsDeckError(true);
-                return;
-            }
-
-            setDecks(res.data);
-        });
+        try {
+            getCachedDecks();
+        } catch (err) {
+            setDeckError(err.message);
+        }
     });
 
     useEffect(() => {
         if (mode === 'edit') {
-            getDungeonDecks(id)
-            .then(res => {
-                if (!res.ok) {
-                    setIsDeckError(true);
-                }
-
-                setSelectedDecksID(res.data.map(d => d.id));
-            });
+            try {
+                getCachedDungeonDecks(id).then(res => {
+                    setSelectedDecksID(res.map(d => d.id));
+                })
+            } catch (err) {
+                setDeckError(err.message);
+            }
         }
     }, [mode, id]);
     
     const handleSelectionChange = (deckID) => {
-        if (selectedDecksID.includes(deckID)) {
-            setSelectedDecksID(selectedDecksID.filter(id => id !== deckID));
-        } else {
-            setSelectedDecksID([...selectedDecksID, deckID]);
+        const selected_without_deck = selectedDecksID.filter(id => id !== deckID);
+
+        if (selected_without_deck.length !== selectedDecksID.length) {
+            setSelectedDecksID(selected_without_deck);
+            return;
         }
+
+        setSelectedDecksID([...selectedDecksID, deckID]);
     };
 
     const handleSave = (e) => {
@@ -59,9 +61,9 @@ export default function DungeonModal({ onClose, onSave, mode, id, initial_name }
     };
 
     const getDeckState = () => {
-        if (isDeckError) {
+        if (deckError) {
             return (
-                <p className="text-sm text-red-400">Could not load decks</p>
+                <p className="text-sm text-red-400">{deckError}</p>
             )
         } else if (!decks || !selectedDecksID) {
             return (

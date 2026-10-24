@@ -72,6 +72,27 @@ router.post('/:id/edit', [
     }
 });
 
+router.post('/grade', [
+    body('grades')
+        .isArray({ min: 1 }).withMessage('\'grades\' must be an array of minimum size 1'),
+    check(`grades.*.id`)
+        .trim()
+        .notEmpty().withMessage('\'id\' is required')
+        .isInt({ min: 0 }).withMessage('\'id\' must be an integer greater than 0'),
+    check(`grades.*.grade`)
+        .isNumeric({ min: 0, max: 3 }).withMessage('\'grade\' must be a number greater than 0 and less than 4')
+], validationHandler, async (req, res, next) => {
+    const { grades } = req.body;
+
+    try {
+        const resp = await cardsService.gradeCards(grades, req.user_id);
+
+        return res.status(204);
+    } catch (error) {
+        next(error);
+    }
+})
+
 router.delete('/:id', [
     param('id')
         .trim()

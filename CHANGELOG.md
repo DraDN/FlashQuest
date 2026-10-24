@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0-alpha] - "Goldfish" - unreleased
+
+### Added
+
+- Cards are now served based on the FSRS algorithm (added dependency: 'ts-fsrs')
+
 ## [0.3.0-alpha] - "Rhino" - 2026-09-23
 
 ### Added
